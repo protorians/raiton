@@ -1,0 +1,38 @@
+{
+  "name": "@protorians/sentient-cli",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "CLI for Sentient",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "sentient": "build/index.js"
+  },
+  "scripts": {
+    "dev": "tsx watch source/index.ts",
+    "build": "tsup --config tsup.config.ts",
+    "start": "node build/index.js --help"
+  },
+  "dependencies": {
+    "commander": "^14.0.2"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.2",
+    "commitizen": "^4.3.1",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "semantic-release": "^25.0.2",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
