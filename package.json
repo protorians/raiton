@@ -13,7 +13,8 @@
   "scripts": {
     "dev": "tsx watch source/index.ts",
     "build": "tsup --config tsup.config.ts",
-    "start": "node build/index.js --help"
+    "start": "node build/index.js --help",
+    "test:commit": "pnpx semantic-release --dry-run"
   },
   "dependencies": {
     "commander": "^14.0.2"

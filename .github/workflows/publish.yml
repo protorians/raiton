@@ -3,9 +3,9 @@ name: Publish
 on:
   push:
     branches:
-#      - main
+      - main
       - beta
-      - dev
+      - alpha
 
 permissions:
   contents: read
@@ -51,9 +51,9 @@ jobs:
               echo "NPM_TAG=beta" >> $GITHUB_ENV
               echo "PREID=beta" >> $GITHUB_ENV
               ;;
-            dev)
-              echo "NPM_TAG=dev" >> $GITHUB_ENV
-              echo "PREID=dev" >> $GITHUB_ENV
+            alpha)
+              echo "NPM_TAG=alpha" >> $GITHUB_ENV
+              echo "PREID=alpha" >> $GITHUB_ENV
               ;;
             *)
               echo "Non supported branch: $BRANCH. Skipping publication."
