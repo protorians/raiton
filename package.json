@@ -14,7 +14,8 @@
     "dev": "tsx watch source/index.ts",
     "build": "tsup --config tsup.config.ts",
     "start": "node build/index.js --help",
-    "test:commit": "pnpx semantic-release --dry-run"
+    "commit": "pnpx semantic-release",
+    "commit:test": "pnpx semantic-release --dry-run"
   },
   "dependencies": {
     "commander": "^14.0.2"
