@@ -8,69 +8,68 @@ on:
       - alpha
 
 permissions:
-  contents: write      # semantic-release doit écrire des tags & changelog
-  issues: write
-  pull-requests: write
+  contents: read
   packages: write
   id-token: write
 
 jobs:
-  release:
+  build-and-publish:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # IMPORTANT pour semantic-release
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: bun run build
+        run: pnpm run build
 
-      - name: Update version
-        run: bun run scripts/update-version.ts
-
-      - name: Get new version
-        id: get_version
-        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-      - name: Git Config
+      - name: Determine publish settings
+        id: settings
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          echo "Branch: $BRANCH"
+          case "$BRANCH" in
+            main)
+              echo "NPM_TAG=latest" >> $GITHUB_ENV
+              echo "PREID=" >> $GITHUB_ENV
+              ;;
+            beta)
+              echo "NPM_TAG=beta" >> $GITHUB_ENV
+              echo "PREID=beta" >> $GITHUB_ENV
+              ;;
+            alpha)
+              echo "NPM_TAG=alpha" >> $GITHUB_ENV
+              echo "PREID=alpha" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "Non supported branch: $BRANCH. Skipping publication."
+              echo "NPM_TAG=" >> $GITHUB_ENV
+              echo "PREID=" >> $GITHUB_ENV
+              ;;
+          esac
 
-      - name: Commit and Tag
+      - name: Bump prerelease version
+        if: env.PREID != ''
         run: |
-          if [ -n "$(git status --porcelain package.json)" ]; then
-            git add package.json
-            git commit -m "chore(release): ${{ steps.get_version.outputs.VERSION }} [skip ci]"
-            git tag v${{ steps.get_version.outputs.VERSION }}
-            git push origin HEAD --tags
-          else
-            echo "No changes in package.json, skipping commit and tag."
-          fi
+          npm version prerelease --preid="${{ env.PREID }}" --no-git-tag-version
 
-      - name: Publish to NPM
-        if: github.ref == 'refs/heads/main'
+      - name: Publish to npm
+        if: env.NPM_TAG != ''
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [ -n "$(git status --porcelain package.json)" ] || [ -n "$(git tag --points-at HEAD)" ]; then
-             npm publish --access public
-          else
-             echo "Nothing to publish."
-          fi
+          npm publish --provenance --access public --tag "${{ env.NPM_TAG }}"
