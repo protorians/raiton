@@ -1,2 +1,2 @@
-# @protorians/sentient-cli
-CLI for Sentient
+# Protorians Raiton CLI
+
