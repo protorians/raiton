@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff29761-65b6-4fa1-b591-7776678942b1" name="Changes" comment="chore: remove `engines` field from `package.json`">
+    <list default="true" id="eff29761-65b6-4fa1-b591-7776678942b1" name="Changes" comment="chore: remove `pnpm-lock.yaml` file to declutter repository">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsc" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/tsc" afterDir="false" />
@@ -14,7 +14,6 @@
       <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/tsup" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/tsup" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -155,7 +154,8 @@
       <workItem from="1766143451281" duration="613000" />
       <workItem from="1766401541135" duration="438000" />
       <workItem from="1766402935370" duration="5374000" />
-      <workItem from="1766412579210" duration="600000" />
+      <workItem from="1766412579210" duration="784000" />
+      <workItem from="1766413412326" duration="141000" />
     </task>
     <task id="LOCAL-00001" summary="chore: update IntelliJ IDEA project configuration files&#10;&#10;- Remove default `.gitignore` entries under `.idea`.&#10;- Rename module file from `sentient-cli.iml` to `raiton.iml`.&#10;- Update project dictionary with new words: `raiton`, `schemeable`.">
       <option name="closed" value="true" />
@@ -301,7 +301,31 @@
       <option name="project" value="LOCAL" />
       <updated>1766413081115</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="chore: clean up `package.json` and refine `.gitignore` &#10;&#10;- Removed `@rollup/rollup-darwin-x64` from `optionalDependencies`.&#10;- Adjusted `.gitignore` to ignore contents of `node_modules` directory.">
+      <option name="closed" value="true" />
+      <created>1766413199489</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1766413199489</updated>
+    </task>
+    <task id="LOCAL-00020" summary="chore: refine IntelliJ IDEA configuration and update tracked changes &#10;&#10;- Adjusted `.idea/workspace.xml` for better environment configuration management. &#10;- Updated tracked changes to reflect recent modifications, including `package.json`.">
+      <option name="closed" value="true" />
+      <created>1766413242697</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1766413242697</updated>
+    </task>
+    <task id="LOCAL-00021" summary="chore: remove `pnpm-lock.yaml` file to declutter repository">
+      <option name="closed" value="true" />
+      <created>1766413523860</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1766413523860</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -322,12 +346,16 @@
     <MESSAGE value="feat: implement core modules for `Raiton` framework&#10;&#10;- Introduced essential modules for `Raiton` framework initialization, including server, thread, and builder functionalities.&#10;- Added utility classes (`RaitonConfig`, `RaitonDirectories`, `ProcessUtility`, `Artifact`) for streamlined configuration, directory management, and artifact generation.&#10;- Integrated Fastify and its plugins (e.g., multipart, JWT auth, Swagger) for building scalable APIs.&#10;- Established a modular structure with support for Hot Module Replacement (HMR) and artifact management.&#10;- Enhanced command-line interaction via `RaitonCommand` and `RaitonCommands`." />
     <MESSAGE value="feat: add CLI commands and bootstrap logic for the `Raiton` framework&#10;&#10;- Introduced CLI entry points (`cli.ts`, `bootstrapper.ts`) to initialize and parse commands.&#10;- Added core commands (`build`, `develop`, `start`, `grafts`) for project lifecycle:&#10;  - `build`: Builds the application with development or bootstrap mode.&#10;  - `develop`: Runs the application in development mode with hot reload support.&#10;  - `start`: Launches the application in production mode.&#10;  - `grafts`: Generates typings grafts for schema management.&#10;- Integrated command registration and execution workflow via the `Command` class." />
     <MESSAGE value="chore: remove deprecated `sentient` CLI implementation" />
-    <MESSAGE value="chore: remove `pnpm-lock.yaml` file to declutter repository" />
     <MESSAGE value="chore: update `.gitignore` to stop excluding `node_modules` directory" />
     <MESSAGE value="chore: update IntelliJ IDEA project configuration files &#10;&#10;- Add `.idea/workspace.xml` for improved environment configuration management." />
     <MESSAGE value="chore: reintroduce `pnpm-lock.yaml` file for dependency management" />
     <MESSAGE value="chore: remove `engines` field from `package.json`" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: remove `engines` field from `package.json`" />
+    <MESSAGE value="chore: remove `optionalDependencies` field from `package.json`" />
+    <MESSAGE value="chore: clean up `package.json` and refine `.gitignore` &#10;&#10;- Removed `@rollup/rollup-darwin-x64` from `optionalDependencies`.&#10;- Adjusted `.gitignore` to ignore contents of `node_modules` directory." />
+    <MESSAGE value="chore: refine IntelliJ IDEA configuration and update tracked changes &#10;&#10;- Adjusted `.idea/workspace.xml` for better environment configuration management. &#10;- Updated tracked changes to reflect recent modifications, including `package.json`." />
+    <MESSAGE value="chore: remove `pnpm-lock.yaml` file to declutter the repository" />
+    <MESSAGE value="chore: remove `pnpm-lock.yaml` file to declutter repository" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: remove `pnpm-lock.yaml` file to declutter repository" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
