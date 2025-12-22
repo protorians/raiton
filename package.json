@@ -78,8 +78,5 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-darwin-x64": "^4.53.3"
   }
 }
