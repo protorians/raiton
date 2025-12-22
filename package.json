@@ -32,7 +32,6 @@
       "types": "./build/types/index.d.ts",
       "import": "./build/types/index.mjs"
     }
-
   },
   "scripts": {
     "dev": "tsup --watch --config tsup.config.ts",
@@ -78,5 +77,10 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
   }
 }
