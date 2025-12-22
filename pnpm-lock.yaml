@@ -41,6 +41,9 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.34.41
         version: 0.34.41
+      '@types/node':
+        specifier: ^25.0.3
+        version: 25.0.3
       argon2:
         specifier: ^0.44.0
         version: 0.44.0
