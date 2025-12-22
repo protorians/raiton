@@ -76,7 +76,7 @@ export class DependencyContainer<T extends IDependencyContainerDefinition<E>, E 
     async imports(): Promise<string[]> {
         const imported: string[] = []
         const files = [
-            ...(ArtifactFactory.get(this.artifact) || ArtifactFactory.load(this.artifact)?.get(this.artifact))?.values() || []
+            ...(ArtifactFactory.get(this.artifact) || ArtifactFactory.load(this.artifact).get(this.artifact))?.values() || []
         ]
 
         for (let file of files) {

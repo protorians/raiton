@@ -30,7 +30,7 @@ export class ArtifactFactory {
 
     static load(key: string) {
         const outputFile = this.getSource(key)
-        if (!fs.existsSync(outputFile)) return;
+        if (!fs.existsSync(outputFile)) return this;
         const content = fs.readFileSync(outputFile, "utf-8");
         const files = JSON.parse(content) as IFileStatInfo[];
         files.forEach(file => this.add(key, file));
