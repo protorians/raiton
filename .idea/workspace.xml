@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eff29761-65b6-4fa1-b591-7776678942b1" name="Changes" comment="chore: remove `pnpm-lock.yaml` file to declutter repository">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="eff29761-65b6-4fa1-b591-7776678942b1" name="Changes" comment="chore: update `.gitignore` and refine IntelliJ IDEA configuration">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/publish.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/publish.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsc" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/tsc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsserver" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/tsserver" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsup" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/tsup" afterDir="false" />
@@ -155,7 +154,7 @@
       <workItem from="1766401541135" duration="438000" />
       <workItem from="1766402935370" duration="5374000" />
       <workItem from="1766412579210" duration="784000" />
-      <workItem from="1766413412326" duration="141000" />
+      <workItem from="1766413412326" duration="221000" />
     </task>
     <task id="LOCAL-00001" summary="chore: update IntelliJ IDEA project configuration files&#10;&#10;- Remove default `.gitignore` entries under `.idea`.&#10;- Rename module file from `sentient-cli.iml` to `raiton.iml`.&#10;- Update project dictionary with new words: `raiton`, `schemeable`.">
       <option name="closed" value="true" />
@@ -325,7 +324,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766413523860</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="chore: update `.gitignore` and refine IntelliJ IDEA configuration">
+      <option name="closed" value="true" />
+      <created>1766413566943</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1766413566943</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -355,7 +362,8 @@
     <MESSAGE value="chore: refine IntelliJ IDEA configuration and update tracked changes &#10;&#10;- Adjusted `.idea/workspace.xml` for better environment configuration management. &#10;- Updated tracked changes to reflect recent modifications, including `package.json`." />
     <MESSAGE value="chore: remove `pnpm-lock.yaml` file to declutter the repository" />
     <MESSAGE value="chore: remove `pnpm-lock.yaml` file to declutter repository" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: remove `pnpm-lock.yaml` file to declutter repository" />
+    <MESSAGE value="chore: update `.gitignore` and refine IntelliJ IDEA configuration" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: update `.gitignore` and refine IntelliJ IDEA configuration" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
