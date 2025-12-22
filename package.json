@@ -4,9 +4,6 @@
   "private": true,
   "type": "module",
   "description": "Protorians Raiton development kit",
-  "engines": {
-    "node": ">=22"
-  },
   "bin": {
     "raiton": "build/bin/index.mjs"
   },
