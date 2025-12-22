@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "CommonJS",
+    "target": "ES2022",
+    "module": "ES2022",
     "moduleResolution": "Node",
     "noStrictGenericChecks": false,
     "esModuleInterop": true,
@@ -12,11 +12,23 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
+    "declaration": true,
+    "sourceMap": true,
     "types": [
       "node"
     ],
+    "baseUrl": "./",
     "outDir": "build",
-    "rootDir": "source"
+    "rootDir": "source",
+    "paths": {
+      "@/*": ["source/*"]
+    }
   },
-  "include": ["source"]
+  "include": [
+    "source"
+  ],
+  "exclude": [
+    "node_modules",
+    "build"
+  ]
 }
