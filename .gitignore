@@ -132,3 +132,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 /.idea/self
+/node_modules/.bin
+/node_modules/commander
+/node_modules/tsup
+/node_modules/typescript
