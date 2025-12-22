@@ -1,6 +1,6 @@
 {
   "name": "raiton",
-  "version": "0.0.2",
+  "version": "1.0.0-alpha.2",
   "private": true,
   "type": "module",
   "description": "Protorians Raiton development kit",
