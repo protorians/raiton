@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="eff29761-65b6-4fa1-b591-7776678942b1" name="Changes" comment="chore: remove `pnpm-lock.yaml` file to declutter repository">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsc" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/tsc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsserver" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/tsserver" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsup" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/tsup" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsup-node" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.bin/tsup-node" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.bin/tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/tsup" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/tsup" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/tsx" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+      <option value="repository" />
+    </option>
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="101" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;protorians&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:/protorians/sentient-cli.git&quot;,
+    &quot;accountId&quot;: &quot;22e4ef57-4d43-4f59-a92d-e8f773ccc41f&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="36YmjqEqD36W6aFd1WOnbTZVZGf" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;alpha&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;pnpm&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/iancarter/Works/Projects/Protorians/Products/raiton/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecapSpentCounter">
+    <option name="endsOfQuotaMs" value="1768657836290" />
+    <option name="spentUsd" value="0.01437975" />
+  </component>
+  <component name="RecapUselessUpdatesCounter">
+    <option name="suspendCountdown" value="8" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/source/sdk" />
+      <recent name="$PROJECT_DIR$/source/sdk/facades" />
+      <recent name="$PROJECT_DIR$/source/core" />
+      <recent name="$PROJECT_DIR$/source" />
+      <recent name="$PROJECT_DIR$/source/bin" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.dev" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.29346.143" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="eff29761-65b6-4fa1-b591-7776678942b1" name="Changes" comment="" />
+      <created>1765192017791</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1765192017791</updated>
+      <workItem from="1765192019567" duration="14103000" />
+      <workItem from="1765214622669" duration="5179000" />
+      <workItem from="1765222431032" duration="7000" />
+      <workItem from="1765295386913" duration="4349000" />
+      <workItem from="1765356833063" duration="76000" />
+      <workItem from="1765364936068" duration="17223000" />
+      <workItem from="1765401598455" duration="110000" />
+      <workItem from="1765446310344" duration="335000" />
+      <workItem from="1765448445434" duration="40000" />
+      <workItem from="1765448502371" duration="5262000" />
+      <workItem from="1765475943768" duration="245000" />
+      <workItem from="1765476321809" duration="8000" />
+      <workItem from="1765479667101" duration="1188000" />
+      <workItem from="1765484502774" duration="3291000" />
+      <workItem from="1765488291074" duration="8000" />
+      <workItem from="1765530860590" duration="810000" />
+      <workItem from="1766139580182" duration="84000" />
+      <workItem from="1766143451281" duration="613000" />
+      <workItem from="1766401541135" duration="438000" />
+      <workItem from="1766402935370" duration="5374000" />
+      <workItem from="1766412579210" duration="305000" />
+    </task>
+    <task id="LOCAL-00001" summary="chore: update IntelliJ IDEA project configuration files&#10;&#10;- Remove default `.gitignore` entries under `.idea`.&#10;- Rename module file from `sentient-cli.iml` to `raiton.iml`.&#10;- Update project dictionary with new words: `raiton`, `schemeable`.">
+      <option name="closed" value="true" />
+      <created>1766412667881</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412667881</updated>
+    </task>
+    <task id="LOCAL-00002" summary="feat: add process event handling and environment configuration setup&#10;&#10;- Add `.env` file loading using `dotenv`.&#10;- Implement process event listeners for graceful shutdown with `EventBus`.">
+      <option name="closed" value="true" />
+      <created>1766412689758</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412689758</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feat: add `IGlobalGrafts` interface definition">
+      <option name="closed" value="true" />
+      <created>1766412694729</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412694729</updated>
+    </task>
+    <task id="LOCAL-00004" summary="feat: add type definitions for core application structures&#10;&#10;- Introduced various interfaces and type definitions to enhance application structure and type safety.">
+      <option name="closed" value="true" />
+      <created>1766412702453</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412702453</updated>
+    </task>
+    <task id="LOCAL-00005" summary="feat: add utility functions for SDK&#10;&#10;- Introduced multiple utility functions for SDK enhancements, including `retryCallable`, `aliasPath`, and JSON stabilization.&#10;- Added artifact generation with `generateArtifacts`.&#10;- Exported functions through an `index.ts` for centralized access.">
+      <option name="closed" value="true" />
+      <created>1766412719982</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412719982</updated>
+    </task>
+    <task id="LOCAL-00006" summary="feat: add Swagger HTML page plugin for API documentation&#10;&#10;- Implemented `swaggerHtmlPagePlugin` to render a preconfigured Swagger UI page.&#10;- Exported the plugin through `index.ts` for centralized use.">
+      <option name="closed" value="true" />
+      <created>1766412731055</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412731055</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feat: add enums for SDK modularization&#10;&#10;- Added multiple enums (`HttpMethodEnum`, `ParamTypeEnum`, `HashAlgoEnum`, `EventMessageEnum`, `TimestampEnum`) to streamline SDK code structure.&#10;- Exported all enums through `index.ts` for centralized access.">
+      <option name="closed" value="true" />
+      <created>1766412739790</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412739790</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feat: introduce decorators for SDK modularization&#10;&#10;- Added multiple decorators (`Controllable`, `AccessGuard`, `Graftable`, `Param`, `Body`, `Query`, `Header`, `UploadedFile`, etc.) to enhance SDK framework capabilities.&#10;- Exported all decorators through an `index.ts` file for centralized access.">
+      <option name="closed" value="true" />
+      <created>1766412748186</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412748186</updated>
+    </task>
+    <task id="LOCAL-00009" summary="feat: add constants for SDK modularization&#10;&#10;- Introduced `SYSTEM_DECORATORS_KEYS` and `MICROSERVICE_NAME` constants for enhanced SDK structure.&#10;- Exported constants through an `index.ts` file for centralized access.">
+      <option name="closed" value="true" />
+      <created>1766412754824</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412754825</updated>
+    </task>
+    <task id="LOCAL-00010" summary="feat: implement SDK core modules and utilities&#10;&#10;- Added foundational SDK modules for streamlined development:&#10;  - `fastify.ts` for Fastify integration.&#10;  - `responses.ts` for HTTP response handling.&#10;  - `env.ts` for environment variable parsing.&#10;  - `schemes.ts` for schema management.&#10;  - `json.ts` for handling JSON structures.&#10;  - `dependency-container.ts` for dependency injection management.&#10;  - `data-transfer-object.ts` for DTO handling.&#10;  - `services.ts` and `repositories.ts` for service-repository structure.&#10;  - `controllers.ts` for controller base class.&#10;  - `encryption.ts` for cryptographic utilities.&#10;  - `routes.ts` for route registration.&#10;  - `artifacts.ts` for artifact management.&#10;  - `grafts.ts` for graft registry.&#10;  - `throwable.ts` for enhanced error handling.&#10;&#10;- Established a comprehensive setup to support SDK modularization and scalability.">
+      <option name="closed" value="true" />
+      <created>1766412787139</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412787139</updated>
+    </task>
+    <task id="LOCAL-00011" summary="feat: implement core modules for `Raiton` framework&#10;&#10;- Introduced essential modules for `Raiton` framework initialization, including server, thread, and builder functionalities.&#10;- Added utility classes (`RaitonConfig`, `RaitonDirectories`, `ProcessUtility`, `Artifact`) for streamlined configuration, directory management, and artifact generation.&#10;- Integrated Fastify and its plugins (e.g., multipart, JWT auth, Swagger) for building scalable APIs.&#10;- Established a modular structure with support for Hot Module Replacement (HMR) and artifact management.&#10;- Enhanced command-line interaction via `RaitonCommand` and `RaitonCommands`.">
+      <option name="closed" value="true" />
+      <created>1766412804134</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412804134</updated>
+    </task>
+    <task id="LOCAL-00012" summary="feat: add CLI commands and bootstrap logic for the `Raiton` framework&#10;&#10;- Introduced CLI entry points (`cli.ts`, `bootstrapper.ts`) to initialize and parse commands.&#10;- Added core commands (`build`, `develop`, `start`, `grafts`) for project lifecycle:&#10;  - `build`: Builds the application with development or bootstrap mode.&#10;  - `develop`: Runs the application in development mode with hot reload support.&#10;  - `start`: Launches the application in production mode.&#10;  - `grafts`: Generates typings grafts for schema management.&#10;- Integrated command registration and execution workflow via the `Command` class.">
+      <option name="closed" value="true" />
+      <created>1766412840521</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412840521</updated>
+    </task>
+    <task id="LOCAL-00013" summary="chore: remove deprecated `sentient` CLI implementation">
+      <option name="closed" value="true" />
+      <created>1766412846233</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412846233</updated>
+    </task>
+    <task id="LOCAL-00014" summary="chore: remove `pnpm-lock.yaml` file to declutter repository">
+      <option name="closed" value="true" />
+      <created>1766412863822</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1766412863822</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="chore: update IntelliJ IDEA project configuration files&#10;&#10;- Remove default `.gitignore` entries under `.idea`.&#10;- Rename module file from `sentient-cli.iml` to `raiton.iml`.&#10;- Update project dictionary with new words: `raiton`, `schemeable`." />
+    <MESSAGE value="chore: initialize environment and process event handling setup&#10;&#10;- Add `env.d.ts` for global type declarations.&#10;- Introduce `requirements.ts` to handle environment configuration and process event lifecycle." />
+    <MESSAGE value="feat: add process event handling and environment configuration setup&#10;&#10;- Add `.env` file loading using `dotenv`.&#10;- Implement process event listeners for graceful shutdown with `EventBus`." />
+    <MESSAGE value="feat: add `IGlobalGrafts` interface definition" />
+    <MESSAGE value="feat: add type definitions for core application structures&#10;&#10;- Introduced various interfaces and type definitions to enhance application structure and type safety." />
+    <MESSAGE value="feat: add utility functions for SDK&#10;&#10;- Introduced multiple utility functions for SDK enhancements, including `retryCallable`, `aliasPath`, and JSON stabilization.&#10;- Added artifact generation with `generateArtifacts`.&#10;- Exported functions through an `index.ts` for centralized access." />
+    <MESSAGE value="feat: add Swagger HTML page plugin for API documentation&#10;&#10;- Implemented `swaggerHtmlPagePlugin` to render a preconfigured Swagger UI page.&#10;- Exported the plugin through `index.ts` for centralized use." />
+    <MESSAGE value="feat: add enums for SDK modularization&#10;&#10;- Added multiple enums (`HttpMethodEnum`, `ParamTypeEnum`, `HashAlgoEnum`, `EventMessageEnum`, `TimestampEnum`) to streamline SDK code structure.&#10;- Exported all enums through `index.ts` for centralized access." />
+    <MESSAGE value="feat: introduce decorators for SDK modularization&#10;&#10;- Added multiple decorators (`Controllable`, `AccessGuard`, `Graftable`, `Param`, `Body`, `Query`, `Header`, `UploadedFile`, etc.) to enhance SDK framework capabilities.&#10;- Exported all decorators through an `index.ts` file for centralized access." />
+    <MESSAGE value="feat: add constants for SDK modularization&#10;&#10;- Introduced `SYSTEM_DECORATORS_KEYS` and `MICROSERVICE_NAME` constants for enhanced SDK structure.&#10;- Exported constants through an `index.ts` file for centralized access." />
+    <MESSAGE value="feat: implement SDK core modules and utilities&#10;&#10;- Added foundational SDK modules for streamlined development:&#10;  - `fastify.ts` for Fastify integration.&#10;  - `responses.ts` for HTTP response handling.&#10;  - `env.ts` for environment variable parsing.&#10;  - `schemes.ts` for schema management.&#10;  - `json.ts` for handling JSON structures.&#10;  - `dependency-container.ts` for dependency injection management.&#10;  - `data-transfer-object.ts` for DTO handling.&#10;  - `services.ts` and `repositories.ts` for service-repository structure.&#10;  - `controllers.ts` for controller base class.&#10;  - `encryption.ts` for cryptographic utilities.&#10;  - `routes.ts` for route registration.&#10;  - `artifacts.ts` for artifact management.&#10;  - `grafts.ts` for graft registry.&#10;  - `throwable.ts` for enhanced error handling.&#10;&#10;- Established a comprehensive setup to support SDK modularization and scalability." />
+    <MESSAGE value="feat: implement core modules for `Raiton` framework&#10;&#10;- Introduced essential modules for `Raiton` framework initialization, including server, thread, and builder functionalities.&#10;- Added utility classes (`RaitonConfig`, `RaitonDirectories`, `ProcessUtility`, `Artifact`) for streamlined configuration, directory management, and artifact generation.&#10;- Integrated Fastify and its plugins (e.g., multipart, JWT auth, Swagger) for building scalable APIs.&#10;- Established a modular structure with support for Hot Module Replacement (HMR) and artifact management.&#10;- Enhanced command-line interaction via `RaitonCommand` and `RaitonCommands`." />
+    <MESSAGE value="feat: add CLI commands and bootstrap logic for the `Raiton` framework&#10;&#10;- Introduced CLI entry points (`cli.ts`, `bootstrapper.ts`) to initialize and parse commands.&#10;- Added core commands (`build`, `develop`, `start`, `grafts`) for project lifecycle:&#10;  - `build`: Builds the application with development or bootstrap mode.&#10;  - `develop`: Runs the application in development mode with hot reload support.&#10;  - `start`: Launches the application in production mode.&#10;  - `grafts`: Generates typings grafts for schema management.&#10;- Integrated command registration and execution workflow via the `Command` class." />
+    <MESSAGE value="chore: remove deprecated `sentient` CLI implementation" />
+    <MESSAGE value="chore: remove `pnpm-lock.yaml` file to declutter repository" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: remove `pnpm-lock.yaml` file to declutter repository" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>
