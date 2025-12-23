@@ -6,7 +6,13 @@ import {LBadge, Logger} from "@protorians/logger";
 import fs from "node:fs";
 import {formatBytes} from "./bytes.util";
 import {ISignalStack, ProcessUtility, Signal} from "@protorians/core";
-import type {BuilderBootCallable, BuilderConfig, BuilderInterface, BuilderSignalMap} from "@/types";
+import type {
+    BuilderBootCallable,
+    BuilderConfig,
+    BuilderInterface,
+    BuilderSignalMap,
+    HmrInterface
+} from "@/types";
 import * as process from "node:process";
 import {EventMessageEnum} from "@/sdk/enums";
 import {until} from "./process.util";
@@ -15,6 +21,7 @@ import sleep = ProcessUtility.sleep;
 import {Raiton} from "@/core/raiton";
 import {EventBus, EventBusEnum} from "@protorians/events-bus";
 import {isControllerFile} from "@/sdk";
+import {Hmr} from "@/core/hmr";
 
 export class RaitonBuilder implements BuilderInterface {
 
@@ -25,13 +32,16 @@ export class RaitonBuilder implements BuilderInterface {
     protected _bootstrapperIndex: string | null = null;
     protected config: BuildOptions | null = null;
     protected _compiledVersionNumber: number = 1;
+    protected _importPattern = /from\s+["'](\.\.?\/[^."'][^"']*)["']/g;
 
+    public readonly hmr: HmrInterface = new Hmr()
     public readonly signal: ISignalStack<BuilderSignalMap> = new Signal.Stack()
 
     constructor(
         public readonly workdir: string,
         public readonly options: BuilderConfig = {},
     ) {
+
     }
 
     public get context(): BuildContext<BuildOptions> | null {
@@ -88,7 +98,7 @@ export class RaitonBuilder implements BuilderInterface {
             const url = this.generateUniqueModuleUrl(filename);
             const mod = await import(url);
 
-            if(!mod) throw new Error('Module is invalid')
+            if (!mod) throw new Error('Module is invalid')
 
             Logger.log('Refreshed', path.relative(Raiton.thread.builder.workdir, url))
             return mod;
@@ -97,6 +107,23 @@ export class RaitonBuilder implements BuilderInterface {
             return null;
         }
 
+    }
+
+    protected async fixImports(pathname: string) {
+        if (!pathname.endsWith(".js")) return;
+
+
+        let code = await fs.promises.readFile(pathname, "utf8");
+
+        const match = this._importPattern.test(code);
+        if (!match) return;
+
+        this._importPattern.lastIndex = 0;
+        const updated = code.replace(this._importPattern, (match, detected) => {
+            return match.replace(detected, detected + ".js");
+        });
+
+        return await fs.promises.writeFile(pathname, updated);
     }
 
     protected watcher(): Plugin {
@@ -122,76 +149,83 @@ export class RaitonBuilder implements BuilderInterface {
 
                     if (result.metafile) {
                         const outputs = Object.keys(result.metafile.outputs);
-                        const bootstrapper = this_._bootstrapperIndex ? result.metafile.outputs[this_._bootstrapperIndex] : undefined;
-                        const imports = bootstrapper?.imports.map(e => path.join(RaitonConfig.get('rootDir'), `${e.path}.ts`))
+
+                        // const bootstrapper = this_._bootstrapperIndex ? result.metafile.outputs[this_._bootstrapperIndex] : undefined;
+                        // const imports = bootstrapper?.imports.map(e => path.join(RaitonConfig.get('rootDir'), `${e.path}.ts`))
+                        // Logger.debug('Stack', result.metafile)
 
                         /**
                          * Outgoing
                          */
-                        for (const output of outputs) {
-                            if (!output.endsWith(".js")) continue;
+                        for (const key of outputs) {
+                            const filename = path.resolve(key);
+                            await this_.fixImports(filename)
 
-                            const abs = path.resolve(output);
-                            let code = await fs.promises.readFile(abs, "utf8");
+                            // if (!fs.existsSync(filename)) continue;
+                            // const metadata = result.metafile.outputs[key];
+                            // Logger.debug('OUT', filename, metadata.bytes)
+                            // await this_.hmr.upsert(key, filename, metadata.bytes)
 
-                            const match = importPattern.test(code);
-                            if (!match) continue;
-
-                            importPattern.lastIndex = 0;
-                            const updated = code.replace(importPattern, (match, detected) => {
-                                return match.replace(detected, detected + ".js");
-                            });
-
-                            await fs.promises.writeFile(abs, updated);
-                        }
-
-                        /**
-                         * Incoming
-                         */
-                        for (const [key, meta] of Object.entries(result.metafile.inputs)) {
-                            const size = temporary.get(key)?.bytes
-                            if (size && meta.bytes === size) continue;
-
-                            temporary.set(key, meta)
-                            Logger.log('Update', LBadge.info(key), `— size: ${formatBytes(meta.bytes)}`, hmrMoment)
-
-                            if (!hmrMoment) continue;
-
-                            if (imports?.includes(key) || (bootstrapper && key === bootstrapper?.entryPoint)) {
-                                process.send?.(EventMessageEnum.RESTART)
-                                Logger.debug('HMR', key, 'changed — reload...', process.send);
-                                break;
-                            }
-
-                            const out = Object.entries(result.metafile.outputs)
-                                .map(([output, meta]) => {
-                                    return {
-                                        output,
-                                        is: meta.entryPoint === key
-                                    }
+                            if (hmrMoment && isControllerFile(filename)) {
+                                Raiton.server.signals.dispatch('hmr:controller', {
+                                    filename,
+                                    timestamp: Date.now(),
+                                    version: getVersionNumber()
                                 })
-                                .filter(({is}) => is)[0] || undefined;
-
-                            if (out && out.is) {
-                                const absolutePath = path.join(Raiton.thread.builder.workdir, out.output);
-
-                                if (isControllerFile(out.output)) {
-                                    Raiton.server.signals.dispatch('hmr:controller', {
-                                        filename: absolutePath,
-                                        timestamp: Date.now(),
-                                        version: getVersionNumber()
-                                    })
-                                    continue;
-                                }
-
-                                await refreshFileCached(absolutePath)
                             }
 
                         }
+
+                        //
+                        //     /**
+                        //      * Incoming
+                        //      */
+                        //     for (const [key, meta] of Object.entries(result.metafile.inputs)) {
+                        //         const size = temporary.get(key)?.bytes
+                        //         if (size && meta.bytes === size) continue;
+                        //
+                        //         temporary.set(key, meta)
+                        //         Logger.log('Update', LBadge.info(key), `— size: ${formatBytes(meta.bytes)}`, hmrMoment)
+                        //
+                        //         if (!hmrMoment) continue;
+                        //
+                        //         if (imports?.includes(key) || (bootstrapper && key === bootstrapper?.entryPoint)) {
+                        //             process.send?.(EventMessageEnum.RESTART)
+                        //             Logger.debug('HMR', key, 'changed — reload...', process.send);
+                        //             break;
+                        //         }
+                        //
+                        //         const out = Object.entries(result.metafile.outputs)
+                        //             .map(([output, meta]) => {
+                        //                 return {
+                        //                     output,
+                        //                     is: meta.entryPoint === key
+                        //                 }
+                        //             })
+                        //             .filter(({is}) => is)[0] || undefined;
+                        //
+                        //         if (out && out.is) {
+                        //             const absolutePath = path.join(Raiton.thread.builder.workdir, out.output);
+                        //
+                        //             if (isControllerFile(out.output)) {
+                        //                 Raiton.server.signals.dispatch('hmr:controller', {
+                        //                     filename: absolutePath,
+                        //                     timestamp: Date.now(),
+                        //                     version: getVersionNumber()
+                        //                 })
+                        //                 continue;
+                        //             }
+                        //
+                        //             await refreshFileCached(absolutePath)
+                        //         }
+                        //
+                        //     }
+                        //
 
                     }
 
                     if (hmrMoment) {
+                        // Raiton.server.signals.dispatch('hmr:triggered', result.metafile)
                         updateVersionNumber()
                         // await registryControllers(Raiton.server.runner)
                     }

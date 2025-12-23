@@ -23,6 +23,7 @@ export class RaitonServer implements ServerInterface {
 
     protected readonly _runner: FastifyInstance;
     protected readonly _feature: ServerFeaturesUsed = new Map();
+    protected DIN: number = 0;
 
     readonly controllers: Map<string, ServerControllerInterface> = new Map();
     readonly signals: ISignalStack<ServerSignalMap> = new Signal.Stack<ServerSignalMap>();
@@ -134,9 +135,15 @@ export class RaitonServer implements ServerInterface {
     public async prepare(): Promise<this> {
         await this.requirements();
 
-        this.signals.listen('hmr:controller', async (payload) => {
-            await this.controllerHmr(payload)
-        })
+        this.signals.listen('hmr:controller', async (payload) =>
+            await this.controllerHmr(payload))
+
+        // this.signals.listen('hmr:triggered', async () => {
+        //     this.DIN++;
+        //     await this.registerControllers(this._runner)
+        //     // await this.controllerHmr(payload)
+        // })
+
         return this;
     }
 
@@ -176,6 +183,9 @@ export class RaitonServer implements ServerInterface {
             handler: (name: string, paramsMetadata: any[] = []) => {
                 return async (req: FastifyRequest, reply: FastifyReply) => {
                     try {
+                        const key = filename.replace(Raiton.thread.builder.workdir, '').substring(1);
+                        Logger.debug('Handler', key, '\n', filename, '\n', Raiton.thread.builder.hmr.get(key))
+
                         const ctrl = this.controllers.get(filename);
                         if (!ctrl) throw new Error(`Controller ${filename} not found`);
 
@@ -199,6 +209,9 @@ export class RaitonServer implements ServerInterface {
             runner.route({
                 method,
                 url,
+                // constraints: {
+                //     version: `1.${this.DIN}`,
+                // },
                 schema: schema,
                 handler: parsed.handler(name, paramsMetadata),
             });
