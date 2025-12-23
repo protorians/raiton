@@ -2,6 +2,7 @@ import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
 import {ISchemeOptions} from "@/types/scheme";
 import {TSchema} from "@sinclair/typebox";
 import {ISignalStack} from "@protorians/core";
+import {Metafile} from "esbuild";
 
 
 export interface ServerOptions {
@@ -67,4 +68,5 @@ export interface ServerSignalMap {
     ready: undefined;
     errors: any;
     'hmr:controller': ServerHMRDeclaration;
+    'hmr:triggered': Metafile | undefined;
 }
