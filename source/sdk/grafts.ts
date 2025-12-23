@@ -3,9 +3,10 @@ import {DependencyContainer} from "./dependency-container";
 import {LifetimeEnum} from "@protorians/core";
 
 export class GraftsRegistry {
-    protected static _container: IDependencyContainer<IGraftDefinition, any> = new DependencyContainer<IGraftDefinition, any>('graft');
+    protected static _container: IDependencyContainer<IGraftDefinition, any>;
 
     static get container(): IDependencyContainer<IGraftDefinition, any> {
+        this._container = this._container || new DependencyContainer<IGraftDefinition, any>('graft');
         return this._container;
     }
 
