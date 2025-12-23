@@ -1,3 +1,10 @@
+# [1.0.0-alpha.3](https://github.com/protorians/raiton/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2025-12-23)
+
+
+### Bug Fixes
+
+* lazy-initialize `_container` in `GraftsRegistry` to optimize resource usage ([2847249](https://github.com/protorians/raiton/commit/2847249a70e08957ae618421bab11e68d126f057))
+
 # [1.0.0-alpha.2](https://github.com/protorians/raiton/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2025-12-22)
 
 
