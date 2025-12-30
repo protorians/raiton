@@ -2,26 +2,23 @@ import {Plugin, BuildContext, BuildOptions, context, Metafile, build} from 'esbu
 import {RaitonConfig} from "./config";
 import path from "node:path";
 import {RaitonDirectories} from "./directories";
-import {LBadge, Logger} from "@protorians/logger";
+import {Logger} from "@protorians/logger";
 import fs from "node:fs";
-import {formatBytes} from "./bytes.util";
-import {ISignalStack, ProcessUtility, Signal} from "@protorians/core";
+import {ProcessUtility} from "@protorians/core";
 import type {
     BuilderBootCallable,
     BuilderConfig,
     BuilderInterface,
-    BuilderSignalMap,
-    HmrInterface
+    HmrInterface,
 } from "@/types";
-import * as process from "node:process";
-import {EventMessageEnum} from "@/sdk/enums";
 import {until} from "./process.util";
 import {RaitonThread} from "./thread";
 import sleep = ProcessUtility.sleep;
 import {Raiton} from "@/core/raiton";
-import {EventBus, EventBusEnum} from "@protorians/events-bus";
 import {isControllerFile} from "@/sdk";
 import {Hmr} from "@/core/hmr";
+import {Throwable} from "@/sdk/throwable";
+import {ControllerBuilder} from "@/core/controller";
 
 export class RaitonBuilder implements BuilderInterface {
 
@@ -35,7 +32,9 @@ export class RaitonBuilder implements BuilderInterface {
     protected _importPattern = /from\s+["'](\.\.?\/[^."'][^"']*)["']/g;
 
     public readonly hmr: HmrInterface = new Hmr()
-    public readonly signal: ISignalStack<BuilderSignalMap> = new Signal.Stack()
+
+    // signal: ISignalStack<ServerSignalMap> = new Signal.Stack()
+
 
     constructor(
         public readonly workdir: string,
@@ -98,9 +97,9 @@ export class RaitonBuilder implements BuilderInterface {
             const url = this.generateUniqueModuleUrl(filename);
             const mod = await import(url);
 
-            if (!mod) throw new Error('Module is invalid')
+            if (!mod) throw new Throwable('Module is invalid')
 
-            Logger.log('Refreshed', path.relative(Raiton.thread.builder.workdir, url))
+            // Logger.log('Refreshed', path.relative(Raiton.thread.builder.workdir, url))
             return mod;
         } catch (er) {
             Logger.error('Failed to refresh file', filename, er)
@@ -133,8 +132,8 @@ export class RaitonBuilder implements BuilderInterface {
 
         const updateVersionNumber = () => this._compiledVersionNumber++;
         const getVersionNumber = () => this._compiledVersionNumber;
-        const refreshFileCached = async (filename: string) =>
-            await this.refreshFileCached(filename)
+        // const refreshFileCached = async (filename: string) =>
+        //     await this.refreshFileCached(filename)
 
         let hmrMoment: boolean = false;
 
@@ -166,8 +165,8 @@ export class RaitonBuilder implements BuilderInterface {
                             // Logger.debug('OUT', filename, metadata.bytes)
                             // await this_.hmr.upsert(key, filename, metadata.bytes)
 
-                            if (hmrMoment && isControllerFile(filename)) {
-                                Raiton.server.signals.dispatch('hmr:controller', {
+                            if (isControllerFile(filename)) {
+                                Raiton.signals.dispatch('hmr:controller', {
                                     filename,
                                     timestamp: Date.now(),
                                     version: getVersionNumber()
@@ -245,6 +244,11 @@ export class RaitonBuilder implements BuilderInterface {
                 await sleep(60)
                 await until(() => this._bootstrapper ? fs.existsSync(this._bootstrapper) : false)
                 callable?.(this)
+
+                Raiton.signals.listen('hmr:controller', async ({filename, version, timestamp}) =>
+                    await ControllerBuilder.build({filename, version, timestamp})
+                )
+
             })
             .catch((err) => Logger.error('Stack:\n', err))
         return this;
@@ -298,7 +302,7 @@ export class RaitonBuilder implements BuilderInterface {
         if (!('default' in bootstrapper))
             throw new Error('Bootstrapper not supported! Please export to "default"')
 
-        Raiton.thread = new RaitonThread({builder: this,})
+        Raiton.thread = new RaitonThread(this, {})
         return bootstrapper.default(Raiton.thread)
     }
 
