@@ -1,4 +1,4 @@
-import {ParamTypeEnum} from "@/sdk/enums/http-parameters.enum";
+import {Parametrable} from "@/sdk/enums/http-parameters.enum";
 import {FastifyReply, FastifyRequest} from "fastify";
 import {MultipartFile} from "@fastify/multipart";
 
@@ -13,7 +13,7 @@ export type RouteParametersMetadataCallable = (payload: RouteParametersMetadataP
 
 export interface RouteParametersMetadataInterface {
     index: number;
-    type: ParamTypeEnum;
+    type: Parametrable;
     key: string;
     multiple: boolean;
     optional: boolean;
