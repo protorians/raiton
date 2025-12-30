@@ -1,3 +1,12 @@
+# 1.0.0 (2025-12-30)
+
+
+### Features
+
+* add `NODE_AUTH_TOKEN` to `publish.yml` for semantic-release environment setup ([44a561b](https://github.com/protorians/raiton/commit/44a561b60bc3f35ae59bb404c343ef56baab4d26))
+* make package public and fix `publish.yml` token variable ([0293ee6](https://github.com/protorians/raiton/commit/0293ee629e444be0d90823896ea57212743d357d))
+* remove redundant comments from `publish.yml` workflow ([37ddce9](https://github.com/protorians/raiton/commit/37ddce94356dba8f2c2d5e87af7fc3ade4ca3cf5))
+
 # 1.0.0-beta.1 (2025-12-30)
 
 
