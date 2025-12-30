@@ -3,21 +3,26 @@ name: Publish
 on:
   push:
     branches:
-#      - main
+      - main
       - beta
-      - dev
+      - alpha
 
 permissions:
-  contents: read
+  contents: write      # semantic-release doit écrire des tags & changelog
+  issues: write
+  pull-requests: write
   packages: write
   id-token: write
 
 jobs:
-  build-and-publish:
+  release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # IMPORTANT pour semantic-release
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
@@ -32,44 +37,16 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+#        run: pnpm i
+#        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build
         run: pnpm run build
 
-      - name: Determine publish settings
-        id: settings
-        run: |
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          echo "Branch: $BRANCH"
-          case "$BRANCH" in
-            main)
-              echo "NPM_TAG=latest" >> $GITHUB_ENV
-              echo "PREID=" >> $GITHUB_ENV
-              ;;
-            beta)
-              echo "NPM_TAG=beta" >> $GITHUB_ENV
-              echo "PREID=beta" >> $GITHUB_ENV
-              ;;
-            dev)
-              echo "NPM_TAG=dev" >> $GITHUB_ENV
-              echo "PREID=dev" >> $GITHUB_ENV
-              ;;
-            *)
-              echo "Non supported branch: $BRANCH. Skipping publication."
-              echo "NPM_TAG=" >> $GITHUB_ENV
-              echo "PREID=" >> $GITHUB_ENV
-              ;;
-          esac
-
-      - name: Bump prerelease version
-        if: env.PREID != ''
-        run: |
-          npm version prerelease --preid="${{ env.PREID }}" --no-git-tag-version
-
-      - name: Publish to npm
-        if: env.NPM_TAG != ''
+      # 👇 semantic-release fait TOUT (version, changelog, tags, npm publish…)
+      - name: Release with semantic-release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          npm publish --provenance --access public --tag "${{ env.NPM_TAG }}"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # obligatoire pour releases & tags
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}  # obligatoire pour publier sur npm
+        run: pnpm dlx semantic-release

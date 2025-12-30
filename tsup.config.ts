@@ -1,14 +1,23 @@
-import { defineConfig } from 'tsup';
+import {defineConfig} from 'tsup';
 
-export default defineConfig({
-  entry: ['source/index.ts'],
-  outDir: 'build',
-  format: ['esm'],
-  target: 'node22',
-  sourcemap: true,
-  clean: true,
-  dts: false,
-  banner: {
-    // js: '#!/usr/bin/env node',
-  },
-});
+export default defineConfig(({watch}) => ({
+    entry: ['source/**/*'],
+    outDir: 'build',
+    format: ['esm'],
+    target: 'node22',
+    clean: true,
+    dts: true,
+    banner: {
+        // js: '#!/usr/bin/env node',
+    },
+    splitting: true,
+    shims: false,
+    sourcemap: false,
+    minify: false,
+    outExtension: ({format}) => {
+        if (format === 'cjs') return {cjs: '.cjs'} as const;
+        if (format === 'esm') return {js: '.mjs'} as const;
+        return {js: '.js'} as const;
+    },
+    watch,
+}));
