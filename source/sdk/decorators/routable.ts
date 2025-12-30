@@ -10,7 +10,7 @@ function createRoutableMethod(method: HttpMethod) {
                 method,
                 path,
                 propertyKey,
-                params: []
+                params: meta.params[propertyKey] || []
             })
         }
 }
