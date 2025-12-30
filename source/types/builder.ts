@@ -1,4 +1,4 @@
-import type {BuildContext, BuildOptions} from "esbuild";
+import type {BuildContext, BuildOptions, Metafile} from "esbuild";
 import {HmrInterface} from "@/types/hmr";
 import {ISignalStack} from "@protorians/core";
 
@@ -17,7 +17,7 @@ export interface BuilderInterface {
     readonly workdir: string;
     readonly options: BuilderConfig;
     readonly hmr: HmrInterface;
-    readonly signal: ISignalStack<BuilderSignalMap>;
+    // readonly signal: ISignalStack<BuilderSignalMap>;
 
     get context(): BuildContext<BuildOptions> | null;
 
@@ -39,6 +39,8 @@ export interface BuilderInterface {
 }
 
 
-export interface BuilderSignalMap {
-    ready?: undefined;
+export interface BuilderHMRDeclaration {
+    filename: string;
+    timestamp?: number;
+    version?: number;
 }
