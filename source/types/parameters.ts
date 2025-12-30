@@ -1,12 +1,12 @@
 import {Parametrable} from "@/sdk/enums/http-parameters.enum";
 import {FastifyReply, FastifyRequest} from "fastify";
-import {MultipartFile} from "@fastify/multipart";
+// import {MultipartFile} from "@fastify/multipart";
 
 
 export interface RouteParametersMetadataPayload {
     request: FastifyRequest;
     reply: FastifyReply;
-    files: AsyncIterableIterator<MultipartFile> | any[]
+    files: AsyncIterableIterator<any> | any[]
 }
 
 export type RouteParametersMetadataCallable = (payload: RouteParametersMetadataPayload) => any[];
