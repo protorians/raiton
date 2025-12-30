@@ -1,19 +1,22 @@
-import type {BuilderInterface} from "./builder";
-import {ServerInterface} from "./server";
+import {BuilderInterface} from "@/types/builder";
+import {RuntimeAdapter} from "@/types/runtime";
+import {ApplicationInterface} from "@/types/application";
+import {RuntimeType} from "@/sdk/enums/runtime.enum";
 
-export interface ThreadOptions {
-    readonly builder: BuilderInterface;
+export interface ThreadSetupOptions {
+    application: ApplicationInterface;
+    runtime?: RuntimeType
 }
 
 export type ThreadWaitCallable = () => (boolean | Promise<boolean>)
 
-export interface ThreadServerOptions {
-    port?: number;
-    prefix?: string;
-}
-
-export interface ThreadInterface extends ThreadOptions {
+export interface ThreadInterface {
     readonly appDir: string;
+    readonly builder: BuilderInterface;
+
+    setup(options: ThreadSetupOptions): this
+
+    run(): Promise<this>;
 
     restart(): void;
 
@@ -22,6 +25,4 @@ export interface ThreadInterface extends ThreadOptions {
     sleep(milliseconds: number): Promise<unknown>;
 
     wait(condition: ThreadWaitCallable): Promise<void>;
-
-    createApplication(options?: ThreadServerOptions): Promise<ServerInterface>;
 }

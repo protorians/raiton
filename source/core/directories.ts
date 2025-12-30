@@ -23,7 +23,7 @@ export class RaitonDirectories {
         return path.join(workdir, this.index);
     }
 
-    public static app(){
+    public static app() {
         return path.join(Raiton.thread.builder.workdir, RaitonConfig.get('rootDir'));
     }
 }

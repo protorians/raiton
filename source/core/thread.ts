@@ -1,30 +1,47 @@
 import type {
-    ThreadInterface,
-    ThreadOptions,
     BuilderInterface,
+    RuntimeAdapter,
+    RuntimeServer,
+    ThreadInterface,
+    ThreadSetupOptions,
     ThreadWaitCallable,
-    ServerOptions, ServerInterface
 } from "@/types";
-import {EventMessageEnum} from "@/sdk/enums";
+import {EventMessageEnum, RuntimeType} from "@/sdk/enums";
 import {ProcessUtility} from "@protorians/core";
 import {until} from "./process.util";
-import {RaitonServer} from "./server";
+import {ApplicationInterface} from "@/types/application";
+import {Runtime} from "@/sdk/runtime";
+import {LBadge, Logger} from "@protorians/logger";
+import {Throwable} from "@/sdk/throwable";
 import {Raiton} from "@/core/raiton";
+import {compileController} from "@/core/controller/compiler";
+import {ControllerBuilder} from "@/core/controller";
+import {bodyParserPlugin} from "@/sdk/plugins/body-parser.plugin";
+
+class ThreadOptions {
+}
 
 export class RaitonThread implements ThreadInterface {
 
+    protected static instance: RaitonThread | null = null;
+
+    public static get current(): RaitonThread {
+        if (!RaitonThread.instance) throw new Throwable('Thread not initialized')
+        return RaitonThread.instance;
+    }
+
+    public application: ApplicationInterface | null = null;
+    public runtime: RuntimeAdapter | null = null;
+    public server: RuntimeServer | null = null;
+
     readonly appDir: string;
-    readonly builder!: BuilderInterface;
 
-    constructor(options?: ThreadOptions) {
+    constructor(
+        public readonly builder: BuilderInterface,
+        protected _options: ThreadOptions = {}
+    ) {
         this.appDir = process.cwd();
-
-        if (options) {
-            for (const [key, value] of Object.entries(options)) {
-                if (typeof value === 'function') continue
-                this[key as keyof this] = value as this[keyof this]
-            }
-        }
+        RaitonThread.instance = this;
     }
 
     public restart(): void {
@@ -43,14 +60,31 @@ export class RaitonThread implements ThreadInterface {
         return await until(condition)
     }
 
-    public async createApplication(options?: ServerOptions): Promise<ServerInterface> {
-        Raiton.server = new RaitonServer({
-            ...options,
-            prefix: options?.prefix,
-            develop: this.builder.options.development,
-            workdir: options?.workdir || this.builder?.workdir || process.cwd(),
-        })
-        await Raiton.server.prepare();
-        return Raiton.server;
+    public setup({application, runtime}: ThreadSetupOptions): this {
+        this.runtime = new Runtime(runtime || RuntimeType.Node);
+        this.application = application;
+
+        this.application.use(bodyParserPlugin())
+        return this;
+    }
+
+    async run(): Promise<this> {
+
+        if (!this.application)
+            throw new Throwable('Application not defined');
+
+        if (!this.runtime)
+            throw new Throwable('Runtime not defined');
+
+        const port = this.application.config.port || 5712;
+
+        this.server = this.runtime.createServer(this.application.handle.bind(this.application))
+
+        await this.server.listen(port)
+        if (this.builder.out)
+            await ControllerBuilder.scan(this.builder.out)
+
+        Logger.log(LBadge.info('Server Started'), (`http://localhost:${port}`))
+        return this;
     }
 }

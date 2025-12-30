@@ -11,7 +11,7 @@ export default class DevelopCommand extends RaitonCommand {
 
     public register(): void {
         this.cli
-            .command("develop")
+            .command(this.name)
             .alias("dev")
             .description("Start the application in development mode")
             .action(this.run.bind(this));
@@ -34,6 +34,6 @@ export default class DevelopCommand extends RaitonCommand {
             if (msg === EventMessageEnum.RESTART) this.restart()
         });
 
-        Logger.info('PID', this.child.pid)
+        Logger.log('PID', this.child.pid)
     }
 }

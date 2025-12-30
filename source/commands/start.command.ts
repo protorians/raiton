@@ -10,7 +10,7 @@ export default class StartCommand extends RaitonCommand {
 
     public register(): void {
         this.cli
-            .command("start")
+            .command(this.name)
             .alias("run")
             .description("Start the application in production mode")
             .action(this.run.bind(this));
