@@ -1,4 +1,4 @@
-import {ParamTypeEnum} from "@/sdk/enums";
+import {Parametrable} from "@/sdk/enums";
 import {FastifyReply, FastifyRequest} from "fastify";
 import {RouteParametersMetadataInterface} from "@/types/parameters";
 import {MultipartFile} from "@fastify/multipart";
@@ -13,28 +13,28 @@ export async function parseParametersArguments(
 
     for (const param of metadata) {
         switch (param.type) {
-            case ParamTypeEnum.APP:
-                args[param.index] = req.server as any;
-                break;
-            case ParamTypeEnum.PARAM:
+            // case Parametrable.APP:
+            //     args[param.index] = req.server as any;
+            //     break;
+            case Parametrable.PARAM:
                 args[param.index] = param.key ? (req.params as any)[param.key] : req.params;
                 break;
-            case ParamTypeEnum.BODY:
+            case Parametrable.BODY:
                 args[param.index] = param.key ? (req.body as any)[param.key] : req.body;
                 break;
-            case ParamTypeEnum.QUERY:
+            case Parametrable.QUERY:
                 args[param.index] = param.key ? (req.query as any)[param.key] : req.query;
                 break;
-            case ParamTypeEnum.HEADER:
+            case Parametrable.HEADER:
                 args[param.index] = req.headers[param.key.toLowerCase()] as any;
                 break;
-            case ParamTypeEnum.REQ:
+            case Parametrable.REQ:
                 args[param.index] = req as any;
                 break;
-            case ParamTypeEnum.RES:
+            case Parametrable.REPLY:
                 args[param.index] = res as any;
                 break;
-            case ParamTypeEnum.UPLOAD_FILE:
+            case Parametrable.UPLOAD_FILE:
                 let accumulate: any = param.multiple ? [] : null;
                 for await (const part of files) {
                     if (param.key === part.fieldname) {
@@ -51,7 +51,7 @@ export async function parseParametersArguments(
                 args[param.index] = accumulate as any;
                 break;
 
-            case ParamTypeEnum.CUSTOM:
+            case Parametrable.CUSTOM:
                 args[param.index] = param.callable?.({request: req, reply: res, files}) ?? null;
                 break;
         }
