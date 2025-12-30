@@ -7,6 +7,12 @@
   "bin": {
     "raiton": "build/bin/index.mjs"
   },
+  "author": "Y. Yannick GOBOU",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/protorians/raiton.git"
+  },
   "exports": {
     "./core/*": {
       "types": "./build/core/*.d.ts",
