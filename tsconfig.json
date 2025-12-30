@@ -15,7 +15,9 @@
     "declaration": true,
     "sourceMap": true,
     "types": [
-      "node"
+      "node",
+      "bun",
+      "deno"
     ],
     "baseUrl": "./",
     "outDir": "build",
