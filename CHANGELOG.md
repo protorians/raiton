@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/protorians/raiton/compare/v1.1.0...v1.1.1) (2025-12-30)
+
+
+### Bug Fixes
+
+* remove unused Fastify dependencies and deprecate parameter handling utilities ([282db2c](https://github.com/protorians/raiton/commit/282db2cb4baeb52b816e1444f9d618570a073443))
+
 # [1.1.0](https://github.com/protorians/raiton/compare/v1.0.0...v1.1.0) (2025-12-30)
 
 
