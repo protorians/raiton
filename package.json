@@ -7,6 +7,10 @@
   "bin": {
     "raiton": "build/bin/index.mjs"
   },
+  "keywords": [
+    "protorians",
+    "raiton"
+  ],
   "author": "Y. Yannick GOBOU",
   "license": "MIT",
   "repository": {
