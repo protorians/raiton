@@ -44,6 +44,6 @@ jobs:
 
       - name: Release with semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # obligatoire pour releases & tags
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}  # obligatoire pour publier sur npm
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm dlx semantic-release
