@@ -5,6 +5,7 @@ import path from "node:path";
 import fs from "node:fs";
 import {LBadge, Logger} from "@protorians/logger";
 import {ArtifactFactory} from "@/sdk/artifacts";
+import {Throwable} from "@/sdk/throwable";
 
 export class Artifact implements ArtifactInterface {
     public readonly directory: string;
@@ -17,10 +18,10 @@ export class Artifact implements ArtifactInterface {
     ) {
         this.options.verbose = typeof options.verbose === "undefined" ? false : options.verbose;
 
-        if (!Raiton.thread.builder.source)
-            throw new Error("Artifact need project source");
+        if (!Raiton.thread.builder?.source)
+            throw new Throwable("Artifact need project source");
 
-        this.directory = RaitonDirectories.artifacts(Raiton.thread.builder.workdir)
+        this.directory = RaitonDirectories.artifacts(Raiton.thread.builder?.workdir)
         this.workdir = Raiton.thread.builder.source;
         this.file = path.join(this.directory, `${this.options.artifact}.d.ts`);
     }
@@ -56,7 +57,7 @@ export class Artifact implements ArtifactInterface {
         return this._files;
     }
 
-    resolve() {
+    generate() {
         try {
             let mappings = "";
 
