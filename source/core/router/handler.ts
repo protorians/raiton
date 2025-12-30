@@ -9,7 +9,10 @@ export function createHandler(
     return async (ctx: any) => {
         const args: any[] = []
 
+        Logger.debug('Metadata:', metadata)
+
         for (const p of metadata.params) {
+
             switch (p.type) {
                 case Parametrable.QUERY:
                     args[p.index] =
@@ -40,10 +43,6 @@ export function createHandler(
                     break;
             }
         }
-
-        Logger.debug('Calling metadata handler:', metadata, args)
-        Logger.debug('metadata.params:', metadata.params)
-        Logger.debug('Request:', ctx.req)
 
         return instance[metadata.propertyKey](...args)
     }

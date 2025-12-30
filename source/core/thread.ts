@@ -16,6 +16,7 @@ import {Throwable} from "@/sdk/throwable";
 import {Raiton} from "@/core/raiton";
 import {compileController} from "@/core/controller/compiler";
 import {ControllerBuilder} from "@/core/controller";
+import {bodyParserPlugin} from "@/sdk/plugins/body-parser.plugin";
 
 class ThreadOptions {
 }
@@ -62,6 +63,8 @@ export class RaitonThread implements ThreadInterface {
     public setup({application, runtime}: ThreadSetupOptions): this {
         this.runtime = new Runtime(runtime || RuntimeType.Node);
         this.application = application;
+
+        this.application.use(bodyParserPlugin())
         return this;
     }
 
