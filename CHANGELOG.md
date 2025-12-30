@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/protorians/raiton/compare/v1.0.0...v1.1.0) (2025-12-30)
+
+
+### Features
+
+* enable provenance support in `package.json` and `.releaserc.json` ([b5db171](https://github.com/protorians/raiton/commit/b5db171a84150aefc2978b37c5d3544b5769b160))
+
 # 1.0.0 (2025-12-30)
 
 
