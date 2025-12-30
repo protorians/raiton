@@ -1,5 +1,5 @@
 import {RaitonCommand, RaitonBuilder} from "@/core";
-import {Logger} from "@protorians/logger";
+import {LBadge, Logger} from "@protorians/logger";
 import type {BuildCommandOptions} from "@/types";
 
 
@@ -18,7 +18,7 @@ export default class BuildCommand extends RaitonCommand {
     }
 
     protected async run(options: BuildCommandOptions): Promise<void> {
-        if (options.develop) Logger.notice("Development mode activated");
+        if (options.develop) Logger.warn(LBadge.log("Dev Mode"),);
 
         const builder = new RaitonBuilder(this.workdir, {
             development: options.develop
