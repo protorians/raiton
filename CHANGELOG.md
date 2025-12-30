@@ -1,3 +1,15 @@
+# [1.0.0-alpha.4](https://github.com/protorians/raiton/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2025-12-30)
+
+
+### Bug Fixes
+
+* update log method in `BuildCommand`, add `LBadge` for improved log formatting ([63d1126](https://github.com/protorians/raiton/commit/63d11265a65af60e47e07053376c87dd541a5fbb))
+
+
+### Features
+
+* integrate `bodyParserPlugin` into application setup, refine `ControllerMeta` structure, and clean up router handler logging ([3dc29b9](https://github.com/protorians/raiton/commit/3dc29b9d203fd1d56cd22de65f58dc6c9353566a))
+
 # [1.0.0-alpha.3](https://github.com/protorians/raiton/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2025-12-23)
 
 
