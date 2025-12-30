@@ -12,7 +12,8 @@ export interface RuntimeRequest {
     method: string
     url: string
     headers: Headers
-    body?: ReadableStream<Uint8Array> | Uint8Array | null
+    body?: ReadableStream<Uint8Array> | Uint8Array | Record<string, any> | null;
+    query?: Record<string, any>
     remoteAddress?: string
 }
 
@@ -37,10 +38,16 @@ export interface RuntimeAdapter {
 
 export interface RuntimeInterface {
     readonly type: RuntimeType;
+
     get isNode(): boolean;
+
     get isDeno(): boolean;
+
     get isWeb(): boolean;
+
     get isBun(): boolean
+
     adapter(): RuntimeAdapter;
+
     createServer(handler: RuntimeHandlerCallable): RuntimeServer;
 }

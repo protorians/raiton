@@ -4,6 +4,7 @@ import {Context} from "@/types/core";
 export interface ControllerMeta {
     prefix?: string
     routes: RouteMeta[]
+    params: Record<string, ParamMeta[]>
 }
 
 export interface RouteMeta {
