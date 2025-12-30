@@ -9,7 +9,7 @@ export default class GraftsCommand extends RaitonCommand {
 
     public register(): void {
         this.cli
-            .command("gen:grafts")
+            .command(this.name)
             .description("Generates typings grafts")
             .action(this.generates.bind(this))
     }

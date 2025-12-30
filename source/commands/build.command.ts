@@ -1,5 +1,3 @@
-// import "reflect-metadata"
-
 import {RaitonCommand, RaitonBuilder} from "@/core";
 import {Logger} from "@protorians/logger";
 import type {BuildCommandOptions} from "@/types";
@@ -11,7 +9,7 @@ export default class BuildCommand extends RaitonCommand {
 
     public register(): void {
         this.cli
-            .command("build")
+            .command(this.name)
             .alias("b")
             .description("Build the application")
             .option("--develop, -d", "Build in development mode")
@@ -20,7 +18,7 @@ export default class BuildCommand extends RaitonCommand {
     }
 
     protected async run(options: BuildCommandOptions): Promise<void> {
-        if (options.develop) Logger.notice("Development mode is used");
+        if (options.develop) Logger.notice("Development mode activated");
 
         const builder = new RaitonBuilder(this.workdir, {
             development: options.develop
