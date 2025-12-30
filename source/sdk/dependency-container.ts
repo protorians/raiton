@@ -31,14 +31,16 @@ export class DependencyContainer<T extends IDependencyContainerDefinition<E>, E 
 
     resolveArguments(definition: T): any[] {
         try {
-            const deps = Reflect.getMetadata(SYSTEM_DECORATORS_KEYS.GRAFT, definition.construct) || [];
-            return deps.map((dep: IConstructor, index: number) => {
-                const depName = [...this._classes.entries()]
-                    .find(([, value]) => value.construct === dep)?.[0];
+            // const deps = Reflect.getMetadata(SYSTEM_DECORATORS_KEYS.GRAFT, definition.construct) || [];
+            // return deps.map((dep: IConstructor, index: number) => {
+            //     const depName = [...this._classes.entries()]
+            //         .find(([, value]) => value.construct === dep)?.[0];
+            //
+            //     if (!depName) throw new Throwable(`Dependency (${index}) not registered in ${this.artifact} on ${definition.name}`);
+            //     return this.get(depName);
+            // });
 
-                if (!depName) throw new Throwable(`Dependency (${index}) not registered in ${this.artifact} on ${definition.name}`);
-                return this.get(depName);
-            });
+            throw new Throwable(`Dependency injection not yet implemented in ${this.artifact} on ${definition.name}`);
 
         } catch (e) {
             Logger.error('Resolve', e);

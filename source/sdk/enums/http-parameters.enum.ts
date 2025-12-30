@@ -1,11 +1,10 @@
-export enum ParamTypeEnum {
-    APP = "application",
+export enum Parametrable {
     PARAM = "param",
     BODY = "body",
     QUERY = "query",
     HEADER = "header",
     REQ = "req",
-    RES = "res",
+    REPLY = "reply",
     UPLOAD_FILE = "upload",
     CUSTOM = "custom",
 }
