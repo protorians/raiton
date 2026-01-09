@@ -2,6 +2,7 @@ import {Command} from 'commander';
 import {RaitonCommands, RaitonConfig} from "@/core";
 import {fileURLToPath} from "node:url"
 import path from "node:path";
+import {Logger} from "@protorians/logger";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -12,7 +13,7 @@ export default async function bootstrapper(cli: Command) {
     const workdir = process.cwd();
     const capabilities = new RaitonCommands(cli, appdir, workdir)
 
-    RaitonConfig.load(workdir);
+    await RaitonConfig.sync(workdir);
     await capabilities.harvest();
     return cli.parse(process.argv)
 }
