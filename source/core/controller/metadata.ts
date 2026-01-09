@@ -1,10 +1,10 @@
 import {ControllerMeta} from "@/types";
+import {METADATA_KEYS} from "@/sdk";
 
-const META = Symbol('controller:meta')
 
 export function getControllerMetadata(target: any): ControllerMeta {
-    if (!target[META])
-        target[META] = {routes: [], params: {}}
-    
-    return target[META]
+    if (!target[METADATA_KEYS.CONTROLLERS])
+        target[METADATA_KEYS.CONTROLLERS] = {routes: [], params: {}}
+
+    return target[METADATA_KEYS.CONTROLLERS]
 }

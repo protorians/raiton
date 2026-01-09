@@ -9,8 +9,6 @@ export function createHandler(
     return async (ctx: any) => {
         const args: any[] = []
 
-        Logger.debug('Metadata:', metadata)
-
         for (const p of metadata.params) {
 
             switch (p.type) {
@@ -23,8 +21,7 @@ export function createHandler(
                         ctx.req.params?.[p.key!] ?? ctx.params?.[p.key!]
                     break
                 case Parametrable.BODY:
-                    args[p.index] =
-                        ctx.req.body
+                    args[p.index] = ctx.req.body
                     break
                 case Parametrable.HEADER:
                     args[p.index] = ctx.req.headers[p.key!.toLowerCase()] as any;

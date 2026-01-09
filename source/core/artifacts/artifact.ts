@@ -11,6 +11,7 @@ export class Artifact implements ArtifactInterface {
     public readonly directory: string;
     public readonly file: string;
     public readonly workdir: string;
+
     protected _files: string[] = [];
 
     constructor(
@@ -57,7 +58,7 @@ export class Artifact implements ArtifactInterface {
         return this._files;
     }
 
-    generate() {
+    generate(): boolean {
         try {
             let mappings = "";
 
@@ -95,10 +96,14 @@ ${mappings} }
 }
 export {};`;
             fs.writeFileSync(this.file, content, "utf-8");
-            if (!ArtifactFactory.save(this.options.artifact)) Logger.error(`Failed to save artifacts for ${this.options.artifact}`);
+            if (!ArtifactFactory.save(this.options.artifact))
+                throw new Throwable(`Failed to save artifacts for ${this.options.artifact}`);
+
+            return true;
         } catch (e: any) {
             Logger.error(`Failed to resolve artifacts for ${this.options.artifact}`, e.message ?? e);
         }
+        return false;
     }
 
 }
