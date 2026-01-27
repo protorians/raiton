@@ -1,10 +1,13 @@
 import {METADATA_KEYS} from "@/sdk/constants";
 import type {ContainerDefinitionInterface} from "@/types";
 import {LifetimeEnum} from "@protorians/core";
+import "reflect-metadata";
 
 export function getContainerMetadata(target: any): ContainerDefinitionInterface {
-    if (!target[METADATA_KEYS.CONTAINER])
-        target[METADATA_KEYS.CONTAINER] = {
+    let metadata = Reflect.getMetadata(METADATA_KEYS.CONTAINER, target);
+
+    if (!metadata) {
+        metadata = {
             name: `${target.name}`,
             construct: target,
             parameters: [],
@@ -12,6 +15,8 @@ export function getContainerMetadata(target: any): ContainerDefinitionInterface 
             instance: undefined,
             scope: undefined,
         } as ContainerDefinitionInterface;
+        Reflect.defineMetadata(METADATA_KEYS.CONTAINER, metadata, target);
+    }
 
-    return target[METADATA_KEYS.CONTAINER];
+    return metadata;
 }

@@ -3,6 +3,7 @@ import {Throwable} from "@/sdk/throwable";
 import {LifetimeEnum} from "@protorians/core";
 import {Logger} from "@protorians/logger";
 import {getContainerMetadata} from "@/core/injection/metadata";
+import "reflect-metadata";
 
 export class Injection {
 
@@ -43,14 +44,29 @@ export class Injection {
         try {
             const metadata: ContainerDefinitionInterface = getContainerMetadata(definition.construct);
             const parameters = metadata.parameters || [];
+            const designParameters = Reflect.getMetadata('design:paramtypes', definition.construct) || [];
             const effectiveScope = scope || definition.scope || this.defaultScope;
 
-            return parameters.map(param => {
+            const maxLen = Math.max(parameters.length, designParameters.length);
+            const args = [];
+
+            for (let i = 0; i < maxLen; i++) {
+                const param = parameters[i];
+                const designParam = designParameters[i];
+
                 if (typeof param === 'string') {
-                    return this.get(param, effectiveScope);
+                    args.push(this.get(param, effectiveScope));
+                    continue;
                 }
-                return undefined;
-            });
+
+                if (designParam && typeof designParam === 'function' && designParam.name) {
+                    args.push(this.get(designParam.name, effectiveScope));
+                    continue;
+                }
+
+                args.push(undefined);
+            }
+            return args;
         } catch (e) {
             Logger.error('Resolve', e);
             return [];
@@ -69,6 +85,7 @@ export class Injection {
         this._resolutionStack.push(name);
 
         try {
+            let instance: any;
             if (cls.lifetime === LifetimeEnum.SINGLETON) {
                 if (!this._instances.has(name)) {
                     this._instances.set(name, new Map());
@@ -76,19 +93,34 @@ export class Injection {
                 const scopeInstances = this._instances.get(name)!;
 
                 if (!scopeInstances.has(effectiveScope)) {
-                    scopeInstances.set(effectiveScope, new cls.construct(...this.resolveArguments(cls, effectiveScope)));
+                    instance = new cls.construct(...this.resolveArguments(cls, effectiveScope));
+                    scopeInstances.set(effectiveScope, instance);
+                    this.injectProperties(instance, cls, effectiveScope);
                 }
                 return scopeInstances.get(effectiveScope);
             }
 
             if (cls.lifetime === LifetimeEnum.TRANSIENT) {
-                return new cls.construct(...this.resolveArguments(cls, effectiveScope)) as any;
+                instance = new cls.construct(...this.resolveArguments(cls, effectiveScope));
+                this.injectProperties(instance, cls, effectiveScope);
+                return instance as any;
             }
         } finally {
             this._resolutionStack.pop();
         }
 
         return undefined;
+    }
+
+    protected static injectProperties(instance: any, definition: ContainerDefinitionInterface, scope?: any): void {
+        const metadata: ContainerDefinitionInterface = getContainerMetadata(definition.construct);
+        if (metadata.properties) {
+            for (const [propertyKey, type] of metadata.properties) {
+                if (type && type.name) {
+                    instance[propertyKey] = this.get(type.name, scope);
+                }
+            }
+        }
     }
 
     static resolve<T>(construct: IConstructor<T>): T {

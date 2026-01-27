@@ -1,10 +1,13 @@
 import {ControllerMeta} from "@/types";
 import {METADATA_KEYS} from "@/sdk";
-
+import "reflect-metadata";
 
 export function getControllerMetadata(target: any): ControllerMeta {
-    if (!target[METADATA_KEYS.CONTROLLERS])
-        target[METADATA_KEYS.CONTROLLERS] = {routes: [], params: {}}
+    let metadata = Reflect.getMetadata(METADATA_KEYS.CONTROLLERS, target);
+    if (!metadata) {
+        metadata = {routes: [], params: {}};
+        Reflect.defineMetadata(METADATA_KEYS.CONTROLLERS, metadata, target);
+    }
 
-    return target[METADATA_KEYS.CONTROLLERS]
+    return metadata;
 }

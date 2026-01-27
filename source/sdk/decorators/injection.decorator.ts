@@ -3,6 +3,7 @@ import {Injection} from "@/core/injection";
 import {LifetimeEnum} from "@protorians/core";
 import {getContainerMetadata} from "@/core/injection/metadata";
 import {Logger} from "@protorians/logger";
+import "reflect-metadata";
 
 
 export function Injectable(lifetime?: LifetimeEnum, name?: string, scope?: any) {
@@ -16,7 +17,7 @@ export function Injectable(lifetime?: LifetimeEnum, name?: string, scope?: any) 
     };
 }
 
-export function Inject(injectable?: any) {
+export function Inject() {
     return function (target: any, propertyKey: string | symbol | undefined, parameterIndex?: number) {
 
         Logger.debug(
@@ -26,12 +27,15 @@ export function Inject(injectable?: any) {
             parameterIndex,
         );
 
-        const name = injectable?.name || injectable;
-        const metadata = getContainerMetadata(target);
+        const metadata = getContainerMetadata(parameterIndex !== undefined ? target : target.constructor);
 
         if (parameterIndex !== undefined) {
             metadata.parameters = metadata.parameters || [];
-            metadata.parameters[parameterIndex] = name || propertyKey;
+            metadata.parameters[parameterIndex] = true;
+        } else if (propertyKey !== undefined) {
+            metadata.properties = metadata.properties || new Map();
+            const type = Reflect.getMetadata('design:type', target, propertyKey);
+            metadata.properties.set(propertyKey, type);
         }
 
         return target
