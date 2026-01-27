@@ -9,4 +9,5 @@ export interface ContainerDefinitionInterface<T = any> {
     instance?: any;
     scope?: Symbol;
     parameters?: any[];
+    properties?: Map<string | symbol, any>;
 }
