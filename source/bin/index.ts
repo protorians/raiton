@@ -1,5 +1,5 @@
-#!/usr/bin/env node
-// import "reflect-metadata"
+#!/usr/bin/env bun
+import "reflect-metadata"
 import bootstrapper from "./bootstrapper";
 import CLI from "./cli";
 
