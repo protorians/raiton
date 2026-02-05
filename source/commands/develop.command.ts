@@ -1,13 +1,15 @@
 import {Raiton, RaitonCommand} from "@/core";
-import {ChildProcess, spawn} from 'node:child_process';
+import {ChildProcess} from 'node:child_process';
 import {Logger} from "@protorians/logger";
 import {EventMessageEnum} from "@/sdk";
+import {CliHelpers} from "@/bin/cli-helpers";
+import path from "node:path";
 
 export default class DevelopCommand extends RaitonCommand {
     public readonly name: string = 'develop';
     public readonly description: string = 'Run the application in development mode';
 
-    private child: ChildProcess | null = null;
+    private child: Bun.Subprocess<"ignore", "pipe", "inherit"> | ChildProcess | null = null;
 
     public register(): void {
         this.cli
@@ -21,18 +23,24 @@ export default class DevelopCommand extends RaitonCommand {
         Logger.info('Reloading...');
         console.clear();
         this.child?.kill('SIGTERM');
-        this.child?.on('exit', () => this.run());
+
+        if (this.child && 'on' in this.child)
+            this.child?.on('exit', () => this.run());
     }
 
     protected async run(): Promise<void> {
-        this.child = spawn(Raiton.identifier, ['build', '-d'], {
+        Logger.info('Workdir', this.workdir);
+
+        const entryPoint = path.join(this.appdir, 'bin/index.ts');
+        this.child = CliHelpers.spawn(entryPoint, ['build', '-d'], {
             stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
             cwd: this.workdir
         });
 
-        this.child.on('message', (msg) => {
-            if (msg === EventMessageEnum.RESTART) this.restart()
-        });
+        if (this.child && 'on' in this.child)
+            this.child.on('message', (msg) => {
+                if (msg === EventMessageEnum.RESTART) this.restart()
+            });
 
         Logger.log('PID', this.child.pid)
     }

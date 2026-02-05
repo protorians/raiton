@@ -264,7 +264,8 @@ export class RaitonBuilder implements BuilderInterface {
     }
 
     public async prepare(): Promise<this> {
-        this._source = path.resolve(this.workdir, RaitonConfig.get('rootDir'));
+        const rootDir = RaitonConfig.get('rootDir') || './';
+        this._source = path.resolve(this.workdir, rootDir);
         this._out = path.resolve(this.workdir, RaitonDirectories.server(this.workdir));
 
         if (!fs.existsSync(this._source))
