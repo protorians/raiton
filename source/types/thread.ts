@@ -26,3 +26,6 @@ export interface ThreadInterface {
 
     wait(condition: ThreadWaitCallable): Promise<void>;
 }
+
+
+export interface ThreadOptions{}
