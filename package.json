@@ -1,51 +1,49 @@
 {
   "name": "raiton",
-  "version": "1.0.0-alpha.4",
-  "private": true,
+  "version": "0.0.2",
+  "private": false,
   "type": "module",
   "description": "Protorians Raiton Development Kit",
+  "main": "./source/core/index.ts",
+  "module": "./source/core/index.ts",
+  "types": "./source/core/index.d.ts",
   "bin": {
-    "raiton": "build/bin/index.mjs"
+    "raiton": "source/bin/index.ts"
+  },
+  "keywords": [
+    "protorians",
+    "raiton",
+    "development",
+    "kit",
+    "typescript",
+    "node",
+    "backend"
+  ],
+  "author": "Y. Yannick GOBOU",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/protorians/raiton.git"
   },
   "exports": {
-    "./core/*": {
-      "types": "./build/core/*.d.ts",
-      "import": "./build/core/*.mjs"
-    },
-    ".": {
-      "types": "./build/core/index.d.ts",
-      "import": "./build/core/index.mjs"
-    },
-    "./commands/*": {
-      "types": "./build/commands/*.d.ts",
-      "import": "./build/commands/*.mjs"
-    },
-    "./sdk/*": {
-      "types": "./build/sdk/*.d.ts",
-      "import": "./build/sdk/*.mjs"
-    },
-    "./sdk": {
-      "types": "./build/sdk/index.d.ts",
-      "import": "./build/sdk/index.mjs"
-    },
-    "./types/*": {
-      "types": "./build/types/index.d.ts",
-      "import": "./build/types/index.mjs"
-    }
+    ".": "./source/core/index.ts",
+    "./core/*": "./source/core/*.ts",
+    "./commands/*": "./source/commands/*.ts",
+    "./sdk": "./source/sdk/index.ts",
+    "./sdk/*": "./source/sdk/*.ts",
+    "./types": "./source/types/index.ts",
+    "./types/*": "./source/types/*.ts"
   },
   "scripts": {
-    "dev": "tsup --watch --config tsup.config.ts",
-    "build": "tsup --config tsup.config.ts",
-    "commit": "pnpx semantic-release",
-    "commit:test": "pnpx semantic-release --dry-run"
+    "commit": "bun semantic-release",
+    "commit:test": "bun semantic-release --dry-run",
+    "dev": "bun run --hot source/bin/index.ts",
+    "start": "bun run build/bin/index.mjs",
+    "build": "bun build source/bin/index.ts --target=node --format=esm --outfile=build/bin/index.mjs",
+    "postinstall": "chmod +x source/bin/index.ts",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@fastify/formbody": "^8.0.2",
-    "@fastify/jwt": "^10.0.0",
-    "@fastify/multipart": "^9.0.3",
-    "@fastify/static": "^8.2.0",
-    "@fastify/swagger": "^9.5.1",
-    "@fastify/type-provider-typebox": "^5.2.0",
     "@protorians/core": "^0.6.13",
     "@protorians/events-bus": "^0.0.1",
     "@protorians/logger": "^0.0.10",
@@ -57,8 +55,6 @@
     "commander": "^14.0.2",
     "dotenv": "^17.2.3",
     "esbuild": "^0.27.1",
-    "fastify": "^5.6.2",
-    "fastify-plugin": "^5.1.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
@@ -73,7 +69,6 @@
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "cz-conventional-changelog": "^3.3.0",
     "semantic-release": "^25.0.2",
-    "tsup": "^8.3.0",
     "typescript": "^5.9.3"
   },
   "config": {
@@ -83,7 +78,11 @@
   },
   "compilerOptions": {
     "types": [
-      "node"
+      "bun"
     ]
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

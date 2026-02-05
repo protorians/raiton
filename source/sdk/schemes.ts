@@ -25,7 +25,7 @@ export type SchematicCast<T> = T extends Scheme<any, any, any, any>
 
 /**
  * Represents a schema configuration that can be used with type-safe operations
- * and is compatible with fastify route options.
+ * and is compatible with route options.
  *
  * @template TBody - Optional schema type for the request body.
  * @template TParams - Optional schema type for the route parameters.

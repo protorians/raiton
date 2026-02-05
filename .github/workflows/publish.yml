@@ -37,16 +37,14 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-#        run: pnpm i
-#        run: pnpm install --frozen-lockfile
         run: pnpm install --no-frozen-lockfile
 
       - name: Build
         run: pnpm run build
 
-      # 👇 semantic-release fait TOUT (version, changelog, tags, npm publish…)
       - name: Release with semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # obligatoire pour releases & tags
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}  # obligatoire pour publier sur npm
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm dlx semantic-release
