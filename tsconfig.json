@@ -20,7 +20,6 @@
       "deno"
     ],
     "baseUrl": "./",
-    "outDir": "build",
     "rootDir": "source",
     "paths": {
       "@/*": ["source/*"]
