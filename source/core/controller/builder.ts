@@ -29,8 +29,10 @@ export class ControllerBuilder {
         if (!controller) return undefined;
         if(!RaitonThread.current.application) return undefined;
 
-        Logger.log(LBadge.info('Controller'), controller.name);
-        return compileController(controller, RaitonThread.current.application)
+        const compilated = compileController(controller, RaitonThread.current.application);
+        Logger.log(LBadge.info('Controller'), controller.name, 'compilated');
+
+        return compilated;
     }
 
 }

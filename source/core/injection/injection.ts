@@ -1,9 +1,10 @@
+import "reflect-metadata";
 import type {IConstructor, ContainerDefinitionInterface} from "@/types";
 import {Throwable} from "@/sdk/throwable";
-import {LifetimeEnum} from "@protorians/core";
+import {LifetimeEnum, TextUtility} from "@protorians/core";
 import {Logger} from "@protorians/logger";
-import {getContainerMetadata} from "@/core/injection/metadata";
-import "reflect-metadata";
+import {METADATA_KEYS} from "@/sdk/constants";
+import camelCase = TextUtility.camelCase;
 
 export class Injection {
 
@@ -22,12 +23,17 @@ export class Injection {
     }
 
     static has(name: string): boolean {
-        return this._classes.has(name);
+        return this._classes.has(this.normalizeName(name));
     }
 
     static clear(): void {
         this._classes.clear();
         this._instances.clear();
+    }
+
+    static normalizeName(name: string): string {
+        const stableName = camelCase(name);
+        return stableName[0].toLowerCase() + stableName.slice(1);
     }
 
     static registry(
@@ -36,14 +42,16 @@ export class Injection {
         lifetime: LifetimeEnum = LifetimeEnum.SINGLETON,
         scope?: Symbol
     ): typeof this {
-        this._classes.set(name, {name, construct, lifetime, scope});
+        if (!construct.name)
+            throw new Error('Le constructeur doit avoir un nom valide pour être enregistré dans le conteneur.');
+
+        this._classes.set(this.normalizeName(name), {name, construct, lifetime, scope});
         return this;
     }
 
     static resolveArguments(definition: ContainerDefinitionInterface, scope?: any): any[] {
         try {
-            const metadata: ContainerDefinitionInterface = getContainerMetadata(definition.construct);
-            const parameters = metadata.parameters || [];
+            const parameters = Reflect.getMetadata(METADATA_KEYS.INJECT_PARAMETERS, definition.construct) || [];
             const designParameters = Reflect.getMetadata('design:paramtypes', definition.construct) || [];
             const effectiveScope = scope || definition.scope || this.defaultScope;
 
@@ -54,13 +62,22 @@ export class Injection {
                 const param = parameters[i];
                 const designParam = designParameters[i];
 
-                if (typeof param === 'string') {
-                    args.push(this.get(param, effectiveScope));
-                    continue;
+                if (param && param !== true) {
+                    const token = typeof param === 'function' ? (param.name || param) : param;
+                    if (typeof token === 'string') {
+                        args.push(this.get(token, effectiveScope));
+                        continue;
+                    }
+                    if (typeof param === 'function') {
+                        const metadata: ContainerDefinitionInterface = Reflect.getMetadata(METADATA_KEYS.CONTAINER, param);
+                        args.push(this.get(metadata?.name || param.name, effectiveScope));
+                        continue;
+                    }
                 }
 
                 if (designParam && typeof designParam === 'function' && designParam.name) {
-                    args.push(this.get(designParam.name, effectiveScope));
+                    const metadata: ContainerDefinitionInterface = Reflect.getMetadata(METADATA_KEYS.CONTAINER, designParam);
+                    args.push(this.get(metadata?.name || designParam.name, effectiveScope));
                     continue;
                 }
 
@@ -74,23 +91,24 @@ export class Injection {
     }
 
     static get<T>(name: string, scope?: Symbol): T | undefined {
-        const cls = this._classes.get(name);
+        const name_ = this.normalizeName(name);
+        const cls = this._classes.get(name_);
         if (!cls) throw new Throwable(`Dependency ${name} not registered`);
 
         const effectiveScope = scope || cls.scope || this.defaultScope;
-        if (this._resolutionStack.includes(name)) {
+        if (this._resolutionStack.includes(name_)) {
             throw new Throwable(`Circular dependency detected: ${this._resolutionStack.join(' -> ')} -> ${name}`);
         }
 
-        this._resolutionStack.push(name);
+        this._resolutionStack.push(name_);
 
         try {
             let instance: any;
             if (cls.lifetime === LifetimeEnum.SINGLETON) {
-                if (!this._instances.has(name)) {
-                    this._instances.set(name, new Map());
+                if (!this._instances.has(name_)) {
+                    this._instances.set(name_, new Map());
                 }
-                const scopeInstances = this._instances.get(name)!;
+                const scopeInstances = this._instances.get(name_)!;
 
                 if (!scopeInstances.has(effectiveScope)) {
                     instance = new cls.construct(...this.resolveArguments(cls, effectiveScope));
@@ -113,20 +131,25 @@ export class Injection {
     }
 
     protected static injectProperties(instance: any, definition: ContainerDefinitionInterface, scope?: any): void {
-        const metadata: ContainerDefinitionInterface = getContainerMetadata(definition.construct);
-        if (metadata.properties) {
-            for (const [propertyKey, type] of metadata.properties) {
-                if (type && type.name) {
-                    instance[propertyKey] = this.get(type.name, scope);
+        const properties: Map<string | symbol, any> = Reflect.getMetadata(METADATA_KEYS.INJECT_PROPERTIES, definition.construct);
+
+        if (properties) {
+            for (const [propertyKey, type] of properties) {
+                const token = typeof type === 'function' ? (type.name || type) : type;
+                if (typeof token === 'string') {
+                    instance[propertyKey] = this.get(token, scope);
+                } else if (typeof type === 'function') {
+                    const metadata: ContainerDefinitionInterface = Reflect.getMetadata(METADATA_KEYS.CONTAINER, type);
+                    instance[propertyKey] = this.get(metadata?.name || type.name, scope);
                 }
             }
         }
     }
 
     static resolve<T>(construct: IConstructor<T>): T {
-        const metadata = getContainerMetadata(construct);
+        const metadata: ContainerDefinitionInterface = Reflect.getMetadata(METADATA_KEYS.CONTAINER, construct);
 
-        if(!metadata)
+        if (!metadata)
             throw new Throwable(`Cannot resolve ${construct.name} as dependency`);
 
         return this.get(metadata.name) as T;
