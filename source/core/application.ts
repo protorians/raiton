@@ -99,9 +99,14 @@ export class Application implements ApplicationInterface {
         }
 
         const pipeline = this.root.middleware.clone()
-        pipeline.use(async (ctx) => {
-            (ctx as any).params = route.parameters
-            ctx.reply.send(await route.handler(ctx))
+        pipeline.use(async ({context}) => {
+            (context as any).params = route.parameters;
+
+            const responses = await route.handler(context)
+
+            // Logger.debug('Responses', responses)
+            // request.reply.header('Content-Type', 'application/json')
+            context.reply.send(responses)
         })
 
         await pipeline.run(ctx)

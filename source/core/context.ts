@@ -1,6 +1,6 @@
 import type {
-  RuntimeRequest,
-  RuntimeReply
+  RuntimeRequestInterface,
+  RuntimeReplyInterface
 } from '@/types'
 
 export class RequestContext {
@@ -8,8 +8,8 @@ export class RequestContext {
   private decorations = new Map<string, any>()
 
   constructor(
-    public req: RuntimeRequest,
-    public reply: RuntimeReply
+    public req: RuntimeRequestInterface,
+    public reply: RuntimeReplyInterface
   ) {}
 
   decorate<T = any>(key: string, value: T) {

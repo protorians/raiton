@@ -1,7 +1,7 @@
 import type {
     BuilderInterface,
-    RuntimeAdapter,
-    RuntimeServer,
+    RuntimeAdapterInterface,
+    RuntimeServerInterface,
     ThreadInterface,
     ThreadOptions,
     ThreadSetupOptions,
@@ -28,8 +28,8 @@ export class RaitonThread implements ThreadInterface {
     }
 
     public application: ApplicationInterface | null = null;
-    public runtime: RuntimeAdapter | null = null;
-    public server: RuntimeServer | null = null;
+    public runtime: RuntimeAdapterInterface | null = null;
+    public runtimeServer: RuntimeServerInterface | null = null;
 
     readonly appDir: string;
 
@@ -75,15 +75,13 @@ export class RaitonThread implements ThreadInterface {
 
         const port = this.application.config.port || 5712;
 
-        this.server = this.runtime.createServer(this.application.handle.bind(this.application))
+        this.runtimeServer = this.runtime.createServer(this.application.handle.bind(this.application))
 
-        await this.server.listen(port)
+        await this.runtimeServer.listen(port)
         if (this.builder.out)
             await ControllerBuilder.scan(this.builder.out)
 
-        Logger.info('Server Started', this.server)
-
-        Logger.log(LBadge.info('Server Started'), (`http://localhost:${port}`))
+        Logger.log(LBadge.info('Server Started'), `http://localhost:${port}`)
         return this;
     }
 }
