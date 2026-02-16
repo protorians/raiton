@@ -1,15 +1,18 @@
-import {RouteMeta} from "@/types";
+import {ControllerMetaInterface, MiddlewareCallable, RouteMetaInterface} from "@/types";
 import {Parametrable} from "@/sdk";
 import {Logger} from "@protorians/logger";
+import {Throwable} from "@/sdk/throwable";
+import {middlewareCompose} from "@/core";
 
 export function createHandler(
     instance: any,
-    metadata: RouteMeta
+    routeMeta: RouteMetaInterface,
+    controllerMeta: ControllerMetaInterface,
 ) {
     return async (ctx: any) => {
         const args: any[] = []
 
-        for (const p of metadata.params) {
+        for (const p of routeMeta.params) {
 
             switch (p.type) {
                 case Parametrable.QUERY:
@@ -41,6 +44,16 @@ export function createHandler(
             }
         }
 
-        return instance[metadata.propertyKey](...args)
+        if (!(routeMeta.propertyKey in instance))
+            throw new Throwable(`${routeMeta.propertyKey} does not exist`)
+
+        const middlewares: MiddlewareCallable[] = [
+            ...controllerMeta.middlewares['@'] || [],
+            ...controllerMeta.middlewares[routeMeta.propertyKey] || []
+        ]
+
+        if (middlewares.length > 0) await middlewareCompose(middlewares)(ctx)
+
+        return instance[routeMeta.propertyKey](...args)
     }
 }
