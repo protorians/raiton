@@ -1,12 +1,12 @@
-import {IParseableEntries, IParseablePrimitiveEntry} from "../types/parseable";
+import {ParseableEntriesType, ParseablePrimitiveType} from "../types/parseable";
 import {stabilizeJson} from "./utilities";
 
 
-export class Json<T extends IParseableEntries> {
+export class Json<T extends ParseableEntriesType> {
 
     public readonly stack: Map<keyof T, T[keyof T]> = new Map();
 
-    constructor(json: IParseablePrimitiveEntry<T>) {
+    constructor(json: ParseablePrimitiveType<T>) {
         this.records(stabilizeJson<T>(json));
     }
 
@@ -43,13 +43,13 @@ export class Json<T extends IParseableEntries> {
         return stabilizeJson<T>(json);
     }
 
-    static from<T extends IParseableEntries>(data: T): Json<T> {
+    static from<T extends ParseableEntriesType>(data: T): Json<T> {
         const json = new Json<T>(null);
         json.records(data);
         return json;
     }
 
-    static records<T extends IParseableEntries>(support: Json<T>, data: IParseablePrimitiveEntry<T>): Json<T> {
+    static records<T extends ParseableEntriesType>(support: Json<T>, data: ParseablePrimitiveType<T>): Json<T> {
         return support.records(this.stabilize(data));
     }
 }
