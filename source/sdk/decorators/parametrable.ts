@@ -1,9 +1,9 @@
-import type {Context, ParamMeta} from "@/types";
+import type {Context, ParamMetaInterface} from "@/types";
 import {getControllerMetadata} from "@/core";
 import {Parametrable} from "@/sdk";
 import {Logger} from "@protorians/logger";
 
-function createParametrable(type: ParamMeta['type'], callable?: (context: Context) => any) {
+function createParametrable(type: ParamMetaInterface['type'], callable?: (context: Context) => any) {
     return (key?: string) => {
         return (target: any, propertyKey: string, index: number) => {
             const meta = getControllerMetadata(target)
