@@ -2,7 +2,7 @@ import {spawn} from 'node:child_process';
 
 const isBunUsed = typeof Bun !== "undefined";
 
-export class CliHelpers {
+export class CliTools {
     static get cwd() {
         return `${process.cwd()}`;
     }

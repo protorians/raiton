@@ -1,12 +1,12 @@
 import {Command} from 'commander';
 import {RaitonCommands, RaitonConfig} from "@/core";
 import {getPackageRoot} from "@/sdk";
-import {CliHelpers} from "@/bin/cli-helpers";
+import {CliTools} from "@/bin/cli-tools";
 
 
 export default async function bootstrapper(cli: Command) {
     const appdir = getPackageRoot(import.meta.url);
-    const workdir = `${CliHelpers.cwd || './'}`;
+    const workdir = `${CliTools.cwd || './'}`;
     const capabilities = new RaitonCommands(cli, appdir, workdir)
 
     await RaitonConfig.sync(workdir);
