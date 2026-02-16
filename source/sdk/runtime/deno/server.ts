@@ -1,6 +1,6 @@
-import {RuntimeAdapter} from '@/types'
+import {RuntimeAdapterInterface} from '@/types'
 
-export const denoRuntime: RuntimeAdapter = {
+export const denoRuntime: RuntimeAdapterInterface = {
     createServer(handler) {
         let controller: AbortController
 

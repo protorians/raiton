@@ -1,14 +1,14 @@
 import http from 'node:http'
 import {
-    RuntimeAdapter,
-    RuntimeRequest,
-    RuntimeReply
+    RuntimeAdapterInterface,
+    RuntimeRequestInterface,
+    RuntimeReplyInterface
 } from '@/types'
 
-export const nodeRuntime: RuntimeAdapter = {
+export const nodeRuntime: RuntimeAdapterInterface = {
     createServer(handler) {
         const server = http.createServer(async (req, res) => {
-            const runtimeReq: RuntimeRequest = {
+            const runtimeReq: RuntimeRequestInterface = {
                 method: req.method || 'GET',
                 url: req.url || '/',
                 headers: new Headers(req.headers as any),
@@ -16,7 +16,7 @@ export const nodeRuntime: RuntimeAdapter = {
                 remoteAddress: req.socket.remoteAddress
             }
 
-            const runtimeReply: RuntimeReply = {
+            const runtimeReply: RuntimeReplyInterface = {
                 status(code) {
                     res.statusCode = code
                 },
