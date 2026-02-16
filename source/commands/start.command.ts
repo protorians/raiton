@@ -1,7 +1,7 @@
 import {RaitonCommand} from "@/core";
 import {ChildProcess} from 'node:child_process';
 import {Raiton} from "@/core/raiton";
-import {CliHelpers} from "@/bin/cli-helpers";
+import {CliTools} from "@/bin/cli-tools";
 import path from "node:path";
 
 export default class StartCommand extends RaitonCommand {
@@ -20,7 +20,7 @@ export default class StartCommand extends RaitonCommand {
 
     protected async run(): Promise<void> {
         const entryPoint = path.join(this.appdir, 'bin/index.ts');
-        this.child = CliHelpers.spawn(entryPoint, ['build', '--bootstrap'], {
+        this.child = CliTools.spawn(entryPoint, ['build', '--bootstrap'], {
             stdio: 'inherit',
             cwd: this.workdir
         });
