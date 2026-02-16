@@ -1,6 +1,6 @@
 {
   "name": "raiton",
-  "version": "1.0.0-alpha.1",
+  "version": "0.0.2-alpha.2",
   "private": false,
   "type": "module",
   "description": "Protorians Raiton Development Kit",
@@ -16,7 +16,9 @@
     "development",
     "kit",
     "typescript",
+    "node",
     "bun",
+    "deno",
     "backend"
   ],
   "author": "Y. Yannick GOBOU",
