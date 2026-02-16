@@ -1,22 +1,34 @@
 import {spawn} from 'node:child_process';
 
-const isBunUsed = typeof Bun !== "undefined";
+const isBunUsed = typeof (globalThis as any).Bun !== "undefined";
+const isDenoUsed = typeof (globalThis as any).Deno !== "undefined";
+
+declare const Bun: any;
+declare const Deno: any;
 
 export class CliTools {
     static get cwd() {
-        return `${process.cwd()}`;
+        return `${isDenoUsed ? (globalThis as any).Deno.cwd() : process.cwd()}`;
     }
 
     static set cwd(value: string) {
-        process.chdir(value)
+        if (isDenoUsed) {
+            (globalThis as any).Deno.chdir(value);
+        } else {
+            process.chdir(value);
+        }
     }
 
     static get argv() {
-        return isBunUsed ? Bun.argv : process.argv;
+        if (isBunUsed) return (globalThis as any).Bun.argv;
+        if (isDenoUsed) return (globalThis as any).Deno.args;
+        return process.argv;
     }
 
     static get process() {
-        return isBunUsed ? Bun : process;
+        if (isBunUsed) return (globalThis as any).Bun;
+        if (isDenoUsed) return (globalThis as any).Deno;
+        return process;
     }
 
     static spawn(command: string | string[], args: string[] = [], options?: Record<string, any>) {
@@ -25,19 +37,36 @@ export class CliTools {
                 ...(typeof command == 'string' ? [command] : (Array.isArray(command) ? command : [])),
                 ...args
             ];
-            // If the command is a .ts file, prepend bun
             if (typeof command === 'string' && command.endsWith('.ts')) {
                 cmdArray.unshift('bun');
             }
             return Bun.spawn(cmdArray, options);
         }
 
-        const cmd = typeof command == 'string' ? command : command[0];
-        // If the command is a .ts file, prepend bun (or npx tsx/ts-node if we wanted to be Node generic, but here we favor Bun)
-        if (cmd.endsWith('.ts')) {
-            return spawn('bun', [cmd, ...args], options);
+        if (isDenoUsed) {
+            const cmd = typeof command == 'string' ? command : command[0];
+            const cmdArgs = typeof command == 'string' ? args : [...command.slice(1), ...args];
+
+            if (cmd.endsWith('.ts')) {
+                return new Deno.Command('deno', {
+                    args: ['run', '-A', cmd, ...cmdArgs],
+                    ...options
+                }).spawn();
+            }
+
+            return new Deno.Command(cmd, {
+                args: cmdArgs,
+                ...options
+            }).spawn();
         }
 
-        return spawn(cmd, args, options);
+        const cmd = typeof command == 'string' ? command : command[0];
+        const cmdArgs = typeof command == 'string' ? args : [...command.slice(1), ...args];
+
+        if (cmd.endsWith('.ts')) {
+            return spawn('node', ['--loader', 'ts-node/register', cmd, ...cmdArgs], options);
+        }
+
+        return spawn(cmd, cmdArgs, options);
     }
 }
