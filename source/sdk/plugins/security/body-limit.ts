@@ -1,17 +1,17 @@
 import {definePlugin} from "@/core/plugins";
-import {Context, Next} from "@/types";
+import {MiddlewareParameters} from "@/types";
 
 
 export const secureBodyLimit = (maxBytes = 1_000_000) =>
   definePlugin((scope) => {
-    scope.use(async (ctx: Context, next: Next) => {
+    scope.use(async ({context, next}: MiddlewareParameters) => {
       const len = Number(
-        ctx.req.headers.get('content-length') ?? 0
+        context.req.headers.get('content-length') ?? 0
       )
 
       if (len > maxBytes) {
-        ctx.reply.status(413)
-        return ctx.send({ error: 'Payload too large' })
+        context.reply.status(413)
+        return context.send({ error: 'Payload too large' })
       }
 
       await next()
