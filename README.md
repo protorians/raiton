@@ -3,7 +3,9 @@
 [![Version](https://img.shields.io/npm/v/raiton.svg)](https://www.npmjs.com/package/raiton)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Protorians Raiton** est un kit de développement (SDK) backend moderne et performant, conçu pour construire des microservices TypeScript. Optimisé pour **Bun**, il offre également un support complet pour **Node.js** et **Deno**.
+**Protorians Raiton** est un kit de développement (SDK) backend moderne et performant, 
+conçu pour construire des microservices TypeScript. Optimisé pour **Bun**, 
+il offre également un support complet pour **Node.js** et **Deno**.
 
 ## Caractéristiques
 
