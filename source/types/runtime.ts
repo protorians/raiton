@@ -1,6 +1,6 @@
 import {RuntimeType} from "@/sdk/enums/runtime.enum";
 
-export interface RuntimeServer {
+export interface RuntimeServerInterface {
     listen(port: number): Promise<void>
 
     close(): Promise<void>
@@ -8,7 +8,7 @@ export interface RuntimeServer {
     handle?(request: Request): Promise<Response>
 }
 
-export interface RuntimeRequest {
+export interface RuntimeRequestInterface {
     method: string
     url: string
     headers: Headers
@@ -17,9 +17,9 @@ export interface RuntimeRequest {
     remoteAddress?: string
 }
 
-export type RuntimeHandlerCallable = (req: RuntimeRequest, reply: RuntimeReply) => Promise<void>
+export type RuntimeHandlerCallable = (req: RuntimeRequestInterface, reply: RuntimeReplyInterface) => Promise<void>
 
-export interface RuntimeReply {
+export interface RuntimeReplyInterface {
     status(code: number): void
 
     header(name: string, value: string): void
@@ -31,8 +31,8 @@ export interface RuntimeReply {
     json(data: any): void
 }
 
-export interface RuntimeAdapter {
-    createServer(handler: RuntimeHandlerCallable): RuntimeServer
+export interface RuntimeAdapterInterface {
+    createServer(handler: RuntimeHandlerCallable): RuntimeServerInterface
 }
 
 
@@ -47,7 +47,7 @@ export interface RuntimeInterface {
 
     get isBun(): boolean
 
-    adapter(): RuntimeAdapter;
+    adapter(): RuntimeAdapterInterface;
 
-    createServer(handler: RuntimeHandlerCallable): RuntimeServer;
+    createServer(handler: RuntimeHandlerCallable): RuntimeServerInterface;
 }

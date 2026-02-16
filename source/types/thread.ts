@@ -1,5 +1,5 @@
 import {BuilderInterface} from "@/types/builder";
-import {RuntimeAdapter} from "@/types/runtime";
+import {RuntimeAdapterInterface} from "@/types/runtime";
 import {ApplicationInterface} from "@/types/application";
 import {RuntimeType} from "@/sdk/enums/runtime.enum";
 

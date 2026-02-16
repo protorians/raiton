@@ -1,6 +1,6 @@
-import {IParseableEntries, IParseableEntry} from "./parseable";
+import {ParseableEntriesType, ParseableType} from "./parseable";
 
-export interface IHttpResponse<T extends IParseableEntry> extends IParseableEntries {
+export interface IHttpResponse<T extends ParseableType> extends ParseableEntriesType {
     statusCode: number,
     message?: string,
     data?: T,
