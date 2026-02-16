@@ -1,3 +1,10 @@
+# [1.0.0-alpha.2](https://github.com/protorians/raiton/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* `CliTools`: add support for Deno runtime, improve runtime detection, and adjust spawn logic for `.ts` file handling ([71c506a](https://github.com/protorians/raiton/commit/71c506afcbb4ec3acffec8d4b36934afa8d0b6b3))
+
 # 1.0.0-alpha.1 (2026-02-16)
 
 
