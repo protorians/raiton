@@ -1,4 +1,4 @@
-import type {Plugin} from "@/types";
+import type {MiddlewareParameters, Plugin} from "@/types";
 import {RequestContext} from "@/core/context";
 import {Logger} from "@protorians/logger";
 import {tryParseJson} from "@/sdk/utilities/json.util";
@@ -7,22 +7,22 @@ export function bodyParserPlugin(): Plugin {
     return {
         name: 'body-parser-plugin',
         setup: (scope) => {
-            scope.use(async (ctx: RequestContext, next: () => Promise<void>) => {
-                const contentType = ctx.req.headers.get('content-type') || '';
+            scope.use(async ({context, next}: MiddlewareParameters) => {
+                const contentType = context.req.headers.get('content-type') || '';
 
-                if (ctx.req.body && !ctx.state.bodyParsed) {
+                if (context.req.body && !context.state.bodyParsed) {
                     try {
-                        const rawBody = await readRawBody(ctx.req.body);
+                        const rawBody = await readRawBody(context.req.body);
                         const bodyString = decode(rawBody);
 
-                        readQueryBody(ctx);
-                        readJsonBody(ctx, contentType, bodyString);
-                        readUrlEncodedBody(ctx, contentType, bodyString);
-                        readTextBody(ctx, contentType, bodyString);
+                        readQueryBody(context);
+                        readJsonBody(context, contentType, bodyString);
+                        readUrlEncodedBody(context, contentType, bodyString);
+                        readTextBody(context, contentType, bodyString);
 
-                        if (!ctx.state.bodyParsed) {
-                            ctx.req.body = rawBody as unknown as any;
-                            ctx.state.bodyParsed = true;
+                        if (!context.state.bodyParsed) {
+                            context.req.body = rawBody as unknown as any;
+                            context.state.bodyParsed = true;
                         }
 
                     } catch (e) {

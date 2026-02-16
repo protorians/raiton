@@ -4,7 +4,7 @@ import {secureRateLimit} from './rate-limit'
 import {secureBodyLimit} from './body-limit'
 import {secureMethodGuard} from './method-guard'
 
-export class SecureApp {
+export class Security {
     static headers = secureHeaders
     static cors = secureCors
     static rateLimit = secureRateLimit
