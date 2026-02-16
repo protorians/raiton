@@ -16,7 +16,7 @@
     "development",
     "kit",
     "typescript",
-    "node",
+    "bun",
     "backend"
   ],
   "author": "Y. Yannick GOBOU",
@@ -54,7 +54,6 @@
     "bcrypt": "^6.0.0",
     "commander": "^14.0.2",
     "dotenv": "^17.2.3",
-    "esbuild": "^0.27.1",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
