@@ -1,6 +1,7 @@
 import type {BuildContext, BuildOptions, Metafile} from "esbuild";
 import {HmrInterface} from "@/types/hmr";
 import {ISignalStack} from "@protorians/core";
+import {WatchEventType} from "node:fs";
 
 export interface BuildCommandOptions {
     develop?: boolean;
@@ -19,7 +20,7 @@ export interface BuilderInterface {
     readonly hmr: HmrInterface;
     // readonly signal: ISignalStack<BuilderSignalMap>;
 
-    get context(): BuildContext<BuildOptions> | null;
+    // get context(): BuildContext<BuildOptions> | null;
 
     get source(): string | null;
 
@@ -27,15 +28,15 @@ export interface BuilderInterface {
 
     get bootstrapper(): string | null;
 
-    get bootstrapperIndex(): string | null;
+    get bootstrapperFile(): string | null;
 
-    get baseConfig(): BuildOptions;
+    // get baseConfig(): BuildOptions;
 
     prepare(): Promise<this>;
 
     boot(): Promise<any>;
 
-    start(callable?: BuilderBootCallable): Promise<this>;
+    // start(callable?: BuilderBootCallable): Promise<this>;
 }
 
 
@@ -43,4 +44,5 @@ export interface BuilderHMRDeclaration {
     filename: string;
     timestamp?: number;
     version?: number;
+    type?: WatchEventType
 }

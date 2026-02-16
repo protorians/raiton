@@ -1,7 +1,7 @@
 
 
-export type IParseableEntry = string | number | boolean | null | undefined | IParseableEntry[] | object;
+export type ParseableType = string | number | boolean | null | undefined | ParseableType[] | object;
 
-export type IParseableEntries = Record<string, IParseableEntry>;
+export type ParseableEntriesType = Record<string, ParseableType>;
 
-export type IParseablePrimitiveEntry<T extends IParseableEntries> = string | T | null;
+export type ParseablePrimitiveType<T extends ParseableEntriesType> = string | T | null;

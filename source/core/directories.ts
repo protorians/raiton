@@ -5,7 +5,8 @@ import {Raiton} from "@/core/raiton";
 
 export class RaitonDirectories {
     public static readonly index = `.${Raiton.identifier}`;
-    public static readonly bootstrapFile = 'main.js';
+    public static readonly bootstrapFile = 'main.ts';
+    // public static readonly bootstrapFile = 'main.js';
 
     public static caches(workdir: string): string {
         return path.join(workdir, this.index, 'caches');
@@ -23,7 +24,7 @@ export class RaitonDirectories {
         return path.join(workdir, this.index);
     }
 
-    public static app() {
-        return path.join(Raiton.thread.builder.workdir, RaitonConfig.get('rootDir'));
+    public static app(): string {
+        return path.join(Raiton.thread.builder.workdir, RaitonConfig.get('rootDir') || './');
     }
 }

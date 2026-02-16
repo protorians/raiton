@@ -12,21 +12,29 @@ export interface ArtifactDecorator {
 }
 
 export interface ArtifactOptions {
-    artifact: string;
-    provider: string;
-    decorator: ArtifactDecorator;
+    readonly artifact: string;
+    readonly provider: string;
+    readonly decorator: ArtifactDecorator;
     verbose?: boolean;
 }
 
 export interface ArtifactInterface {
-    // readonly entries: Map<string, ArtifactEntry>;
     readonly options: ArtifactOptions;
-    //
-    // add(name: string, cacheableEntry: ArtifactEntry): this;
-    //
-    // remove(name: string): this;
-    //
-    // get(name: string): ArtifactEntry | undefined;
-    //
-    // reset(): this;
+    readonly directory: string;
+    readonly file: string;
+    readonly workdir: string;
+
+    get files(): string[];
+
+    get extensions(): string[];
+
+    scan(): string[];
+
+    generate(): boolean;
+}
+
+export interface ArtifactEntry {
+    vendor: string;
+    decorator: string;
+    pattern: string;
 }

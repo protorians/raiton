@@ -1,6 +1,6 @@
 import type {
-    RuntimeRequest,
-    RuntimeReply
+    RuntimeRequestInterface,
+    RuntimeReplyInterface
 } from './runtime'
 
 export type HookName =
@@ -15,8 +15,8 @@ export type HookHandler = (
 ) => Promise<void> | void
 
 export interface Context {
-    req: RuntimeRequest
-    reply: RuntimeReply
+    req: RuntimeRequestInterface
+    reply: RuntimeReplyInterface
 
     state: Record<string, any>
 

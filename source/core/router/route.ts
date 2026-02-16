@@ -1,4 +1,4 @@
-import {RouteDefinition} from '@/types'
+import type {RouteDefinition} from '@/types/router'
 
 export class Route {
     method: string
@@ -50,7 +50,6 @@ export class Route {
 
         const fullPath = (this.version ? `/${this.version}${this.path}` : this.path)
             .replace(/\/+$/, '')
-
         const cleanUrl = url.replace(/\/+$/, '')
 
         if (!fullPath.includes(':')) {

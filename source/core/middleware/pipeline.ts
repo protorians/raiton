@@ -1,11 +1,10 @@
-import { Middleware } from '@/types'
-import { compose } from './compose'
-import {Logger} from "@protorians/logger";
+import { MiddlewareType } from '@/types'
+import { middlewareCompose } from '@/core'
 
 export class MiddlewarePipeline {
-  private stack: Middleware[] = []
+  private stack: MiddlewareType[] = []
 
-  use(mw: Middleware): this {
+  use(mw: MiddlewareType): this {
     this.stack.push(mw)
     return this;
   }
@@ -16,7 +15,7 @@ export class MiddlewarePipeline {
   }
 
   run(ctx: any) {
-    const fn = compose(this.stack)
+    const fn = middlewareCompose(this.stack)
     return typeof fn == 'function' ? fn(ctx) : undefined;
   }
 

@@ -1,4 +1,4 @@
-import type {RuntimeAdapter, RuntimeHandlerCallable, RuntimeInterface, RuntimeServer} from "@/types";
+import type {RuntimeAdapterInterface, RuntimeHandlerCallable, RuntimeInterface, RuntimeServerInterface} from "@/types";
 import {RuntimeType} from "@/sdk/enums/runtime.enum";
 import {nodeRuntime} from "@/sdk/runtime/node/server";
 import {bunRuntime} from "@/sdk/runtime/bun/server";
@@ -28,7 +28,7 @@ export class Runtime implements RuntimeInterface {
         return this.type === RuntimeType.Bun;
     }
 
-    adapter(): RuntimeAdapter {
+    adapter(): RuntimeAdapterInterface {
         switch (this.type) {
             case RuntimeType.Node:
                 return nodeRuntime
@@ -41,7 +41,7 @@ export class Runtime implements RuntimeInterface {
         }
     }
 
-    createServer(handler: RuntimeHandlerCallable): RuntimeServer {
+    createServer(handler: RuntimeHandlerCallable): RuntimeServerInterface {
         return this.adapter().createServer(handler)
     }
 }

@@ -1,8 +1,9 @@
 import type {
     BuilderInterface,
-    RuntimeAdapter,
-    RuntimeServer,
+    RuntimeAdapterInterface,
+    RuntimeServerInterface,
     ThreadInterface,
+    ThreadOptions,
     ThreadSetupOptions,
     ThreadWaitCallable,
 } from "@/types";
@@ -13,13 +14,9 @@ import {ApplicationInterface} from "@/types/application";
 import {Runtime} from "@/sdk/runtime";
 import {LBadge, Logger} from "@protorians/logger";
 import {Throwable} from "@/sdk/throwable";
-import {Raiton} from "@/core/raiton";
-import {compileController} from "@/core/controller/compiler";
 import {ControllerBuilder} from "@/core/controller";
 import {bodyParserPlugin} from "@/sdk/plugins/body-parser.plugin";
 
-class ThreadOptions {
-}
 
 export class RaitonThread implements ThreadInterface {
 
@@ -31,8 +28,8 @@ export class RaitonThread implements ThreadInterface {
     }
 
     public application: ApplicationInterface | null = null;
-    public runtime: RuntimeAdapter | null = null;
-    public server: RuntimeServer | null = null;
+    public runtime: RuntimeAdapterInterface | null = null;
+    public runtimeServer: RuntimeServerInterface | null = null;
 
     readonly appDir: string;
 
@@ -61,9 +58,9 @@ export class RaitonThread implements ThreadInterface {
     }
 
     public setup({application, runtime}: ThreadSetupOptions): this {
-        this.runtime = new Runtime(runtime || RuntimeType.Node);
+        const defaultRuntime = typeof Bun !== 'undefined' ? RuntimeType.Bun : RuntimeType.Node;
+        this.runtime = new Runtime(runtime || defaultRuntime);
         this.application = application;
-
         this.application.use(bodyParserPlugin())
         return this;
     }
@@ -78,13 +75,13 @@ export class RaitonThread implements ThreadInterface {
 
         const port = this.application.config.port || 5712;
 
-        this.server = this.runtime.createServer(this.application.handle.bind(this.application))
+        this.runtimeServer = this.runtime.createServer(this.application.handle.bind(this.application))
 
-        await this.server.listen(port)
+        await this.runtimeServer.listen(port)
         if (this.builder.out)
             await ControllerBuilder.scan(this.builder.out)
 
-        Logger.log(LBadge.info('Server Started'), (`http://localhost:${port}`))
+        Logger.log(LBadge.info('Server Started'), `http://localhost:${port}`)
         return this;
     }
 }
