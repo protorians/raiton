@@ -1,20 +1,20 @@
-import {RuntimeAdapter, RuntimeReply, RuntimeRequest} from '@/types'
+import {RuntimeAdapterInterface, RuntimeReplyInterface, RuntimeRequestInterface} from '@/types'
 
-export const webRuntime: RuntimeAdapter = {
+export const webRuntime: RuntimeAdapterInterface = {
     createServer(handler) {
-        async function fetching(request: Request, handler: (req: RuntimeRequest, reply: RuntimeReply) => Promise<void>): Promise<Response> {
+        async function fetching(request: Request, handler: (req: RuntimeRequestInterface, reply: RuntimeReplyInterface) => Promise<void>): Promise<Response> {
             let responseBody: any
             let statusCode = 200
             const headers = new Headers()
 
-            const runtimeReq: RuntimeRequest = {
+            const runtimeReq: RuntimeRequestInterface = {
                 method: request.method,
                 url: request.url,
                 headers: request.headers,
                 body: request.body as any
             }
 
-            const runtimeReply: RuntimeReply = {
+            const runtimeReply: RuntimeReplyInterface = {
                 status(code) {
                     statusCode = code
                 },

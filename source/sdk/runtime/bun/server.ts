@@ -1,6 +1,6 @@
-import {RuntimeAdapter} from '@/types'
+import {RuntimeAdapterInterface} from '@/types'
 
-export const bunRuntime: RuntimeAdapter = {
+export const bunRuntime: RuntimeAdapterInterface = {
     createServer(handler) {
         if (typeof Bun === 'undefined') throw new Error(
             'bun is not installed, please run `npm install bun`'
@@ -31,13 +31,21 @@ export const bunRuntime: RuntimeAdapter = {
                                 header(name, value) {
                                     headers.set(name, value)
                                 },
-                                send(body) {
-                                    responseBody = body
+                                send(body: any) {
+                                    if (body === undefined) {
+                                        responseBody = ''
+                                    } else if (typeof body === 'string' || Buffer.isBuffer(body)) {
+                                        responseBody = body;
+                                    } else {
+                                        headers.set('content-type', 'application/json');
+                                        responseBody = (JSON.stringify(body));
+                                    }
                                 },
                                 text(text: string | Buffer) {
                                     responseBody = text
                                 },
                                 json(json: any) {
+                                    headers.set('content-type', 'application/json')
                                     responseBody = JSON.stringify(json)
                                 },
                             }
