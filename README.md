@@ -118,7 +118,7 @@ raiton start
 
 Si `raiton` n'est pas dans votre PATH, utilisez `bun x raiton` ou `npx raiton`.
 
-## 🛠 Runtimes supportés
+## Runtimes supportés
 
 Raiton détecte automatiquement l'environnement d'exécution et adapte son serveur :
 
@@ -126,7 +126,7 @@ Raiton détecte automatiquement l'environnement d'exécution et adapte son serve
 - **Node.js** : Adaptateur pour serveurs HTTP Node.
 - **Web** : Compatible avec les environnements basés sur les standards Web (Fetch API).
 
-## 📄 Licence
+## Licence
 
 Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
