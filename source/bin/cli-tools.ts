@@ -1,10 +1,6 @@
 import {spawn} from 'node:child_process';
+import {isBunUsed, isDenoUsed} from "@/bin/constants";
 
-const isBunUsed = typeof (globalThis as any).Bun !== "undefined";
-const isDenoUsed = typeof (globalThis as any).Deno !== "undefined";
-
-declare const Bun: any;
-declare const Deno: any;
 
 export class CliTools {
     static get cwd() {
@@ -53,7 +49,6 @@ export class CliTools {
                     ...options
                 }).spawn();
             }
-
 
             return new Deno.Command(cmd, {
                 args: cmdArgs,
