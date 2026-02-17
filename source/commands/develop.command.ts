@@ -1,5 +1,5 @@
 import {Raiton, RaitonCommand} from "@/core";
-import {ChildProcess} from 'node:child_process';
+import {ChildProcess, ChildProcessWithoutNullStreams} from 'node:child_process';
 import {Logger} from "@protorians/logger";
 import {EventMessageEnum} from "@/sdk";
 import {CliTools} from "@/bin/cli-tools";
@@ -9,7 +9,7 @@ export default class DevelopCommand extends RaitonCommand {
     public readonly name: string = 'develop';
     public readonly description: string = 'Run the application in development mode';
 
-    private child: Bun.Subprocess<"ignore", "pipe", "inherit"> | ChildProcess | null = null;
+    private child: Bun.Subprocess<"ignore", "pipe", "inherit"> | ChildProcess | Deno.ChildProcess | ChildProcessWithoutNullStreams | null = null;
 
     public register(): void {
         this.cli
@@ -42,6 +42,6 @@ export default class DevelopCommand extends RaitonCommand {
                 if (msg === EventMessageEnum.RESTART) this.restart()
             });
 
-        Logger.log('PID', this.child.pid)
+        Logger.log('PID', this.child?.pid)
     }
 }
