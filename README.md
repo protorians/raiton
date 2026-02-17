@@ -10,7 +10,7 @@ il offre également un support complet pour **Node.js** et **Deno**.
 ## Caractéristiques
 
 - **Optimisé pour Bun** : Utilise `Bun.serve` nativement pour des performances maximales.
-- **Multi-Runtime** : Compatible avec Bun (recommandé), Node.js, Deno(beta) et les environnements Web.
+- **Multi-Runtime** : Compatible avec Bun (recommandé), Node.js et les environnements Web.
 - **Architecture Décorative** : Utilise les décorateurs TypeScript pour définir contrôleurs, routes et injections.
 - **Modulaire** : Système de plugins et de middlewares flexible.
 - **CLI Puissant** : Outils intégrés pour le développement, le build et le déploiement.
@@ -88,7 +88,6 @@ Raiton détecte automatiquement l'environnement d'exécution et adapte son serve
 
 - **Bun** : Utilisation de `Bun.serve`.
 - **Node.js** : Adaptateur pour serveurs HTTP Node.
-- **Deno** : Support natif de l'environnement Deno.
 - **Web** : Compatible avec les environnements basés sur les standards Web (Fetch API).
 
 ## 📄 Licence
