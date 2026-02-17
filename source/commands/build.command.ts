@@ -25,6 +25,7 @@ export default class BuildCommand extends RaitonCommand {
         });
 
         await builder.prepare()
-        await builder.start(async () => (options.develop || options.bootstrap) ? await builder.boot() : void (0))
+        await builder.boot()
+        // await builder.start(async () => (options.develop || options.bootstrap) ? await builder.boot() : void (0))
     }
 }

@@ -1,5 +1,6 @@
-export * from "./http.enum"
+export * from "./http-method.enum"
 export * from "./http-parameters.enum"
+export * from "./http-status.enum"
 export * from "./encrypted.enum"
 export * from "./event.message.enum"
 export * from "./timestamp.enum"

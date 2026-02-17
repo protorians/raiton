@@ -1,8 +1,8 @@
 /source
 /.github
 /.idea
-/source/tests
 tsup.config.ts
-jest.config.cjs
 tsconfig.json
-/.changeset
+bun.lock
+.releaserc.json
+!build/

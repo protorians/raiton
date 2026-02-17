@@ -16,9 +16,9 @@ export interface ApplicationInterface {
 
     get hostname(): string;
 
-    // setOption<K extends keyof ApplicationConfig>(key: K, value: ApplicationConfig[K]): this;
-    //
-    // setOptions(options: ApplicationConfig): this;
+    setOption<K extends keyof ApplicationConfig>(key: K, value: ApplicationConfig[K]): this;
+
+    setOptions(options: ApplicationConfig): this;
 
     register(plugin: any): this;
 

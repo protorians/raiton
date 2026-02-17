@@ -1,17 +1,17 @@
-import {RuntimeAdapter} from '@/types'
+import {RuntimeAdapterInterface} from '@/types'
 
-export const denoRuntime: RuntimeAdapter = {
+export const denoRuntime: RuntimeAdapterInterface = {
     createServer(handler) {
         let controller: AbortController
 
         return {
-            async listen(port) {
+            async listen(port, hostname) {
                 if (typeof Deno === 'undefined') throw new Error(
                     'Deno is not installed, please run `deno install -A -f --unstable https://deno.land/x/raiton/cli.ts`'
                 )
 
                 controller = new AbortController()
-                Deno.serve({port, signal: controller.signal}, async (req: any) => {
+                Deno.serve({port, hostname, signal: controller.signal}, async (req: any) => {
                     let body: any
                     let status = 200
                     const headers = new Headers()

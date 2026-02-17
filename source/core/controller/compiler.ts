@@ -2,22 +2,21 @@ import {ApplicationInterface} from "@/types/application";
 import {getControllerMetadata} from "@/core";
 import {createHandler} from "@/core/router";
 import {Injection} from "@/core/injection";
+import {ControllerMetaInterface} from "@/types";
 
 export function compileController(
     ControllerClass: any,
     app: ApplicationInterface
 ) {
-    const instance = Injection.resolve<typeof ControllerClass>(ControllerClass)
-    // const instance = new ControllerClass()
-    const metadata = getControllerMetadata(ControllerClass.prototype)
+    const instance: any = Injection.resolve<typeof ControllerClass>(ControllerClass)
+    const metadata: ControllerMetaInterface = getControllerMetadata(ControllerClass.prototype)
 
-    for (const meta of metadata.routes) {
+    for (const route of metadata.routes)
         app.route(
-            meta.method as any,
-            `${metadata.prefix ?? ''}${meta.path}`,
-            createHandler(instance, meta),
+            route.method as any,
+            `${metadata.prefix ?? ''}${route.path}`,
+            createHandler(instance, route, metadata),
         )
-    }
 
     return instance;
 }

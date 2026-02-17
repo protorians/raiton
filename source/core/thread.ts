@@ -1,8 +1,9 @@
 import type {
     BuilderInterface,
-    RuntimeAdapter,
-    RuntimeServer,
+    RuntimeAdapterInterface,
+    RuntimeServerInterface,
     ThreadInterface,
+    ThreadOptions,
     ThreadSetupOptions,
     ThreadWaitCallable,
 } from "@/types";
@@ -12,27 +13,24 @@ import {until} from "./process.util";
 import {ApplicationInterface} from "@/types/application";
 import {Runtime} from "@/sdk/runtime";
 import {LBadge, Logger} from "@protorians/logger";
-import {Throwable} from "@/sdk/throwable";
-import {Raiton} from "@/core/raiton";
-import {compileController} from "@/core/controller/compiler";
 import {ControllerBuilder} from "@/core/controller";
 import {bodyParserPlugin} from "@/sdk/plugins/body-parser.plugin";
+import {Injection} from "@/core/injection/injection";
+import {Throwable} from "@/sdk/exceptions";
 
-class ThreadOptions {
-}
 
 export class RaitonThread implements ThreadInterface {
 
     protected static instance: RaitonThread | null = null;
 
-    public static get current(): RaitonThread {
-        if (!RaitonThread.instance) throw new Throwable('Thread not initialized')
+    public static get current(): RaitonThread | null {
+        // if (!RaitonThread.instance) throw new Throwable('Thread not initialized')
         return RaitonThread.instance;
     }
 
     public application: ApplicationInterface | null = null;
-    public runtime: RuntimeAdapter | null = null;
-    public server: RuntimeServer | null = null;
+    public runtime: RuntimeAdapterInterface | null = null;
+    public runtimeServer: RuntimeServerInterface | null = null;
 
     readonly appDir: string;
 
@@ -48,7 +46,8 @@ export class RaitonThread implements ThreadInterface {
         process.send?.(EventMessageEnum.RESTART)
     }
 
-    public stop(): void {
+    public async stop(): Promise<void> {
+        await Injection.shutdown();
         process.exit(0)
     }
 
@@ -61,9 +60,9 @@ export class RaitonThread implements ThreadInterface {
     }
 
     public setup({application, runtime}: ThreadSetupOptions): this {
-        this.runtime = new Runtime(runtime || RuntimeType.Node);
+        const defaultRuntime = typeof Bun !== 'undefined' ? RuntimeType.Bun : RuntimeType.Node;
+        this.runtime = new Runtime(runtime || defaultRuntime);
         this.application = application;
-
         this.application.use(bodyParserPlugin())
         return this;
     }
@@ -76,15 +75,23 @@ export class RaitonThread implements ThreadInterface {
         if (!this.runtime)
             throw new Throwable('Runtime not defined');
 
+        process.on('SIGINT', async () => {
+            await this.stop();
+        });
+
+        process.on('SIGTERM', async () => {
+            await this.stop();
+        });
+
         const port = this.application.config.port || 5712;
+        const hostname = this.application.config.hostname || 'localhost';
 
-        this.server = this.runtime.createServer(this.application.handle.bind(this.application))
+        this.runtimeServer = this.runtime.createServer(this.application.handle.bind(this.application))
 
-        await this.server.listen(port)
-        if (this.builder.out)
-            await ControllerBuilder.scan(this.builder.out)
+        await this.runtimeServer.listen(port, hostname)
+        if (this.builder.source) await ControllerBuilder.scan(this.builder.source)
 
-        Logger.log(LBadge.info('Server Started'), (`http://localhost:${port}`))
+        Logger.log(LBadge.info('Server Started'), `http://${hostname}:${port}`)
         return this;
     }
 }

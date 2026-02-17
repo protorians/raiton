@@ -1,5 +1,5 @@
 import {definePlugin} from "@/core/plugins";
-import {Context, Next} from "@/types";
+import {Context, MiddlewareParameters, NextCallable} from "@/types";
 
 export interface CorsOptions {
     origin?: string | string[]
@@ -9,8 +9,8 @@ export interface CorsOptions {
 
 export const secureCors = (opts: CorsOptions = {}) =>
     definePlugin((scope) => {
-        scope.use(async (ctx: Context, next: Next) => {
-            const origin = ctx.req.headers.get('origin')
+        scope.use(async ({context, next}: MiddlewareParameters) => {
+            const origin = context.req.headers.get('origin')
 
             if (opts.origin) {
                 const allowed = Array.isArray(opts.origin)
@@ -18,25 +18,25 @@ export const secureCors = (opts: CorsOptions = {}) =>
                     : opts.origin === origin
 
                 if (allowed) {
-                    ctx.reply.header('Access-Control-Allow-Origin', origin!)
+                    context.reply.header('Access-Control-Allow-Origin', origin!)
                 }
             } else {
-                ctx.reply.header('Access-Control-Allow-Origin', '*')
+                context.reply.header('Access-Control-Allow-Origin', '*')
             }
 
-            ctx.reply.header(
+            context.reply.header(
                 'Access-Control-Allow-Methods',
                 (opts.methods ?? ['GET', 'POST', 'PUT', 'DELETE']).join(',')
             )
 
-            ctx.reply.header(
+            context.reply.header(
                 'Access-Control-Allow-Headers',
                 (opts.headers ?? ['Content-Type', 'Authorization']).join(',')
             )
 
-            if (ctx.req.method === 'OPTIONS') {
-                ctx.reply.status(204)
-                return ctx.send(null)
+            if (context.req.method === 'OPTIONS') {
+                context.reply.status(204)
+                return context.send(null)
             }
 
             await next()

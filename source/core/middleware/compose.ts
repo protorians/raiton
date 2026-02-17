@@ -1,7 +1,8 @@
-import {Middleware} from '@/types'
+import {MiddlewareType} from '@/types'
+import {Throwable} from "@/sdk/exceptions";
 
-export function compose(middlewares: Middleware[]) {
-    return function (ctx: any) {
+export function middlewareCompose(middlewares: MiddlewareType[]) {
+    return function (request: any) {
         let index = -1
 
         return dispatch(0)
@@ -9,7 +10,7 @@ export function compose(middlewares: Middleware[]) {
         async function dispatch(i: number): Promise<void> {
             if (i <= index) {
                 return Promise.reject(
-                    new Error('next() called multiple times')
+                    new Throwable('next() called multiple times')
                 )
             }
 
@@ -19,15 +20,15 @@ export function compose(middlewares: Middleware[]) {
                 if (!fn) return Promise.resolve()
 
                 if (typeof fn === 'function') {
-                    return Promise.resolve(fn(ctx, () => dispatch(i + 1)))
+                    return Promise.resolve(fn({context: request, next: () => dispatch(i + 1)}))
                 }
 
                 if (typeof fn === 'object' && 'setup' in fn && typeof fn.setup == 'function') {
                     if (fn.setup.length === 1) {
-                        await Promise.resolve(fn.setup(ctx))
+                        await Promise.resolve(fn.setup(request))
                         return await dispatch(i + 1)
                     }
-                    return Promise.resolve(fn.setup(ctx, () => dispatch(i + 1)))
+                    return Promise.resolve(fn.setup(request, () => dispatch(i + 1)))
                 }
 
                 return Promise.resolve()

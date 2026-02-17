@@ -1,12 +1,14 @@
 import {RaitonCommand} from "@/core";
-import {ChildProcess, spawn} from 'node:child_process';
+import {ChildProcess} from 'node:child_process';
 import {Raiton} from "@/core/raiton";
+import {CliTools} from "@/bin/cli-tools";
+import path from "node:path";
 
 export default class StartCommand extends RaitonCommand {
     public readonly name: string = 'start';
     public readonly description: string = 'Run the application in production mode';
 
-    private child: ChildProcess | null = null;
+    private child:  Bun.Subprocess<"ignore", "pipe", "inherit"> | ChildProcess | Deno.ChildProcess | null = null;
 
     public register(): void {
         this.cli
@@ -17,7 +19,8 @@ export default class StartCommand extends RaitonCommand {
     }
 
     protected async run(): Promise<void> {
-        this.child = spawn(Raiton.identifier, ['build', '--bootstrap'], {
+        const entryPoint = path.join(this.appdir, 'bin/index.ts');
+        this.child = CliTools.spawn(entryPoint, ['build', '--bootstrap'], {
             stdio: 'inherit',
             cwd: this.workdir
         });

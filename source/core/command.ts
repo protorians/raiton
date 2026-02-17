@@ -9,7 +9,8 @@ export class RaitonCommand {
 
     public constructor(
         public readonly cli: Command,
-        public readonly workdir: string
+        public readonly workdir: string,
+        public readonly appdir: string = ''
     ) {
         this.construct()
     }
