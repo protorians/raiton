@@ -19,7 +19,8 @@
     "node",
     "bun",
     "deno",
-    "backend"
+    "backend",
+    "microservices"
   ],
   "author": "Y. Yannick GOBOU",
   "license": "MIT",
