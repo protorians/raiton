@@ -1,6 +1,3 @@
-import type {BuildContext, BuildOptions, Metafile} from "esbuild";
-import {HmrInterface} from "@/types/hmr";
-import {ISignalStack} from "@protorians/core";
 import {WatchEventType} from "node:fs";
 
 export interface BuildCommandOptions {
@@ -17,7 +14,6 @@ export type BuilderBootCallable = (builder: BuilderInterface) => Promise<void>
 export interface BuilderInterface {
     readonly workdir: string;
     readonly options: BuilderConfig;
-    readonly hmr: HmrInterface;
     // readonly signal: ISignalStack<BuilderSignalMap>;
 
     // get context(): BuildContext<BuildOptions> | null;
