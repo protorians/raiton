@@ -1,3 +1,22 @@
+# [1.0.0-alpha.3](https://github.com/protorians/raiton/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2026-02-17)
+
+
+### Bug Fixes
+
+* extend `ChildProcess` types to include `ChildProcessWithoutNullStreams` and adjust `Logger` for optional child process PID ([e1e7e17](https://github.com/protorians/raiton/commit/e1e7e17ddd921da5f09cf3240f06a64fddd274f5))
+* refactor runtime detection in `CliTools` and streamline imports in bin files ([b431aa3](https://github.com/protorians/raiton/commit/b431aa31d86e2ef480fbafa8a2cfbb5ae6a4c640))
+* remove unused HMR and artifact modules, refactor thread lifecycle, and optimize artifact initialization in application core ([af88e34](https://github.com/protorians/raiton/commit/af88e341ba8c695b3a9817d450845e25bb004b9e))
+* remove unused SDK modules, rework artifacts handling, and enhance parametrable decorators ([ddc6d35](https://github.com/protorians/raiton/commit/ddc6d35cd070e25f0da19185e776feead0843ad0))
+* remove unused types, streamline imports, and enhance type definitions with Lifecycle interfaces ([5ef2e46](https://github.com/protorians/raiton/commit/5ef2e46ecec191c1e51d79c997ebe2f8244dc7fc))
+
+
+### Features
+
+* add `class-validator` dependency and update README to remove Deno beta references ([a616086](https://github.com/protorians/raiton/commit/a616086652d437d0763d7c8313150c56ee4d11d9))
+* add basic `deno.json` with imports and tasks configuration ([e31b024](https://github.com/protorians/raiton/commit/e31b02414bc4378a7125678fe88268f57367c646))
+* add global runtime detection constants for Bun and Deno in `constants.ts` ([c63ac8e](https://github.com/protorians/raiton/commit/c63ac8e36089e58856c180706c89b51390ae850f))
+* introduce HTTP response handling modules with enums, exceptions, and utilities for streamlined error management and parameterized responses ([e1c5fa3](https://github.com/protorians/raiton/commit/e1c5fa3cc00fd7e7ce61ac44243483c2127f1dfe))
+
 # [1.0.0-alpha.2](https://github.com/protorians/raiton/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2026-02-16)
 
 
