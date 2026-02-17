@@ -9,9 +9,10 @@ export const bunRuntime: RuntimeAdapterInterface = {
         let server: any
 
         return {
-            async listen(port) {
+            async listen(port, hostname) {
                 server = Bun.serve({
                     port,
+                    hostname,
                     fetch: async (request: Request) => {
                         let responseBody: any
                         let statusCode = 200

@@ -45,9 +45,9 @@ export const nodeRuntime: RuntimeAdapterInterface = {
         })
 
         return {
-            listen(port) {
+            listen(port, hostname) {
                 return new Promise((resolve) =>
-                    server.listen(port, resolve)
+                    server.listen(port, hostname, resolve)
                 )
             },
             close() {
