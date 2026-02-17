@@ -1,6 +1,6 @@
 import {HttpResponseInterface} from "@/types";
 import {HttpStatus} from "@/sdk/enums";
-import {ThrowableResponse} from "@/sdk";
+import {ThrowableResponse} from "@/sdk/responses";
 
 
 export class HttpResponse {
