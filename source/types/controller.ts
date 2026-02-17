@@ -5,7 +5,6 @@ import {MiddlewareCallable, MiddlewareType} from "@/types/middleware";
 export interface ControllerMetaInterface {
     prefix?: string;
     routes: RouteMetaInterface[];
-    params: Record<string, ParamMetaInterface[]>;
     middlewares: Record<string, MiddlewareCallable[]>;
 }
 
@@ -15,7 +14,6 @@ export interface RouteMetaInterface {
     method: HttpMethod;
     path: string;
     propertyKey: string;
-    params: ParamMetaInterface[];
 }
 
 export interface ParamMetaInterface {
@@ -23,6 +21,7 @@ export interface ParamMetaInterface {
     type: Parametrable;
     key?: string;
     callable?: (ctx: Context) => any;
+    metatype?: any;
 }
 
 export interface RouteDecoratorParameters {

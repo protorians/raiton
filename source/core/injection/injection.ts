@@ -1,16 +1,19 @@
 import "reflect-metadata";
 import type {IConstructor, ContainerDefinitionInterface} from "@/types";
-import {Throwable} from "@/sdk/throwable";
 import {LifetimeEnum, TextUtility} from "@protorians/core";
 import {Logger} from "@protorians/logger";
 import {METADATA_KEYS} from "@/sdk/constants";
-import camelCase = TextUtility.camelCase;
+import {Throwable} from "@/sdk/exceptions";
+
+const camelCase = TextUtility.camelCase;
 
 export class Injection {
 
     protected static _classes: Map<string, ContainerDefinitionInterface> = new Map();
     protected static _instances: Map<string, Map<any, any>> = new Map();
     protected static _resolutionStack: string[] = [];
+    protected static _dependents: Map<string, Set<string>> = new Map();
+    protected static _artifactPaths: Map<string, string> = new Map();
 
     static get classes(): Map<string, ContainerDefinitionInterface> {
         return this._classes;
@@ -29,6 +32,8 @@ export class Injection {
     static clear(): void {
         this._classes.clear();
         this._instances.clear();
+        this._dependents.clear();
+        this._artifactPaths.clear();
     }
 
     static normalizeName(name: string): string {
@@ -49,6 +54,25 @@ export class Injection {
         return this;
     }
 
+    static updateConstruct(name: string, construct: IConstructor): typeof this {
+        const name_ = this.normalizeName(name);
+        this._classes.set(name_, {...this._classes.get(this.normalizeName(name))!, construct});
+        return this;
+    }
+
+    static getDependents(name: string): string[] {
+        return Array.from(this._dependents.get(this.normalizeName(name)) || []);
+    }
+
+    static registerArtifactPath(name: string, path: string): typeof this {
+        this._artifactPaths.set(this.normalizeName(name), path);
+        return this;
+    }
+
+    static getArtifactPath(name: string): string | undefined {
+        return this._artifactPaths.get(this.normalizeName(name));
+    }
+
     static resolveArguments(definition: ContainerDefinitionInterface, scope?: any): any[] {
         try {
             const parameters = Reflect.getMetadata(METADATA_KEYS.INJECT_PARAMETERS, definition.construct) || [];
@@ -65,19 +89,24 @@ export class Injection {
                 if (param && param !== true) {
                     const token = typeof param === 'function' ? (param.name || param) : param;
                     if (typeof token === 'string') {
+                        this.addDependent(token, definition.name);
                         args.push(this.get(token, effectiveScope));
                         continue;
                     }
                     if (typeof param === 'function') {
                         const metadata: ContainerDefinitionInterface = Reflect.getMetadata(METADATA_KEYS.CONTAINER, param);
-                        args.push(this.get(metadata?.name || param.name, effectiveScope));
+                        const token = metadata?.name || param.name;
+                        this.addDependent(token, definition.name);
+                        args.push(this.get(token, effectiveScope));
                         continue;
                     }
                 }
 
                 if (designParam && typeof designParam === 'function' && designParam.name) {
                     const metadata: ContainerDefinitionInterface = Reflect.getMetadata(METADATA_KEYS.CONTAINER, designParam);
-                    args.push(this.get(metadata?.name || designParam.name, effectiveScope));
+                    const token = metadata?.name || designParam.name;
+                    this.addDependent(token, definition.name);
+                    args.push(this.get(token, effectiveScope));
                     continue;
                 }
 
@@ -88,6 +117,14 @@ export class Injection {
             Logger.error('Resolve', e);
             return [];
         }
+    }
+
+    protected static addDependent(dependencyName: string, dependentName: string) {
+        const dep = this.normalizeName(dependencyName);
+        if (!this._dependents.has(dep)) {
+            this._dependents.set(dep, new Set());
+        }
+        this._dependents.get(dep)!.add(this.normalizeName(dependentName));
     }
 
     static get<T>(name: string, scope?: Symbol): T | undefined {
@@ -114,6 +151,7 @@ export class Injection {
                     instance = new cls.construct(...this.resolveArguments(cls, effectiveScope));
                     scopeInstances.set(effectiveScope, instance);
                     this.injectProperties(instance, cls, effectiveScope);
+                    this.triggerLifecycle(instance);
                 }
                 return scopeInstances.get(effectiveScope);
             }
@@ -121,6 +159,7 @@ export class Injection {
             if (cls.lifetime === LifetimeEnum.TRANSIENT) {
                 instance = new cls.construct(...this.resolveArguments(cls, effectiveScope));
                 this.injectProperties(instance, cls, effectiveScope);
+                this.triggerLifecycle(instance);
                 return instance as any;
             }
         } finally {
@@ -137,13 +176,36 @@ export class Injection {
             for (const [propertyKey, type] of properties) {
                 const token = typeof type === 'function' ? (type.name || type) : type;
                 if (typeof token === 'string') {
+                    this.addDependent(token, definition.name);
                     instance[propertyKey] = this.get(token, scope);
                 } else if (typeof type === 'function') {
                     const metadata: ContainerDefinitionInterface = Reflect.getMetadata(METADATA_KEYS.CONTAINER, type);
-                    instance[propertyKey] = this.get(metadata?.name || type.name, scope);
+                    const token_ = metadata?.name || type.name;
+                    this.addDependent(token_, definition.name);
+                    instance[propertyKey] = this.get(token_, scope);
                 }
             }
         }
+    }
+
+    protected static triggerLifecycle(instance: any): void {
+        if (typeof instance.onInit === 'function') {
+            instance.onInit();
+        }
+        if (typeof instance.onMount === 'function') {
+            instance.onMount();
+        }
+    }
+
+    static async shutdown(): Promise<void> {
+        for (const scopeInstances of this._instances.values()) {
+            for (const instance of scopeInstances.values()) {
+                if (typeof instance.onUnmount === 'function') {
+                    await instance.onUnmount();
+                }
+            }
+        }
+        this.clear();
     }
 
     static resolve<T>(construct: IConstructor<T>): T {

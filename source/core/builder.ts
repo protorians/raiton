@@ -2,18 +2,16 @@ import {RaitonConfig} from "./config";
 import path from "node:path";
 import {RaitonDirectories} from "./directories";
 import fs, {WatchEventType} from "node:fs";
-import type {
-    BuilderConfig,
-    BuilderInterface,
-    HmrInterface,
-} from "@/types";
+import type {BuilderConfig, BuilderInterface,} from "@/types";
 import {RaitonThread} from "./thread";
 import {Raiton} from "@/core/raiton";
-import {isControllerFile} from "@/sdk";
-import {Hmr} from "@/core/hmr";
-import {Throwable} from "@/sdk/throwable";
+import {isControllerArtifact, isServiceArtifact} from "@/sdk";
 import {ControllerBuilder} from "@/core/controller";
 import {watch} from "fs";
+import {LBadge, Logger} from "@protorians/logger";
+import {Throwable} from "@/sdk/exceptions";
+import {Injection} from "@/core/injection";
+import {Artifacts} from "@/sdk/artifacts";
 
 export class RaitonBuilder implements BuilderInterface {
     protected _source: string | null = null;
@@ -21,8 +19,6 @@ export class RaitonBuilder implements BuilderInterface {
     protected _bootstrapper: string | null = null;
     protected _bootstrapperFile: string | null = null;
     protected _compiledVersionNumber: number = 1;
-
-    public readonly hmr: HmrInterface = new Hmr()
     protected _watcher?: fs.FSWatcher;
 
 
@@ -53,7 +49,7 @@ export class RaitonBuilder implements BuilderInterface {
         return this._watcher;
     }
 
-    protected parse(filename: string, type?: WatchEventType) {
+    protected async parse(filename: string, type?: WatchEventType) {
         if (!fs.existsSync(filename)) return;
 
         const payload = {
@@ -63,20 +59,28 @@ export class RaitonBuilder implements BuilderInterface {
             type
         }
 
-        if (isControllerFile(filename)) {
+        Logger.log(LBadge.info('HMR'), 'activated');
+
+        if (isControllerArtifact(filename)) {
             Raiton.signals.dispatch('hmr:controller', payload)
         }
+
+        if (Artifacts.is(filename))
+            Artifacts.reload(
+                await import(`${filename}?v=${payload.version || 1}&t=${payload.timestamp || Date.now()}`),
+                filename
+            )
 
         return payload;
     }
 
-    protected parsing() {
+    protected async parsing(): Promise<this> {
         if (typeof this._source != 'string') throw new Throwable('Application source not found');
 
-        for (const filename of [...fs.readdirSync(this._source, {recursive: true})]) {
-            this.parse(path.join(this._source, String(filename)));
-        }
+        for (const filename of [...fs.readdirSync(this._source, {recursive: true})])
+            await this.parse(path.join(this._source, String(filename)));
 
+        return this;
     }
 
     protected watching(): this {
@@ -114,11 +118,12 @@ export class RaitonBuilder implements BuilderInterface {
         await this.initialize()
         Raiton.signals.listen(
             'hmr:controller',
-            async ({filename, version, timestamp}) =>
+            async ({filename, version, timestamp}) => {
                 await ControllerBuilder.build({filename, version, timestamp})
+            }
         )
-        this.parsing()
-        this.watching()
+        // this.parsing();
+        this.watching();
         return this;
     }
 
@@ -131,8 +136,9 @@ export class RaitonBuilder implements BuilderInterface {
         if (!('default' in bootstrapper))
             throw new Error('Bootstrapper not supported! Please export to "default"')
 
-        Raiton.thread = new RaitonThread(this, {})
-        return bootstrapper.default(Raiton.thread)
+        const thread = new RaitonThread(this, {})
+        Raiton.thread = thread;
+        return await bootstrapper.default(thread);
     }
 
 }

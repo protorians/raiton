@@ -25,6 +25,6 @@ export class RaitonDirectories {
     }
 
     public static app(): string {
-        return path.join(Raiton.thread.builder.workdir, RaitonConfig.get('rootDir') || './');
+        return path.join(Raiton.thread?.builder.workdir || '', RaitonConfig.get('rootDir') || './');
     }
 }

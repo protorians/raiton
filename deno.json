@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@": "./source",
+    "@/": "./source/"
+  },
+  "tasks": {
+    "start": "deno run --allow-all source/bin/bootstrapper.ts"
+  }
+}

@@ -11,3 +11,13 @@ export enum HashAlgoEnum {
     SHA3_256 = 'SHA3_256',
     SHA3_512 = 'SHA3_512',
 }
+
+export enum CipherAlgoEnum {
+    AES_256_CBC = 'AES-256-CBC',
+}
+
+export enum PasswordAlgoEnum {
+    ARGON2ID = 'argon2id',
+    BCRYPT = 'BCRYPT',
+    SCRYPT = 'SCRYPT',
+}

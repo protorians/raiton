@@ -4,6 +4,8 @@ import {ApplicationConfig, ApplicationInterface} from "@/types/application";
 import {HttpMethod} from "@/sdk";
 import {RouteHandler} from "@/types";
 import {Logger} from "@protorians/logger";
+import {RaitonConfig} from "@/core/config";
+import {Artifacts} from "@/sdk/artifacts";
 
 export class Application implements ApplicationInterface {
     private root: PluginScope
@@ -12,6 +14,18 @@ export class Application implements ApplicationInterface {
         readonly config: ApplicationConfig
     ) {
         this.root = new PluginScope()
+        if (this.config.workdir) {
+            process.chdir(this.config.workdir)
+        }
+        this.initialize()
+    }
+
+    protected initialize(): this {
+        const artifacts = RaitonConfig.get('artifacts')
+        const artifactTypes = [...artifacts?.types || [], ...Artifacts.defaultTypes]
+
+        Artifacts.registerMany(...artifactTypes)
+        return this;
     }
 
     public get hostname(): string {
@@ -26,15 +40,15 @@ export class Application implements ApplicationInterface {
         }`
     }
 
-    // public setOption<K extends keyof ApplicationConfig>(key: K, value: ApplicationConfig[K]): this {
-    //     this.config[key] = value;
-    //     return this;
-    // }
-    //
-    // public setOptions(options: ApplicationConfig): this {
-    //     Object.assign(this.config, options);
-    //     return this;
-    // }
+    public setOption<K extends keyof ApplicationConfig>(key: K, value: ApplicationConfig[K]): this {
+        this.config[key] = value;
+        return this;
+    }
+
+    public setOptions(options: ApplicationConfig): this {
+        Object.assign(this.config, options);
+        return this;
+    }
 
     register(plugin: any): this {
         this.root.register(plugin)
@@ -47,7 +61,9 @@ export class Application implements ApplicationInterface {
     }
 
     route(method: HttpMethod, path: string, handler: RouteHandler, version?: string): this {
-        this.root.route(method, path, handler, version)
+        const prefix = this.config.prefix ?? ''
+        const fullPath = `${prefix}${path}`.replace(/\/+/g, '/') || '/'
+        this.root.route(method, fullPath, handler, version)
         return this
     }
 
@@ -86,27 +102,59 @@ export class Application implements ApplicationInterface {
     async handle(req: any, reply: any): Promise<any> {
         const ctx = new RequestContext(req, reply)
 
+        if (this.config.verbose) {
+            Logger.info(
+                `Incoming request: ${req.method} ${req.url}`
+            )
+        }
+
         await this.root.hooks.run('onRequest', ctx)
+
+        const url = new URL(req.url, this.hostname)
+        let pathname = url.pathname
+
+        if (this.config.pathname && this.config.pathname !== '/') {
+            const appPathname = this.config.pathname.endsWith('/') ? this.config.pathname : `${this.config.pathname}/`
+            if (pathname.startsWith(appPathname)) {
+                pathname = pathname.substring(appPathname.length - 1) || '/'
+            } else if (pathname === this.config.pathname) {
+                pathname = '/'
+            } else {
+                // Requête hors du pathname de l'application
+                if (this.config.verbose) {
+                    Logger.warn(`Request out of application pathname: ${pathname} (expected prefix: ${this.config.pathname})`)
+                }
+                reply.status(404)
+                return reply.send({error: false, statusCode: 404})
+            }
+        }
 
         const route = this.root.router.match(
             req.method,
-            new URL(req.url, this.hostname).pathname
+            pathname
         )
 
         if (!route) {
+            if (this.config.verbose) {
+                Logger.warn(`Route not found: ${req.method} ${pathname}`)
+            }
             reply.status(404)
             return reply.send({error: false, statusCode: 404})
         }
 
         const pipeline = this.root.middleware.clone()
         pipeline.use(async ({context}) => {
-            (context as any).params = route.parameters;
+            try {
+                (context as any).params = route.parameters;
+                let responses = await route.handler(context)
 
-            const responses = await route.handler(context)
-
-            // Logger.debug('Responses', responses)
-            // request.reply.header('Content-Type', 'application/json')
-            context.reply.send(responses)
+                context.reply.send(responses)
+            } catch (e: any) {
+                Logger.error('Failed to handle request', e.message ?? e)
+                if (this.config.develop) {
+                    console.error(e)
+                }
+            }
         })
 
         await pipeline.run(ctx)

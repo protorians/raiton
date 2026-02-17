@@ -8,7 +8,7 @@ export default class StartCommand extends RaitonCommand {
     public readonly name: string = 'start';
     public readonly description: string = 'Run the application in production mode';
 
-    private child:  Bun.Subprocess<"ignore", "pipe", "inherit"> | ChildProcess | null = null;
+    private child:  Bun.Subprocess<"ignore", "pipe", "inherit"> | ChildProcess | Deno.ChildProcess | null = null;
 
     public register(): void {
         this.cli

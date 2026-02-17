@@ -9,9 +9,8 @@ export class Raiton {
     static title: string = 'Protorians Raiton';
     static identifier: string = 'raiton';
 
-    static get thread(): ThreadInterface {
-        if (!this._thread)
-            throw new Error(`${Raiton.title} Thread instance not initialized`);
+    static get thread(): ThreadInterface| undefined {
+        // if (!this._thread) throw new Error(`${Raiton.title} Thread instance not initialized`);
         return this._thread;
     }
 

@@ -1,7 +1,6 @@
 import {getControllerMetadata} from "@/core";
 import {HttpMethod} from "@/sdk";
 import {ControllerMetaInterface, RouteDecoratorCallable, RouteMetaInterface} from "@/types";
-import path from "node:path";
 
 
 function stabilizeRoute(meta: ControllerMetaInterface, {path, method, propertyKey}: Partial<RouteMetaInterface>) {
@@ -10,7 +9,6 @@ function stabilizeRoute(meta: ControllerMetaInterface, {path, method, propertyKe
         method,
         path,
         propertyKey,
-        params: (propertyKey ? meta.params[propertyKey] : []) || [],
     } as RouteMetaInterface;
 }
 
@@ -22,7 +20,6 @@ export function createRoutableDecorator(method: HttpMethod) {
                 method,
                 path,
                 propertyKey,
-                params: meta.params[propertyKey] || [],
             });
             meta.routes.push(route)
         }
