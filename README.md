@@ -11,9 +11,7 @@ il offre également un support complet pour **Node.js** et **Deno**.
 
 - **Optimisé pour Bun** : Utilise `Bun.serve` nativement pour des performances maximales.
 - **Multi-Runtime** : Compatible avec Bun (recommandé), Node.js et les environnements Web.
-- **Architecture Décorative** : Utilise les décorateurs TypeScript pour définir contrôleurs, routes et injections de dépendances.
-- **Validation DTO** : Intégration native de `class-validator` pour la validation des données entrantes.
-- **Cycle de Vie** : Support des hooks `onInit`, `onMount` et `onUnmount` pour les services et contrôleurs.
+- **Architecture Décorative** : Utilise les décorateurs TypeScript pour définir contrôleurs, routes et injections.
 - **Modulaire** : Système de plugins et de middlewares flexible.
 - **CLI Puissant** : Outils intégrés pour le développement, le build et le déploiement.
 
@@ -69,54 +67,20 @@ export default async function (thread: ThreadInterface) {
 }
 ```
 
-### 3. Validation avec DTO (`source/dtos/user.dto.ts`)
-
-Raiton intègre `class-validator` pour valider vos données entrantes via des DTOs.
-
-```typescript
-import { DataTransferObject } from "raiton/sdk";
-import { IsString, MinLength } from "class-validator";
-
-export class CreateUserDto extends DataTransferObject {
-    @IsString()
-    @MinLength(3)
-    name: string;
-}
-```
-
-Utilisez-le dans votre contrôleur :
-
-```typescript
-import { Controllable, Post, Body } from "raiton/sdk";
-import { CreateUserDto } from "../dtos/user.dto";
-
-@Controllable('/users')
-export class UserController {
-    @Post('/')
-    create(@Body(CreateUserDto) body: CreateUserDto) {
-        return { message: `Utilisateur ${body.name} créé !` };
-    }
-}
-```
-
 ## Utilisation du CLI
 
 Raiton est livré avec une interface en ligne de commande pour faciliter le développement.
 
-> **Note :** Il est recommandé d'utiliser **Bun** pour une meilleure expérience.
-
 ```bash
 # Lancer en mode développement (avec hot reload)
-raiton develop
+bun raiton develop
 
 # Builder le projet
-raiton build
+bun raiton build
 
 # Démarrer le projet buildé
-raiton start
+bun raiton start
 ```
-
-Si `raiton` n'est pas dans votre PATH, utilisez `bun x raiton` ou `npx raiton`.
 
 ## Runtimes supportés
 
