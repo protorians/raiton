@@ -1,7 +1,6 @@
-
 import crypto from "node:crypto";
 import argon2, {Options} from "argon2";
-import {HashAlgoEnum} from "./enums";
+import {HashAlgoEnum, PasswordAlgoEnum} from "./enums";
 import bcrypt from "bcrypt";
 import {IDerivationOptions, IEncryptionResult, IScryptOptions} from "@/types";
 
@@ -10,14 +9,14 @@ export class Encryption {
         return HashAlgoEnum;
     }
 
-    static randomAlgo() {
-        return Object.values(this.algos)[
+    static randomAlgo(algo?: PasswordAlgoEnum[] | HashAlgoEnum[]) {
+        return (algo ?? Object.values(this.algos))[
             Math.floor(Math.random() * Object.values(this.algos).length)
             ];
     }
 
-    constructor(public readonly algo: HashAlgoEnum) {
-        if (!Object.values(HashAlgoEnum).includes(this.algo)) {
+    constructor(public readonly algo: HashAlgoEnum | PasswordAlgoEnum) {
+        if (![...Object.values(HashAlgoEnum), ...Object.values(PasswordAlgoEnum)].includes(this.algo)) {
             throw new Error(`Invalid hash algorithm: ${this.algo}`);
         }
     }

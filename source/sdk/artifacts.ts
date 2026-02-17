@@ -1,55 +1,79 @@
-import path from "node:path";
-import fs from "fs";
+import {Injection} from "@/core/injection";
 import {Logger} from "@protorians/logger";
-import {IFileStatInfo} from "@/types";
+import type {IConstructor} from "@/types";
 import {Raiton} from "@/core/raiton";
-import {RaitonDirectories} from "@/core";
+import {isArtifact, isControllerArtifact} from "@/sdk/utilities";
 
-export class ArtifactFactory {
-    protected static readonly stack: Map<string, Set<IFileStatInfo>> = new Map();
+export class Artifacts {
 
-    static getSource(key: string) {
-        return path.join(
-            RaitonDirectories.artifacts(Raiton.thread.builder.workdir),
-            `${key}.json`
-        );
+    static readonly types: Set<string> = new Set();
+
+    static readonly defaultTypes = [
+        'service',
+        'provider',
+        'type',
+        'repository',
+        'database',
+        'db',
+        'util',
+        'utility',
+        'source',
+        'controller',
+        'middleware',
+        'hook',
+        'event',
+        'listener',
+        'validator',
+        'strategy',
+        'strategy-provider',
+        'strategy-type',
+    ]
+
+    static register(type: string) {
+        this.types.add(type)
+        return this
     }
 
-    static add(key: string, file: IFileStatInfo) {
-        if (!this.stack.has(key)) this.stack.set(key, new Set());
-        this.stack.get(key)?.add(file);
-    }
-
-    static get(key: string): Set<IFileStatInfo> | undefined {
-        return this.stack.get(key);
-    }
-
-    static has(key: string): boolean {
-        return this.stack.has(key);
-    }
-
-    static load(key: string) {
-        const outputFile = this.getSource(key)
-        if (!fs.existsSync(outputFile)) return this;
-        const content = fs.readFileSync(outputFile, "utf-8");
-        const files = JSON.parse(content) as IFileStatInfo[];
-        files.forEach(file => this.add(key, file));
+    static registerMany(...types: string[]) {
+        for (const type of types) this.register(type)
         return this;
     }
 
-    static save(key: string) {
-        try {
-            const set = this.stack.get(key);
-            if (!set) return;
-            const content = JSON.stringify([...set.values()]);
-            const outputFile = this.getSource(key)
-            const dir = path.dirname(outputFile);
-            if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(outputFile, content, "utf-8");
-            return true
-        } catch (e) {
-            Logger.error(`Failed to save artifacts for key ${key}:`, e);
-            return false;
+    static is(filename: string) {
+        return [...this.types]
+            .map(type => isArtifact(filename, type))
+            .some(Boolean)
+    }
+
+    static reload(modulo: any, filename?: string) {
+
+        if (Raiton.thread?.builder.options.development === false)
+            return Logger.warn(
+                'Artifact reload is only available in development mode'
+            )
+
+        for (const mod of Object.values(modulo)) {
+            const name = (mod && typeof mod === 'object' && 'name' in mod) ? mod.name : (
+                typeof mod === 'function' ? mod.name ?? mod.constructor.name : undefined
+            );
+
+            if (typeof name === 'string' && Injection.has(name)) {
+                if (filename) Injection.registerArtifactPath(name, filename);
+                Injection.updateConstruct(name, mod as IConstructor)
+
+                const dependents = Injection.getDependents(name);
+                for (const dependent of dependents) {
+                    const dependentPath = Injection.getArtifactPath(dependent);
+                    if (dependentPath && isControllerArtifact(dependentPath)) {
+                        Raiton.signals.dispatch('hmr:controller', {
+                            filename: dependentPath,
+                            timestamp: Date.now(),
+                            version: 1
+                        })
+                    }
+                }
+            }
         }
+
     }
 }
