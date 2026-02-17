@@ -1,3 +1,21 @@
+# [1.0.0-alpha.4](https://github.com/protorians/raiton/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2026-02-17)
+
+
+### Bug Fixes
+
+* remove emojis from README section titles for consistency ([8d604ee](https://github.com/protorians/raiton/commit/8d604eec0825bfdf172988ee9fe662076b7e46be))
+* remove unused Fastify dependencies and deprecate parameter handling utilities ([282db2c](https://github.com/protorians/raiton/commit/282db2cb4baeb52b816e1444f9d618570a073443))
+* update `.releaserc.json` to refine branch configurations and format `assets` array ([0f803c0](https://github.com/protorians/raiton/commit/0f803c08d03549bd28ef9e61fe9c6c121d2f781d))
+* update keywords in `package.json` and reset version to `0.0.0` ([44f7c85](https://github.com/protorians/raiton/commit/44f7c858330fc5455260d66d05b78a5a33d388f8))
+
+
+### Features
+
+* add `NODE_AUTH_TOKEN` to `publish.yml` for semantic-release environment setup ([44a561b](https://github.com/protorians/raiton/commit/44a561b60bc3f35ae59bb404c343ef56baab4d26))
+* enable provenance support in `package.json` and `.releaserc.json` ([b5db171](https://github.com/protorians/raiton/commit/b5db171a84150aefc2978b37c5d3544b5769b160))
+* make package public and fix `publish.yml` token variable ([0293ee6](https://github.com/protorians/raiton/commit/0293ee629e444be0d90823896ea57212743d357d))
+* remove redundant comments from `publish.yml` workflow ([37ddce9](https://github.com/protorians/raiton/commit/37ddce94356dba8f2c2d5e87af7fc3ade4ca3cf5))
+
 # [1.0.0-alpha.3](https://github.com/protorians/raiton/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2026-02-17)
 
 
