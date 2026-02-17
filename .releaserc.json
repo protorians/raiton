@@ -3,11 +3,11 @@
     "main",
     {
       "name": "beta",
-      "prerelease": true
+      "prerelease": "beta"
     },
     {
       "name": "alpha",
-      "prerelease": true
+      "prerelease": "alpha"
     }
   ],
   "plugins": [
