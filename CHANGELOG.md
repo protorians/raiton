@@ -1,6 +1,6 @@
 # [1.0.0-alpha.4](https://github.com/protorians/raiton/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2026-02-17)
 
-
+## Breaking Changes
 ### Bug Fixes
 
 * remove emojis from README section titles for consistency ([8d604ee](https://github.com/protorians/raiton/commit/8d604eec0825bfdf172988ee9fe662076b7e46be))
