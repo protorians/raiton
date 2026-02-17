@@ -1,7 +1,6 @@
 export * from "./config"
 export * from "./process.util"
 export * from "./builder"
-export * from "./hmr"
 export * from "./bytes.util"
 export * from "./commands"
 export * from "./command"
