@@ -13,15 +13,16 @@ export function bodyParserPlugin(): Plugin {
                 if (context.req.body && !context.state.bodyParsed) {
                     try {
                         const rawBody = await readRawBody(context.req.body);
+                        context.req.body = rawBody as unknown as any;
                         const bodyString = decode(rawBody);
 
                         readQueryBody(context);
+                        await readMultipartBody(context, contentType);
                         readJsonBody(context, contentType, bodyString);
                         readUrlEncodedBody(context, contentType, bodyString);
                         readTextBody(context, contentType, bodyString);
 
                         if (!context.state.bodyParsed) {
-                            context.req.body = rawBody as unknown as any;
                             context.state.bodyParsed = true;
                         }
 
@@ -40,6 +41,46 @@ function readJsonBody(ctx: RequestContext, contentType: string, body: any) {
     if (contentType.includes('application/json')) {
         ctx.req.body = tryParseJson(body) || {} as unknown as any;
         ctx.state.bodyParsed = true;
+    }
+}
+
+async function readMultipartBody(ctx: RequestContext, contentType: string) {
+    if (contentType.includes('multipart/form-data')) {
+        const body = ctx.req.body;
+
+        try {
+            const tempRequest = new Request(ctx.req.url, {
+                method: ctx.req.method,
+                headers: ctx.req.headers,
+                body: body as any
+            });
+
+            const formData = await tempRequest.formData();
+            const record: Record<string, any> = {};
+            const files: Record<string, any> = {};
+
+            for (const [key, value] of formData.entries()) {
+                const v = value as any;
+                if (v && (v instanceof File)) {
+                    files[key] = {
+                        name: v.name,
+                        type: v.type,
+                        size: v.size,
+                        lastModified: v.lastModified,
+                        buffer: Buffer.from(await v.arrayBuffer())
+                    };
+                } else {
+                    record[key] = value;
+                }
+            }
+
+            ctx.req.body = record;
+            ctx.req.files = files;
+            ctx.req.file = Object.values(files)[0] || null;
+            ctx.state.bodyParsed = true;
+        } catch (e) {
+            Logger.error('Error parsing multipart body:', e);
+        }
     }
 }
 

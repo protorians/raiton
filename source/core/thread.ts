@@ -17,6 +17,7 @@ import {ControllerBuilder} from "@/core/controller";
 import {bodyParserPlugin} from "@/sdk/plugins/body-parser.plugin";
 import {Injection} from "@/core/injection/injection";
 import {Throwable} from "@/sdk/exceptions";
+import os from "os";
 
 
 export class RaitonThread implements ThreadInterface {
@@ -59,6 +60,18 @@ export class RaitonThread implements ThreadInterface {
         return await until(condition)
     }
 
+    protected getNetworkIp(): string | null {
+        const interfaces = os.networkInterfaces();
+        for (const name of Object.keys(interfaces)) {
+            for (const iface of interfaces[name] || []) {
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    return iface.address;
+                }
+            }
+        }
+        return null;
+    }
+
     public setup({application, runtime}: ThreadSetupOptions): this {
         const defaultRuntime = typeof Bun !== 'undefined' ? RuntimeType.Bun : RuntimeType.Node;
         this.runtime = new Runtime(runtime || defaultRuntime);
@@ -84,14 +97,16 @@ export class RaitonThread implements ThreadInterface {
         });
 
         const port = this.application.config.port || 5712;
-        const hostname = this.application.config.hostname || 'localhost';
+        const hostname = this.application.config.hostname || '0.0.0.0';
+        const displayHostname = (hostname === '0.0.0.0') ? (this.getNetworkIp() || 'localhost') : hostname;
+        const prefix = this.application.config.prefix
 
         this.runtimeServer = this.runtime.createServer(this.application.handle.bind(this.application))
 
         await this.runtimeServer.listen(port, hostname)
         if (this.builder.source) await ControllerBuilder.scan(this.builder.source)
 
-        Logger.log(LBadge.info('Server Started'), `http://${hostname}:${port}`)
+        Logger.log(LBadge.info('Server Started'), `http://${displayHostname}:${port}${prefix ?? ''}`)
         return this;
     }
 }

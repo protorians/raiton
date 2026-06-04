@@ -47,7 +47,7 @@ export function createHandler(
                         args[p.index] = ctx.REPLY
                         break
                     case Parametrable.UPLOAD_FILE:
-                        args[p.index] = ctx.req.file
+                        args[p.index] = ctx.req.file || ctx.req.files?.[p.key!]
                         break
                     case Parametrable.CUSTOM:
                         args[p.index] = p.callable?.(ctx) ?? null;
