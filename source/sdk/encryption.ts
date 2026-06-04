@@ -10,15 +10,18 @@ export class Encryption {
     }
 
     static randomAlgo(algo?: PasswordAlgoEnum[] | HashAlgoEnum[]) {
-        return (algo ?? Object.values(this.algos))[
-            Math.floor(Math.random() * Object.values(this.algos).length)
-            ];
+        const algos = algo ?? Object.values(this.algos);
+        return algos[Math.floor(Math.random() * Object.values(algos).length)];
     }
 
     constructor(public readonly algo: HashAlgoEnum | PasswordAlgoEnum) {
         if (![...Object.values(HashAlgoEnum), ...Object.values(PasswordAlgoEnum)].includes(this.algo)) {
             throw new Error(`Invalid hash algorithm: ${this.algo}`);
         }
+    }
+
+    async compare(value: string, hash: string): Promise<boolean> {
+        return this.make(value).then(result => result === hash);
     }
 
     async make(value: string, options?: IDerivationOptions | IScryptOptions): Promise<IEncryptionResult> {

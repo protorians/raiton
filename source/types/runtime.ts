@@ -14,6 +14,9 @@ export interface RuntimeRequestInterface {
     headers: Headers
     body?: ReadableStream<Uint8Array> | Uint8Array | Record<string, any> | null;
     query?: Record<string, any>
+    params?: Record<string, any>
+    file?: any
+    files?: any
     remoteAddress?: string
 }
 
