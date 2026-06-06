@@ -55,12 +55,22 @@ jobs:
 
       - name: Commit and Tag
         run: |
-          git add package.json
-          git commit -m "chore(release): ${{ steps.get_version.outputs.VERSION }} [skip ci]"
-          git tag v${{ steps.get_version.outputs.VERSION }}
-          git push origin HEAD --tags
+          if [ -n "$(git status --porcelain package.json)" ]; then
+            git add package.json
+            git commit -m "chore(release): ${{ steps.get_version.outputs.VERSION }} [skip ci]"
+            git tag v${{ steps.get_version.outputs.VERSION }}
+            git push origin HEAD --tags
+          else
+            echo "No changes in package.json, skipping commit and tag."
+          fi
 
       - name: Publish to NPM
+        if: github.ref == 'refs/heads/main'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
+        run: |
+          if [ -n "$(git status --porcelain package.json)" ] || [ -n "$(git tag --points-at HEAD)" ]; then
+             npm publish --access public
+          else
+             echo "Nothing to publish."
+          fi
