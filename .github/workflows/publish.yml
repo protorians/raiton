@@ -41,9 +41,26 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Release with semantic-release
+      - name: Update version
+        run: bun run scripts/update-version.ts
+
+      - name: Get new version
+        id: get_version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Git Config
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and Tag
+        run: |
+          git add package.json
+          git commit -m "chore(release): ${{ steps.get_version.outputs.VERSION }} [skip ci]"
+          git tag v${{ steps.get_version.outputs.VERSION }}
+          git push origin HEAD --tags
+
+      - name: Publish to NPM
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: bun x semantic-release
+        run: npm publish --access public
