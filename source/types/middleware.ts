@@ -1,4 +1,4 @@
-import {RequestContext} from "@/core/context";
+import {RequestContext} from "../core/context";
 
 
 export type NextCallable = () => Promise<void>

@@ -2,16 +2,16 @@ import {RaitonConfig} from "./config";
 import path from "node:path";
 import {RaitonDirectories} from "./directories";
 import fs, {WatchEventType} from "node:fs";
-import type {BuilderConfig, BuilderInterface,} from "@/types";
+import type {BuilderConfig, BuilderInterface,} from "../types";
 import {RaitonThread} from "./thread";
-import {Raiton} from "@/core/raiton";
-import {isControllerArtifact, isServiceArtifact} from "@/sdk";
-import {ControllerBuilder} from "@/core/controller";
+import {Raiton} from "./raiton";
+import {isControllerArtifact, isServiceArtifact} from "../sdk";
+import {ControllerBuilder} from "./controller";
 import {watch} from "fs";
 import {LBadge, Logger} from "@protorians/logger";
-import {Throwable} from "@/sdk/exceptions";
-import {Injection} from "@/core/injection";
-import {Artifacts} from "@/sdk/artifacts";
+import {Throwable} from "../sdk/exceptions";
+import {Injection} from "./injection";
+import {Artifacts} from "../sdk/artifacts";
 
 export class RaitonBuilder implements BuilderInterface {
     protected _source: string | null = null;

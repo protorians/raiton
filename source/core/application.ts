@@ -1,11 +1,11 @@
-import {PluginScope} from '@/core/plugins/scope'
+import {PluginScope} from './plugins/scope'
 import {RequestContext} from './context'
-import {ApplicationConfig, ApplicationInterface} from "@/types/application";
-import {HttpMethod} from "@/sdk";
-import {RouteHandler} from "@/types";
+import {ApplicationConfig, ApplicationInterface} from "../types/application";
+import {HttpMethod} from "../sdk";
+import {RouteHandler} from "../types";
 import {Logger} from "@protorians/logger";
-import {RaitonConfig} from "@/core/config";
-import {Artifacts} from "@/sdk/artifacts";
+import {RaitonConfig} from "./config";
+import {Artifacts} from "../sdk/artifacts";
 
 export class Application implements ApplicationInterface {
     private root: PluginScope

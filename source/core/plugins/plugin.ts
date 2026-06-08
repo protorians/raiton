@@ -1,4 +1,4 @@
-import { Plugin, PluginFn } from '@/types'
+import { Plugin, PluginFn } from '../../types'
 
 export function definePlugin(
   setup: PluginFn,

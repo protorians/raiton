@@ -1,4 +1,4 @@
-import {RuntimeType} from "@/sdk/enums/runtime.enum";
+import {RuntimeType} from "../sdk/enums/runtime.enum";
 
 export interface RuntimeServerInterface {
     listen(port: number, hostname?: string): Promise<void>

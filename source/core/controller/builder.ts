@@ -1,10 +1,10 @@
 import fs from "node:fs";
-import {BuilderHMRDeclaration} from "@/types";
+import {BuilderHMRDeclaration} from "../../types";
 import {LBadge, Logger} from "@protorians/logger";
-import {compileController} from "@/core/controller/compiler";
-import {RaitonThread} from "@/core/thread";
-import {Injection} from "@/core/injection";
-import {isControllerArtifact} from "@/sdk";
+import {compileController} from "./compiler";
+import {RaitonThread} from "../thread";
+import {Injection} from "../injection";
+import {isControllerArtifact} from "../../sdk";
 import path from "node:path";
 
 export class ControllerBuilder {

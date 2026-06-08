@@ -1,9 +1,9 @@
-import type {RuntimeAdapterInterface, RuntimeHandlerCallable, RuntimeInterface, RuntimeServerInterface} from "@/types";
-import {RuntimeType} from "@/sdk/enums/runtime.enum";
-import {nodeRuntime} from "@/sdk/runtime/node/server";
-import {bunRuntime} from "@/sdk/runtime/bun/server";
-import {denoRuntime} from "@/sdk/runtime/deno/server";
-import {webRuntime} from "@/sdk/runtime/web/server";
+import type {RuntimeAdapterInterface, RuntimeHandlerCallable, RuntimeInterface, RuntimeServerInterface} from "../../types";
+import {RuntimeType} from "../enums/runtime.enum";
+import {nodeRuntime} from "./node/server";
+import {bunRuntime} from "./bun/server";
+import {denoRuntime} from "./deno/server";
+import {webRuntime} from "./web/server";
 
 
 export class Runtime implements RuntimeInterface {

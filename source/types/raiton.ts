@@ -1,4 +1,4 @@
-import {BuilderHMRDeclaration} from "@/types/builder";
+import {BuilderHMRDeclaration} from "./builder";
 
 export interface RaitonSignalMap {
     ready?: undefined;

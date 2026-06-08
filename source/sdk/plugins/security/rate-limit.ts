@@ -1,5 +1,5 @@
-import {definePlugin} from "@/core/plugins";
-import {Context, MiddlewareParameters, NextCallable} from "@/types";
+import {definePlugin} from "../../../core/plugins";
+import {Context, MiddlewareParameters, NextCallable} from "../../../types";
 
 
 export interface RateLimitOptions {

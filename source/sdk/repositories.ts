@@ -1,4 +1,4 @@
-import {Throwable} from "@/sdk/exceptions";
+import {Throwable} from "./exceptions";
 
 
 export class DelegateRepository {

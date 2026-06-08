@@ -1,6 +1,6 @@
-import {HookStore} from '@/core/hooks'
-import {MiddlewarePipeline} from '@/core/middleware'
-import {Route, Router} from '@/core/router'
+import {HookStore} from '../hooks'
+import {MiddlewarePipeline} from '../middleware'
+import {Route, Router} from '../router'
 
 export class PluginScope {
     public hooks: HookStore

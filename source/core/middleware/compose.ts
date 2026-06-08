@@ -1,5 +1,5 @@
-import {MiddlewareType} from '@/types'
-import {Throwable} from "@/sdk/exceptions";
+import {MiddlewareType} from '../../types'
+import {Throwable} from "../../sdk/exceptions";
 
 export function middlewareCompose(middlewares: MiddlewareType[]) {
     return function (request: any) {

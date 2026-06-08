@@ -1,4 +1,4 @@
-import {RuntimeAdapterInterface, RuntimeReplyInterface, RuntimeRequestInterface} from '@/types'
+import {RuntimeAdapterInterface, RuntimeReplyInterface, RuntimeRequestInterface} from '../../../types'
 
 export const webRuntime: RuntimeAdapterInterface = {
     createServer(handler) {

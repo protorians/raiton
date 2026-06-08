@@ -1,4 +1,4 @@
-import {HookName, HookHandler} from '@/types'
+import {HookName, HookHandler} from '../types'
 
 export class HookStore {
     private hooks = new Map<HookName, HookHandler[]>()

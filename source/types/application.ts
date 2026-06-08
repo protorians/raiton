@@ -1,4 +1,4 @@
-import {HttpMethod} from "@/sdk";
+import {HttpMethod} from "../sdk";
 
 export interface ApplicationConfig {
     workdir?: string;

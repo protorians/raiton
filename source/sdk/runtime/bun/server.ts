@@ -1,4 +1,4 @@
-import {RuntimeAdapterInterface} from '@/types'
+import {RuntimeAdapterInterface} from '../../../types'
 
 export const bunRuntime: RuntimeAdapterInterface = {
     createServer(handler) {

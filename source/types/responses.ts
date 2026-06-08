@@ -1,4 +1,4 @@
-import {HttpStatus} from "@/sdk/enums/http-status.enum";
+import {HttpStatus} from "../sdk/enums/http-status.enum";
 
 export interface HttpResponseBaseInterface {
     message: string;

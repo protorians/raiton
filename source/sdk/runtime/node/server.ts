@@ -3,7 +3,7 @@ import {
     RuntimeAdapterInterface,
     RuntimeRequestInterface,
     RuntimeReplyInterface
-} from '@/types'
+} from '../../../types'
 
 export const nodeRuntime: RuntimeAdapterInterface = {
     createServer(handler) {

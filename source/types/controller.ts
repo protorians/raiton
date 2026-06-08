@@ -1,6 +1,6 @@
-import {HttpMethod, Parametrable} from "@/sdk/enums";
-import {Context} from "@/types/core";
-import {MiddlewareCallable, MiddlewareType} from "@/types/middleware";
+import {HttpMethod, Parametrable} from "../sdk/enums";
+import {Context} from "./core";
+import {MiddlewareCallable, MiddlewareType} from "./middleware";
 
 export interface ControllerMetaInterface {
     prefix?: string;

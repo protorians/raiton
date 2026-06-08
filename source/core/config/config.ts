@@ -1,8 +1,8 @@
 import path from "node:path";
 import fs from "node:fs";
-import {Configurable} from "@/types";
+import {Configurable} from "../../types";
 import {Logger} from "@protorians/logger";
-import {Raiton} from "@/core/raiton";
+import {Raiton} from "../raiton";
 
 export class RaitonConfig {
     static readonly current: Map<keyof Configurable, Configurable[keyof Configurable]> = new Map();

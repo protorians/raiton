@@ -1,5 +1,5 @@
-import type {ErrorResponseInterface} from "@/types";
-import {HttpResponse} from "@/sdk/responses/http";
+import type {ErrorResponseInterface} from "../../types";
+import {HttpResponse} from "./http";
 
 
 export class HttpErrorResponse {

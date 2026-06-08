@@ -1,4 +1,4 @@
-import type {RouteDefinition} from '@/types/router'
+import type {RouteDefinition} from '../../types/router'
 
 export class Route {
     method: string

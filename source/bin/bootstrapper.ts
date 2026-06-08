@@ -1,7 +1,7 @@
 import {Command} from 'commander';
-import {RaitonCommands, RaitonConfig} from "@/core";
-import {getPackageRoot} from "@/sdk";
-import {CliTools} from "@/bin/cli-tools";
+import {RaitonCommands, RaitonConfig} from "../core";
+import {getPackageRoot} from "../sdk";
+import {CliTools} from "./cli-tools";
 
 
 export default async function bootstrapper(cli: Command) {

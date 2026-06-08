@@ -1,6 +1,6 @@
-import {HttpResponse, HttpStatus} from "@/sdk";
-import {HttpResponseInterface} from "@/types";
-import {Raiton} from "@/core";
+import {HttpResponse, HttpStatus} from "..";
+import {HttpResponseInterface} from "../../types";
+import {Raiton} from "../../core";
 
 
 export function RaitonResponses(

@@ -1,4 +1,4 @@
-import {ParseableEntriesType, ParseablePrimitiveType} from "@/types";
+import {ParseableEntriesType, ParseablePrimitiveType} from "../types";
 import {stabilizeJson} from "./utilities";
 import {DynamicParameter, IDynamicParameters, IDynamicProps, IParameter,} from "@protorians/parameters";
 

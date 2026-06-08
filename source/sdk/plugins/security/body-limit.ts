@@ -1,5 +1,5 @@
-import {definePlugin} from "@/core/plugins";
-import {MiddlewareParameters} from "@/types";
+import {definePlugin} from "../../../core/plugins";
+import {MiddlewareParameters} from "../../../types";
 
 
 export const secureBodyLimit = (maxBytes = 1_000_000) =>

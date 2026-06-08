@@ -1,7 +1,7 @@
-import type {MiddlewareParameters, Plugin} from "@/types";
-import {RequestContext} from "@/core/context";
+import type {MiddlewareParameters, Plugin} from "../../types";
+import {RequestContext} from "../../core/context";
 import {Logger} from "@protorians/logger";
-import {tryParseJson} from "@/sdk/utilities/json.util";
+import {tryParseJson} from "../utilities/json.util";
 
 export function bodyParserPlugin(): Plugin {
     return {

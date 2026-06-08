@@ -1,6 +1,6 @@
-import {getControllerMetadata} from "@/core";
-import {HttpMethod} from "@/sdk";
-import {ControllerMetaInterface, RouteDecoratorCallable, RouteMetaInterface} from "@/types";
+import {getControllerMetadata} from "../../core";
+import {HttpMethod} from "..";
+import {ControllerMetaInterface, RouteDecoratorCallable, RouteMetaInterface} from "../../types";
 
 
 function stabilizeRoute(meta: ControllerMetaInterface, {path, method, propertyKey}: Partial<RouteMetaInterface>) {

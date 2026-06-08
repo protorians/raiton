@@ -1,4 +1,4 @@
-import {Route} from '@/core/router'
+import {Route} from '.'
 
 export class RouteMatcher {
     protected routes = new Map<string, Route>()

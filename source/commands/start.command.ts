@@ -1,7 +1,7 @@
-import {RaitonCommand} from "@/core";
+import {RaitonCommand} from "../core";
 import {ChildProcess} from 'node:child_process';
-import {Raiton} from "@/core/raiton";
-import {CliTools} from "@/bin/cli-tools";
+import {Raiton} from "../core/raiton";
+import {CliTools} from "../bin/cli-tools";
 import path from "node:path";
 
 export default class StartCommand extends RaitonCommand {

@@ -1,5 +1,5 @@
-import {MiddlewareCallable} from "@/types";
-import {getControllerMetadata} from "@/core";
+import {MiddlewareCallable} from "../../types";
+import {getControllerMetadata} from "../../core";
 
 
 export function Middleware(middleware: MiddlewareCallable) {

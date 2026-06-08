@@ -1,4 +1,4 @@
-import type {ServerInterface, ServerOptions} from "@/types";
+import type {ServerInterface, ServerOptions} from "../types";
 
 
 export class Server implements ServerInterface {

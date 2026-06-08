@@ -1,7 +1,7 @@
 import type {
   RuntimeRequestInterface,
   RuntimeReplyInterface
-} from '@/types'
+} from '../types'
 
 export class RequestContext {
   public state: Record<string, any> = {}

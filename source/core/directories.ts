@@ -1,6 +1,6 @@
 import path from "node:path";
 import {RaitonConfig} from "./config";
-import {Raiton} from "@/core/raiton";
+import {Raiton} from "./raiton";
 
 
 export class RaitonDirectories {

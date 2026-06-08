@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import argon2, {Options} from "argon2";
 import {HashAlgoEnum, PasswordAlgoEnum} from "./enums";
 import bcrypt from "bcrypt";
-import {IDerivationOptions, IEncryptionResult, IScryptOptions} from "@/types";
+import {IDerivationOptions, IEncryptionResult, IScryptOptions} from "../types";
 
 export class Encryption {
     static get algos() {

@@ -1,8 +1,8 @@
-import {Injection} from "@/core/injection";
+import {Injection} from "../core/injection";
 import {Logger} from "@protorians/logger";
-import type {IConstructor} from "@/types";
-import {Raiton} from "@/core/raiton";
-import {isArtifact, isControllerArtifact} from "@/sdk/utilities";
+import type {IConstructor} from "../types";
+import {Raiton} from "../core/raiton";
+import {isArtifact, isControllerArtifact} from "./utilities";
 
 export class Artifacts {
 

@@ -1,8 +1,8 @@
-import {ApplicationInterface} from "@/types/application";
-import {getControllerMetadata} from "@/core";
-import {createHandler} from "@/core/router";
-import {Injection} from "@/core/injection";
-import {ControllerMetaInterface} from "@/types";
+import {ApplicationInterface} from "../../types/application";
+import {getControllerMetadata} from "..";
+import {createHandler} from "../router";
+import {Injection} from "../injection";
+import {ControllerMetaInterface} from "../../types";
 
 export function compileController(
     ControllerClass: any,

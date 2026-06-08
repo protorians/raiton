@@ -1,7 +1,7 @@
-import {BuilderInterface} from "@/types/builder";
-import {RuntimeAdapterInterface} from "@/types/runtime";
-import {ApplicationInterface} from "@/types/application";
-import {RuntimeType} from "@/sdk/enums/runtime.enum";
+import {BuilderInterface} from "./builder";
+import {RuntimeAdapterInterface} from "./runtime";
+import {ApplicationInterface} from "./application";
+import {RuntimeType} from "../sdk/enums/runtime.enum";
 
 export interface ThreadSetupOptions {
     application: ApplicationInterface;

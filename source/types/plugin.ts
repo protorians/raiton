@@ -1,4 +1,4 @@
-import {PluginScope} from "@/core/plugins/scope";
+import {PluginScope} from "../core/plugins/scope";
 
 export type PluginFn = (
   scope: PluginScope

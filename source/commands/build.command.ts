@@ -1,6 +1,6 @@
-import {RaitonCommand, RaitonBuilder} from "@/core";
+import {RaitonCommand, RaitonBuilder} from "../core";
 import {LBadge, Logger} from "@protorians/logger";
-import type {BuildCommandOptions} from "@/types";
+import type {BuildCommandOptions} from "../types";
 
 
 export default class BuildCommand extends RaitonCommand {

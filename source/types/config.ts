@@ -1,4 +1,4 @@
-import type {ArtifactsConfig} from "@/types/artifact";
+import type {ArtifactsConfig} from "./artifact";
 
 export interface Configurable {
     rootDir: string;

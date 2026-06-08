@@ -1,5 +1,5 @@
-import {Configurable} from "@/types/config";
-import {JsonUtil} from "@/sdk/utilities";
+import {Configurable} from "../../types/config";
+import {JsonUtil} from "../../sdk/utilities";
 
 export async function defineConfig(config?: Configurable) {
     const workdir = process.cwd();

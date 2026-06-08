@@ -1,4 +1,4 @@
-import {IConstructor} from "@/types/contruct";
+import {IConstructor} from "./contruct";
 import {LifetimeEnum} from "@protorians/core";
 
 

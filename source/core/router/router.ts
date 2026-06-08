@@ -1,7 +1,7 @@
-import {RouteHandler} from '@/types'
-import {HttpMethod} from "@/sdk/enums";
-import {Route} from '@/core/router/route'
-import {RouteMatcher} from '@/core/router/matcher'
+import {RouteHandler} from '../../types'
+import {HttpMethod} from "../../sdk/enums";
+import {Route} from './route'
+import {RouteMatcher} from './matcher'
 
 export class Router {
     private matcher = new RouteMatcher()

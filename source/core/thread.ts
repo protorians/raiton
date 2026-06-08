@@ -6,17 +6,17 @@ import type {
     ThreadOptions,
     ThreadSetupOptions,
     ThreadWaitCallable,
-} from "@/types";
-import {EventMessageEnum, RuntimeType} from "@/sdk/enums";
+} from "../types";
+import {EventMessageEnum, RuntimeType} from "../sdk/enums";
 import {ProcessUtility} from "@protorians/core";
 import {until} from "./process.util";
-import {ApplicationInterface} from "@/types/application";
-import {Runtime} from "@/sdk/runtime";
+import {ApplicationInterface} from "../types/application";
+import {Runtime} from "../sdk/runtime";
 import {LBadge, Logger} from "@protorians/logger";
-import {ControllerBuilder} from "@/core/controller";
-import {bodyParserPlugin} from "@/sdk/plugins/body-parser.plugin";
-import {Injection} from "@/core/injection/injection";
-import {Throwable} from "@/sdk/exceptions";
+import {ControllerBuilder} from "./controller";
+import {bodyParserPlugin} from "../sdk/plugins/body-parser.plugin";
+import {Injection} from "./injection/injection";
+import {Throwable} from "../sdk/exceptions";
 import os from "os";
 
 

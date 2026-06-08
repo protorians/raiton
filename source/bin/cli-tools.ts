@@ -1,5 +1,5 @@
 import {spawn} from 'node:child_process';
-import {isBunUsed, isDenoUsed} from "@/bin/constants";
+import {isBunUsed, isDenoUsed} from "./constants";
 
 
 export class CliTools {

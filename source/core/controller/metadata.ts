@@ -1,5 +1,5 @@
-import {ControllerMetaInterface} from "@/types";
-import {METADATA_KEYS} from "@/sdk";
+import {ControllerMetaInterface} from "../../types";
+import {METADATA_KEYS} from "../../sdk";
 import "reflect-metadata";
 
 export function getControllerMetadata(target: any): ControllerMetaInterface {

@@ -1,8 +1,8 @@
-import {Raiton, RaitonCommand} from "@/core";
+import {Raiton, RaitonCommand} from "../core";
 import {ChildProcess, ChildProcessWithoutNullStreams} from 'node:child_process';
 import {Logger} from "@protorians/logger";
-import {EventMessageEnum} from "@/sdk";
-import {CliTools} from "@/bin/cli-tools";
+import {EventMessageEnum} from "../sdk";
+import {CliTools} from "../bin/cli-tools";
 import path from "node:path";
 
 export default class DevelopCommand extends RaitonCommand {
