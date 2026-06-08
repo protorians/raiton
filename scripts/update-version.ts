@@ -23,13 +23,27 @@ function getCommitsSince(tag: string | null) {
 function determineIncrement(commits: string[]) {
   let increment: "major" | "minor" | "patch" | null = null;
 
-  for (const commit of commits) {
-    if (commit.includes("BREAKING CHANGE") || commit.includes("!")) {
+  for (let commit of commits) {
+    commit = commit.trim();
+    if (
+        commit.includes("BREAKING CHANGE") ||
+        commit.includes("!") ||
+        commit.toLowerCase().startsWith("release") ||
+        commit.toLowerCase().startsWith("upgrade") ||
+        commit.toLowerCase().startsWith("remove")
+    ) {
       return "major";
     }
-    if (commit.startsWith("feat")) {
+    if (
+        commit.startsWith("feat") ||
+        commit.startsWith("add")
+    ) {
       increment = "minor";
-    } else if (!increment && commit.startsWith("fix")) {
+    } else if (
+        !increment &&
+        commit.startsWith("fix") ||
+        commit.startsWith("update")
+    ) {
       increment = "patch";
     }
   }
