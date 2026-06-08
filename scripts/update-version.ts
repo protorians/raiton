@@ -29,8 +29,7 @@ function determineIncrement(commits: string[]) {
         commit.includes("BREAKING CHANGE") ||
         commit.includes("!") ||
         commit.toLowerCase().startsWith("release") ||
-        commit.toLowerCase().startsWith("upgrade") ||
-        commit.toLowerCase().startsWith("remove")
+        commit.toLowerCase().startsWith("upgrade")
     ) {
       return "major";
     }
@@ -42,7 +41,8 @@ function determineIncrement(commits: string[]) {
     } else if (
         !increment &&
         commit.startsWith("fix") ||
-        commit.startsWith("update")
+        commit.startsWith("update") ||
+        commit.toLowerCase().startsWith("remove")
     ) {
       increment = "patch";
     }
