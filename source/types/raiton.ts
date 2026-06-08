@@ -1,7 +1,7 @@
-import {BuilderHMRDeclaration} from "./builder";
+import {BuilderHMRDeclarationInterface} from "./builder";
 
-export interface RaitonSignalMap {
+export interface RaitonSignalMapInterface {
     ready?: undefined;
     errors: any;
-    'hmr:controller': BuilderHMRDeclaration;
+    'hmr:controller': BuilderHMRDeclarationInterface;
 }

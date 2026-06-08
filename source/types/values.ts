@@ -1,3 +1,3 @@
 
-export type IString = string | Object | null | undefined;
-export type IStringable = IString | IString[] | Promise<IString | IString[]>;
+export type StringType = string | Object | null | undefined;
+export type StringableType = StringType | StringType[] | Promise<StringType | StringType[]>;

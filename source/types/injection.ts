@@ -1,10 +1,10 @@
-import {IConstructor} from "./contruct";
+import {ConstructorType} from "./contruct";
 import {LifetimeEnum} from "@protorians/core";
 
 
 export interface ContainerDefinitionInterface<T = any> {
     name: string;
-    construct: IConstructor<T>;
+    construct: ConstructorType<T>;
     lifetime: LifetimeEnum;
     instance?: any;
     scope?: Symbol;

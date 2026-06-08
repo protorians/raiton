@@ -1,5 +1,5 @@
 import {definePlugin} from "../../../core/plugins";
-import {Context, MiddlewareParameters, NextCallable} from "../../../types";
+import {ContextInterface, MiddlewareParametersInterface, MiddlewareNextCallable} from "../../../types";
 
 export interface CorsOptions {
     origin?: string | string[]
@@ -9,7 +9,7 @@ export interface CorsOptions {
 
 export const secureCors = (opts: CorsOptions = {}) =>
     definePlugin((scope) => {
-        scope.use(async ({context, next}: MiddlewareParameters) => {
+        scope.use(async ({context, next}: MiddlewareParametersInterface) => {
             const origin = context.req.headers.get('origin')
 
             if (opts.origin) {

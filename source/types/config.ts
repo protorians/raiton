@@ -1,7 +1,7 @@
-import type {ArtifactsConfig} from "./artifact";
+import type {ArtifactsConfigInterface} from "./artifact";
 
-export interface Configurable {
+export interface ConfigurableInterface {
     rootDir: string;
     version: string;
-    artifacts?: ArtifactsConfig
+    artifacts?: ArtifactsConfigInterface
 }

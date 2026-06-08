@@ -1,6 +1,6 @@
 import {RaitonCommand, RaitonBuilder} from "../core";
 import {Logger} from "@protorians/logger";
-import type {BuildCommandOptions} from "../types";
+import type {BuildCommandOptionsInterface} from "../types";
 
 
 export default class ArtifactCommand extends RaitonCommand {
@@ -19,7 +19,7 @@ export default class ArtifactCommand extends RaitonCommand {
             .action(this.run.bind(this));
     }
 
-    protected async run(options: BuildCommandOptions): Promise<void> {
+    protected async run(options: BuildCommandOptionsInterface): Promise<void> {
 
         Logger.notice("Artifact management is not yet implemented");
         Logger.debug('Options:', options, '')

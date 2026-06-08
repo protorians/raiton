@@ -1,3 +1,3 @@
 
 
-export type IConstructor<T = any> = new (...args: any[]) => T;
+export type ConstructorType<T = any> = new (...args: any[]) => T;

@@ -1,6 +1,6 @@
-import {IGenericValueType} from "../../types";
+import {GenericValuesType} from "../../types";
 
-export function getType(value: any): IGenericValueType {
+export function getType(value: any): GenericValuesType {
     if (typeof value === "string") return "string";
     if (typeof value === "boolean") return "boolean";
     if (typeof value === "bigint") return "bigInt";

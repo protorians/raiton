@@ -1,8 +1,8 @@
 import {PluginScope} from './plugins/scope'
 import {RequestContext} from './context'
-import {ApplicationConfig, ApplicationInterface} from "../types/application";
+import {ApplicationConfigInterface, ApplicationInterface} from "../types/application";
 import {HttpMethod} from "../sdk";
-import {RouteHandler} from "../types";
+import {RouteHandlerCallable} from "../types";
 import {Logger} from "@protorians/logger";
 import {RaitonConfig} from "./config";
 import {Artifacts} from "../sdk/artifacts";
@@ -11,7 +11,7 @@ export class Application implements ApplicationInterface {
     private root: PluginScope
 
     constructor(
-        readonly config: ApplicationConfig
+        readonly config: ApplicationConfigInterface
     ) {
         this.root = new PluginScope()
         if (this.config.workdir) {
@@ -40,12 +40,12 @@ export class Application implements ApplicationInterface {
         }`
     }
 
-    public setOption<K extends keyof ApplicationConfig>(key: K, value: ApplicationConfig[K]): this {
+    public setOption<K extends keyof ApplicationConfigInterface>(key: K, value: ApplicationConfigInterface[K]): this {
         this.config[key] = value;
         return this;
     }
 
-    public setOptions(options: ApplicationConfig): this {
+    public setOptions(options: ApplicationConfigInterface): this {
         Object.assign(this.config, options);
         return this;
     }
@@ -60,42 +60,42 @@ export class Application implements ApplicationInterface {
         return this
     }
 
-    route(method: HttpMethod, path: string, handler: RouteHandler, version?: string): this {
+    route(method: HttpMethod, path: string, handler: RouteHandlerCallable, version?: string): this {
         const prefix = this.config.prefix ?? ''
         const fullPath = `${prefix}${path}`.replace(/\/+/g, '/') || '/'
         this.root.route(method, fullPath, handler, version)
         return this
     }
 
-    get(path: string, handler: RouteHandler, version?: string): this {
+    get(path: string, handler: RouteHandlerCallable, version?: string): this {
         return this.route(HttpMethod.GET, path, handler, version)
     }
 
-    post(path: string, handler: RouteHandler, version?: string): this {
+    post(path: string, handler: RouteHandlerCallable, version?: string): this {
         return this.route(HttpMethod.POST, path, handler, version)
     }
 
-    patch(path: string, handler: RouteHandler, version?: string): this {
+    patch(path: string, handler: RouteHandlerCallable, version?: string): this {
         return this.route(HttpMethod.PATCH, path, handler, version)
     }
 
-    put(path: string, handler: RouteHandler, version?: string): this {
+    put(path: string, handler: RouteHandlerCallable, version?: string): this {
         return this.route(HttpMethod.PUT, path, handler, version)
     }
 
-    delete(path: string, handler: RouteHandler, version?: string): this {
+    delete(path: string, handler: RouteHandlerCallable, version?: string): this {
         return this.route(HttpMethod.DELETE, path, handler, version)
     }
 
-    options(path: string, handler: RouteHandler, version?: string): this {
+    options(path: string, handler: RouteHandlerCallable, version?: string): this {
         return this.route(HttpMethod.OPTIONS, path, handler, version)
     }
 
-    head(path: string, handler: RouteHandler, version?: string): this {
+    head(path: string, handler: RouteHandlerCallable, version?: string): this {
         return this.route(HttpMethod.HEAD, path, handler, version)
     }
 
-    trace(path: string, handler: RouteHandler, version?: string): this {
+    trace(path: string, handler: RouteHandlerCallable, version?: string): this {
         return this.route(HttpMethod.TRACE, path, handler, version)
     }
 

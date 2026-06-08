@@ -1,14 +1,9 @@
 import {HttpStatus} from "../sdk/enums/http-status.enum";
+import {ParseableEntriesType, ParseableType} from "./parseable";
 
 export interface HttpResponseBaseInterface {
     message: string;
     statusCode?: HttpStatus;
-}
-
-export interface HttpResponseInterface<T = any> extends HttpResponseBaseInterface{
-    error?: boolean;
-    errorStack?: Error | ErrorResponseInterface[];
-    data?: T
 }
 
 export interface ErrorResponseInterface {
@@ -17,4 +12,12 @@ export interface ErrorResponseInterface {
     code?: string;
     statusCode?: HttpStatus;
     error?: Error
+}
+
+export interface HttpResponseInterface<T extends ParseableType> extends ParseableEntriesType {
+    statusCode: number,
+    message?: string,
+    data?: T,
+    error?: any,
+    errorStack?: Error | ErrorResponseInterface[];
 }

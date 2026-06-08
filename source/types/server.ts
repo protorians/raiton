@@ -1,10 +1,10 @@
 export interface ServerInterface {
-    readonly options: ServerOptions;
+    readonly options: ServerOptionsInterface;
 
-    option<K extends keyof ServerOptions>(key: K): ServerOptions[K];
+    option<K extends keyof ServerOptionsInterface>(key: K): ServerOptionsInterface[K];
 }
 
-export interface ServerOptions {
+export interface ServerOptionsInterface {
     os?: string;
     arch?: string;
     ip?: string;

@@ -1,8 +1,8 @@
-import { Plugin, PluginFn } from '../../types'
+import { PluginInterface, PluginCallable } from '../../types'
 
 export function definePlugin(
-  setup: PluginFn,
+  setup: PluginCallable,
   name?: string
-): Plugin {
+): PluginInterface {
   return { setup, name }
 }

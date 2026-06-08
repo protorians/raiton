@@ -1,5 +1,5 @@
 import {HttpMethod, Parametrable} from "../sdk/enums";
-import {Context} from "./core";
+import {ContextInterface} from "./core";
 import {MiddlewareCallable, MiddlewareType} from "./middleware";
 
 export interface ControllerMetaInterface {
@@ -20,14 +20,14 @@ export interface ParamMetaInterface {
     index: number;
     type: Parametrable;
     key?: string;
-    callable?: (ctx: Context) => any;
+    callable?: (ctx: ContextInterface) => any;
     metatype?: any;
 }
 
-export interface RouteDecoratorParameters {
+export interface RouteDecoratorParametersInterface {
     controller: ControllerMetaInterface;
     route: RouteMetaInterface;
     index: number;
 }
 
-export type RouteDecoratorCallable = (parameters: RouteDecoratorParameters) => void;
+export type RouteDecoratorCallable = (parameters: RouteDecoratorParametersInterface) => void;

@@ -3,7 +3,7 @@ import {RuntimeAdapterInterface} from "./runtime";
 import {ApplicationInterface} from "./application";
 import {RuntimeType} from "../sdk/enums/runtime.enum";
 
-export interface ThreadSetupOptions {
+export interface ThreadSetupOptionsInterface {
     application: ApplicationInterface;
     runtime?: RuntimeType
 }
@@ -14,7 +14,7 @@ export interface ThreadInterface {
     readonly appDir: string;
     readonly builder: BuilderInterface;
 
-    setup(options: ThreadSetupOptions): this
+    setup(options: ThreadSetupOptionsInterface): this
 
     run(): Promise<this>;
 
@@ -28,4 +28,4 @@ export interface ThreadInterface {
 }
 
 
-export interface ThreadOptions{}
+export interface ThreadOptionsInterface {}

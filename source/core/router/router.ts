@@ -1,4 +1,4 @@
-import {RouteHandler} from '../../types'
+import {RouteHandlerCallable} from '../../types'
 import {HttpMethod} from "../../sdk/enums";
 import {Route} from './route'
 import {RouteMatcher} from './matcher'
@@ -6,7 +6,7 @@ import {RouteMatcher} from './matcher'
 export class Router {
     private matcher = new RouteMatcher()
 
-    add(method: HttpMethod, path: string, handler: RouteHandler, version?: string) {
+    add(method: HttpMethod, path: string, handler: RouteHandlerCallable, version?: string) {
         const route = new Route({
             method,
             path,

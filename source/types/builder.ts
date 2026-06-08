@@ -1,19 +1,19 @@
 import {WatchEventType} from "node:fs";
 
-export interface BuildCommandOptions {
+export interface BuildCommandOptionsInterface {
     develop?: boolean;
     bootstrap?: boolean;
 }
 
-export interface BuilderConfig {
+export interface BuilderConfigInterface {
     development?: boolean;
 }
 
-export type BuilderBootCallable = (builder: BuilderInterface) => Promise<void>
+export type BuilderBootCallableType = (builder: BuilderInterface) => Promise<void>
 
 export interface BuilderInterface {
     readonly workdir: string;
-    readonly options: BuilderConfig;
+    readonly options: BuilderConfigInterface;
     // readonly signal: ISignalStack<BuilderSignalMap>;
 
     // get context(): BuildContext<BuildOptions> | null;
@@ -36,7 +36,7 @@ export interface BuilderInterface {
 }
 
 
-export interface BuilderHMRDeclaration {
+export interface BuilderHMRDeclarationInterface {
     filename: string;
     timestamp?: number;
     version?: number;

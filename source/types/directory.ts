@@ -1,6 +1,6 @@
 
 
-export interface IFileStatInfo {
+export interface FileStatInfoInterface {
     absolute: string;
     relative: string;
     dir: string;

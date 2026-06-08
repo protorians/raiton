@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import type {Context, ParamMetaInterface} from "../../types";
+import type {ContextInterface, ParamMetaInterface} from "../../types";
 import {METADATA_KEYS, Parametrable} from "..";
 
-function createRouteParametrableDecorator(type: ParamMetaInterface['type'], callable?: (context: Context) => any) {
+function createRouteParametrableDecorator(type: ParamMetaInterface['type'], callable?: (context: ContextInterface) => any) {
     return (key?: string) => {
         return (target: any, propertyKey: string, index: number) => {
             const params = Reflect.getMetadata(METADATA_KEYS.ROUTE_PARAMETERS, target.constructor) || {}

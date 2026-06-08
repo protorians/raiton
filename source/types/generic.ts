@@ -1,3 +1,3 @@
-export type IGenericValue = 'string' | 'int' | 'bigInt' | 'float' | 'boolean'
+export type GenericValueType = 'string' | 'int' | 'bigInt' | 'float' | 'boolean'
 
-export type IGenericValueType = IGenericValue | 'array' | 'object' | 'function' | undefined;
+export type GenericValuesType = GenericValueType | 'array' | 'object' | 'function' | undefined;

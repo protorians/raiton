@@ -1,10 +1,10 @@
 import {definePlugin} from "../../../core/plugins";
-import {MiddlewareParameters} from "../../../types";
+import {MiddlewareParametersInterface} from "../../../types";
 
 
 export const secureBodyLimit = (maxBytes = 1_000_000) =>
   definePlugin((scope) => {
-    scope.use(async ({context, next}: MiddlewareParameters) => {
+    scope.use(async ({context, next}: MiddlewareParametersInterface) => {
       const len = Number(
         context.req.headers.get('content-length') ?? 0
       )

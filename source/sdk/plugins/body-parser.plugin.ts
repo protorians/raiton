@@ -1,13 +1,13 @@
-import type {MiddlewareParameters, Plugin} from "../../types";
+import type {MiddlewareParametersInterface, PluginInterface} from "../../types";
 import {RequestContext} from "../../core/context";
 import {Logger} from "@protorians/logger";
 import {tryParseJson} from "../utilities/json.util";
 
-export function bodyParserPlugin(): Plugin {
+export function bodyParserPlugin(): PluginInterface {
     return {
         name: 'body-parser-plugin',
         setup: (scope) => {
-            scope.use(async ({context, next}: MiddlewareParameters) => {
+            scope.use(async ({context, next}: MiddlewareParametersInterface) => {
                 const contentType = context.req.headers.get('content-type') || '';
 
                 if (context.req.body && !context.state.bodyParsed) {

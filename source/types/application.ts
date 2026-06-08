@@ -1,6 +1,6 @@
 import {HttpMethod} from "../sdk";
 
-export interface ApplicationConfig {
+export interface ApplicationConfigInterface {
     workdir?: string;
     hostname?: string;
     port?: number;
@@ -12,13 +12,13 @@ export interface ApplicationConfig {
 }
 
 export interface ApplicationInterface {
-    readonly config: ApplicationConfig;
+    readonly config: ApplicationConfigInterface;
 
     get hostname(): string;
 
-    setOption<K extends keyof ApplicationConfig>(key: K, value: ApplicationConfig[K]): this;
+    setOption<K extends keyof ApplicationConfigInterface>(key: K, value: ApplicationConfigInterface[K]): this;
 
-    setOptions(options: ApplicationConfig): this;
+    setOptions(options: ApplicationConfigInterface): this;
 
     register(plugin: any): this;
 

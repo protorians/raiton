@@ -1,9 +1,9 @@
 import {definePlugin} from "../../../core/plugins";
-import {Context, MiddlewareParameters, NextCallable} from "../../../types";
+import {ContextInterface, MiddlewareParametersInterface, MiddlewareNextCallable} from "../../../types";
 
 
 export const secureHeaders = definePlugin((scope) => {
-  scope.use(async ({context, next}: MiddlewareParameters) => {
+  scope.use(async ({context, next}: MiddlewareParametersInterface) => {
     context.reply.header('X-Content-Type-Options', 'nosniff')
     context.reply.header('X-Frame-Options', 'DENY')
     context.reply.header('Referrer-Policy', 'no-referrer')

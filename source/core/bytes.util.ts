@@ -1,6 +1,6 @@
-import {FileSizeFormated} from "../types";
+import {FileSizeFormatedInterface} from "../types";
 
-export function parseBytes(bytes: number, decimals = 2): FileSizeFormated {
+export function parseBytes(bytes: number, decimals = 2): FileSizeFormatedInterface {
     if (bytes === 0) return {size: 0, unit: "o"};
 
     const k = 1024;

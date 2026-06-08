@@ -1,19 +1,19 @@
 import path from "node:path";
 import fs from "node:fs";
-import {Configurable} from "../../types";
+import {ConfigurableInterface} from "../../types";
 import {Logger} from "@protorians/logger";
 import {Raiton} from "../raiton";
 
 export class RaitonConfig {
-    static readonly current: Map<keyof Configurable, Configurable[keyof Configurable]> = new Map();
+    static readonly current: Map<keyof ConfigurableInterface, ConfigurableInterface[keyof ConfigurableInterface]> = new Map();
 
     protected static _extensions: string[] = ['.js', '.mjs'];
 
-    static get<K extends keyof Configurable>(key: K): Configurable[K] | undefined {
-        return this.current.get(key) as Configurable[K];
+    static get<K extends keyof ConfigurableInterface>(key: K): ConfigurableInterface[K] | undefined {
+        return this.current.get(key) as ConfigurableInterface[K];
     }
 
-    static defaultConfig: Configurable = {
+    static defaultConfig: ConfigurableInterface = {
         rootDir: '.',
         version: '0.0.1'
     }
@@ -26,7 +26,7 @@ export class RaitonConfig {
                 if (fs.existsSync(configJsonPath)) {
                     const configContent = fs.readFileSync(configJsonPath, 'utf-8');
                     for (const [key, value] of Object.entries({...this.defaultConfig, ...(JSON.parse(configContent) || {})}))
-                        this.current.set(key as keyof Configurable, value as Configurable[keyof Configurable]);
+                        this.current.set(key as keyof ConfigurableInterface, value as ConfigurableInterface[keyof ConfigurableInterface]);
                 } else {
                     for (const ext of this._extensions) {
                         const configPath = path.join(workdir, `${Raiton.identifier}.config${ext}`);
@@ -34,7 +34,7 @@ export class RaitonConfig {
                             const configModule = await import(configPath);
                             const config = await configModule?.default || configModule;
                             for (const [key, value] of Object.entries(config)) {
-                                this.current.set(key as keyof Configurable, value as Configurable[keyof Configurable]);
+                                this.current.set(key as keyof ConfigurableInterface, value as ConfigurableInterface[keyof ConfigurableInterface]);
                             }
                         }
                     }

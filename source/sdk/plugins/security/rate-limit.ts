@@ -1,5 +1,5 @@
 import {definePlugin} from "../../../core/plugins";
-import {Context, MiddlewareParameters, NextCallable} from "../../../types";
+import {ContextInterface, MiddlewareParametersInterface, MiddlewareNextCallable} from "../../../types";
 
 
 export interface RateLimitOptions {
@@ -16,7 +16,7 @@ export const secureRateLimit = (
         const windowMs = opts.windowMs ?? 60_000
         const max = opts.max ?? 100
 
-        scope.use(async ({context, next}: MiddlewareParameters) => {
+        scope.use(async ({context, next}: MiddlewareParametersInterface) => {
             const ip =
                 context.req.remoteAddress ?? 'unknown'
             const now = Date.now()

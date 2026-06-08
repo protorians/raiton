@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import argon2, {Options} from "argon2";
 import {HashAlgoEnum, PasswordAlgoEnum} from "./enums";
 import bcrypt from "bcrypt";
-import {IDerivationOptions, IEncryptionResult, IScryptOptions} from "../types";
+import {DerivationOptionsInterface, EncryptionResultType, ScryptOptionsInterface} from "../types";
 
 export class Encryption {
     static get algos() {
@@ -24,7 +24,7 @@ export class Encryption {
         return this.make(value).then(result => result === hash);
     }
 
-    async make(value: string, options?: IDerivationOptions | IScryptOptions): Promise<IEncryptionResult> {
+    async make(value: string, options?: DerivationOptionsInterface | ScryptOptionsInterface): Promise<EncryptionResultType> {
         if (!value) {
             throw new Error('Value cannot be empty');
         }
@@ -45,9 +45,9 @@ export class Encryption {
             case HashAlgoEnum.SHA3_512:
                 return this.sha3_512(value);
             case HashAlgoEnum.PBKDF2:
-                return this.pbkdf2(value, options as IDerivationOptions | undefined);
+                return this.pbkdf2(value, options as DerivationOptionsInterface | undefined);
             case HashAlgoEnum.SCRYPT:
-                return this.scrypt(value, options as IScryptOptions | undefined);
+                return this.scrypt(value, options as ScryptOptionsInterface | undefined);
             case HashAlgoEnum.ARGON2ID:
             case HashAlgoEnum.BCRYPT:
                 return this.password(value);
@@ -56,35 +56,35 @@ export class Encryption {
         }
     }
 
-    protected sha256(value: string): IEncryptionResult {
+    protected sha256(value: string): EncryptionResultType {
         return crypto.createHash("sha256").update(value).digest("hex");
     }
 
-    protected sha512(value: string): IEncryptionResult {
+    protected sha512(value: string): EncryptionResultType {
         return crypto.createHash("sha512").update(value).digest("hex");
     }
 
-    protected md5(value: string): IEncryptionResult {
+    protected md5(value: string): EncryptionResultType {
         return crypto.createHash("md5").update(value).digest("hex");
     }
 
-    protected ripemd160(value: string): IEncryptionResult {
+    protected ripemd160(value: string): EncryptionResultType {
         return crypto.createHash("ripemd160").update(value).digest("hex");
     }
 
-    protected blake2b(value: string): IEncryptionResult {
+    protected blake2b(value: string): EncryptionResultType {
         return crypto.createHash("blake2b512").update(value).digest("hex");
     }
 
-    protected sha3_256(value: string): IEncryptionResult {
+    protected sha3_256(value: string): EncryptionResultType {
         return crypto.createHash("sha3-256").update(value).digest("hex");
     }
 
-    protected sha3_512(value: string): IEncryptionResult {
+    protected sha3_512(value: string): EncryptionResultType {
         return crypto.createHash("sha3-512").update(value).digest("hex");
     }
 
-    protected pbkdf2(value: string, options?: IDerivationOptions): IEncryptionResult {
+    protected pbkdf2(value: string, options?: DerivationOptionsInterface): EncryptionResultType {
         const {salt, iterations, keylen, digest} = options || {};
         const usedSalt = salt ?? crypto.randomBytes(16).toString("hex");
         const usedIterations = iterations ?? 100_000;
@@ -96,8 +96,8 @@ export class Encryption {
         return `pbkdf2$${usedDigest}$${usedIterations}$${usedSalt}$${derived}`;
     }
 
-    protected scrypt(value: string, options?: IScryptOptions): IEncryptionResult {
-        const {salt, keylen, cost, blockSize, parallelization} = options || {} as IScryptOptions;
+    protected scrypt(value: string, options?: ScryptOptionsInterface): EncryptionResultType {
+        const {salt, keylen, cost, blockSize, parallelization} = options || {} as ScryptOptionsInterface;
         const usedSalt = salt ?? crypto.randomBytes(16).toString("hex");
         const usedKeylen = keylen ?? 64;
         const usedCost = cost ?? 16384; // N
@@ -120,7 +120,7 @@ export class Encryption {
 
     async password(value: string, options?: (Options & {
         raw?: boolean
-    }) | (string | number) | undefined): Promise<IEncryptionResult> {
+    }) | (string | number) | undefined): Promise<EncryptionResultType> {
         switch (this.algo) {
             case HashAlgoEnum.ARGON2ID: {
                 return await argon2.hash(value, {

@@ -1,4 +1,4 @@
-import type {ServerInterface, ServerOptions} from "../types";
+import type {ServerInterface, ServerOptionsInterface} from "../types";
 
 
 export class Server implements ServerInterface {
@@ -14,12 +14,12 @@ export class Server implements ServerInterface {
     }
 
     constructor(
-        public readonly options: ServerOptions
+        public readonly options: ServerOptionsInterface
     ) {
         Server.instance = this;
     }
 
-    option<K extends keyof ServerOptions>(key: K): ServerOptions[K] {
+    option<K extends keyof ServerOptionsInterface>(key: K): ServerOptionsInterface[K] {
         return this.options[key];
     }
 

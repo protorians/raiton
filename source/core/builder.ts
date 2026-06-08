@@ -2,7 +2,7 @@ import {RaitonConfig} from "./config";
 import path from "node:path";
 import {RaitonDirectories} from "./directories";
 import fs, {WatchEventType} from "node:fs";
-import type {BuilderConfig, BuilderInterface,} from "../types";
+import type {BuilderConfigInterface, BuilderInterface,} from "../types";
 import {RaitonThread} from "./thread";
 import {Raiton} from "./raiton";
 import {isControllerArtifact, isServiceArtifact} from "../sdk";
@@ -24,7 +24,7 @@ export class RaitonBuilder implements BuilderInterface {
 
     constructor(
         public readonly workdir: string,
-        public readonly options: BuilderConfig = {},
+        public readonly options: BuilderConfigInterface = {},
     ) {
 
     }

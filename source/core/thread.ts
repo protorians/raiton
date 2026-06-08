@@ -3,8 +3,8 @@ import type {
     RuntimeAdapterInterface,
     RuntimeServerInterface,
     ThreadInterface,
-    ThreadOptions,
-    ThreadSetupOptions,
+    ThreadOptionsInterface,
+    ThreadSetupOptionsInterface,
     ThreadWaitCallable,
 } from "../types";
 import {EventMessageEnum, RuntimeType} from "../sdk/enums";
@@ -37,7 +37,7 @@ export class RaitonThread implements ThreadInterface {
 
     constructor(
         public readonly builder: BuilderInterface,
-        protected _options: ThreadOptions = {}
+        protected _options: ThreadOptionsInterface = {}
     ) {
         this.appDir = process.cwd();
         RaitonThread.instance = this;
@@ -72,7 +72,7 @@ export class RaitonThread implements ThreadInterface {
         return null;
     }
 
-    public setup({application, runtime}: ThreadSetupOptions): this {
+    public setup({application, runtime}: ThreadSetupOptionsInterface): this {
         const defaultRuntime = typeof Bun !== 'undefined' ? RuntimeType.Bun : RuntimeType.Node;
         this.runtime = new Runtime(runtime || defaultRuntime);
         this.application = application;
@@ -106,7 +106,8 @@ export class RaitonThread implements ThreadInterface {
         await this.runtimeServer.listen(port, hostname)
         if (this.builder.source) await ControllerBuilder.scan(this.builder.source)
 
-        Logger.log(LBadge.info('Server Started'), `http://${displayHostname}:${port}${prefix ?? ''}`)
+        Logger.log(LBadge.info('Local access:'), `http://localhost:${port}${prefix ?? ''}`,)
+        Logger.log(LBadge.info('LAN access:'), `http://${displayHostname}:${port}${prefix ?? ''}`,)
         return this;
     }
 }

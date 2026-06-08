@@ -1,6 +1,6 @@
 import {Injection} from "../core/injection";
 import {Logger} from "@protorians/logger";
-import type {IConstructor} from "../types";
+import type {ConstructorType} from "../types";
 import {Raiton} from "../core/raiton";
 import {isArtifact, isControllerArtifact} from "./utilities";
 
@@ -59,7 +59,7 @@ export class Artifacts {
 
             if (typeof name === 'string' && Injection.has(name)) {
                 if (filename) Injection.registerArtifactPath(name, filename);
-                Injection.updateConstruct(name, mod as IConstructor)
+                Injection.updateConstruct(name, mod as ConstructorType)
 
                 const dependents = Injection.getDependents(name);
                 for (const dependent of dependents) {

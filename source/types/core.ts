@@ -3,18 +3,16 @@ import type {
     RuntimeReplyInterface
 } from './runtime'
 
-export type HookName =
+export type HookNameType =
     | 'onRequest'
     | 'preParsing'
     | 'preHandler'
     | 'onSend'
     | 'onResponse'
 
-export type HookHandler = (
-    ctx: Context
-) => Promise<void> | void
+export type HookHandlerCallable = (ctx: ContextInterface) => Promise<void> | void
 
-export interface Context {
+export interface ContextInterface {
     req: RuntimeRequestInterface
     reply: RuntimeReplyInterface
 

@@ -1,13 +1,13 @@
-import type {RouteDefinition} from '../../types/router'
+import type {RouteDefinitionInterface} from '../../types/router'
 
 export class Route {
     method: string
     path: string
     version?: string
-    handler: RouteDefinition['handler']
+    handler: RouteDefinitionInterface['handler']
     parameters: Record<string, string> = {}
 
-    constructor(def: RouteDefinition) {
+    constructor(def: RouteDefinitionInterface) {
         this.method = def.method
         this.path = def.path
         this.version = def.version

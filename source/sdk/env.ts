@@ -1,9 +1,9 @@
-import {IGenericValue} from "../types/generic";
+import {GenericValueType} from "../types/generic";
 import {getType} from "./utilities";
 
-export function env<T>(key: string, type?: IGenericValue): T | undefined {
+export function env<T>(key: string, type?: GenericValueType): T | undefined {
     const value = process.env[key];
-    type = type || getType(value) as IGenericValue;
+    type = type || getType(value) as GenericValueType;
 
     if (value) {
         switch (type) {
@@ -28,10 +28,10 @@ export function env<T>(key: string, type?: IGenericValue): T | undefined {
     return undefined;
 }
 
-export function envGroup(key: string): Record<string, IGenericValue | undefined> {
+export function envGroup(key: string): Record<string, GenericValueType | undefined> {
     const filtered = Object.entries(process.env)
         .filter(([index]) => key.startsWith(index))
-    const gen: Record<string, IGenericValue | undefined> = {}
+    const gen: Record<string, GenericValueType | undefined> = {}
 
     for (const [index, value] of filtered)
         gen[index] = env(value as any, undefined)

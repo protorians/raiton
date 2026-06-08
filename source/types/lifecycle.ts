@@ -1,11 +1,11 @@
-export interface OnMount {
+export interface OnMountInterface {
     onMount(): void | Promise<void>;
 }
 
-export interface OnUnmount {
+export interface OnUnmountInterface {
     onUnmount(): void | Promise<void>;
 }
 
-export interface OnInit {
+export interface OnInitInterface {
     onInit(): void | Promise<void>;
 }

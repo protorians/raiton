@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import type {IConstructor, ContainerDefinitionInterface} from "../../types";
+import type {ConstructorType, ContainerDefinitionInterface} from "../../types";
 import {LifetimeEnum, TextUtility} from "@protorians/core";
 import {Logger} from "@protorians/logger";
 import {METADATA_KEYS} from "../../sdk/constants";
@@ -43,7 +43,7 @@ export class Injection {
 
     static registry(
         name: string,
-        construct: IConstructor,
+        construct: ConstructorType,
         lifetime: LifetimeEnum = LifetimeEnum.SINGLETON,
         scope?: Symbol
     ): typeof this {
@@ -54,7 +54,7 @@ export class Injection {
         return this;
     }
 
-    static updateConstruct(name: string, construct: IConstructor): typeof this {
+    static updateConstruct(name: string, construct: ConstructorType): typeof this {
         const name_ = this.normalizeName(name);
         this._classes.set(name_, {...this._classes.get(this.normalizeName(name))!, construct});
         return this;
@@ -208,7 +208,7 @@ export class Injection {
         this.clear();
     }
 
-    static resolve<T>(construct: IConstructor<T>): T {
+    static resolve<T>(construct: ConstructorType<T>): T {
         const metadata: ContainerDefinitionInterface = Reflect.getMetadata(METADATA_KEYS.CONTAINER, construct);
 
         if (!metadata)

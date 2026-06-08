@@ -1,18 +1,18 @@
 import {RequestContext} from "../core/context";
 
 
-export type NextCallable = () => Promise<void>
+export type MiddlewareNextCallable = () => Promise<void>
 
 export interface MiddlewareSetupInterface {
     setup: any,
     name: string;
 }
 
-export interface MiddlewareParameters {
+export interface MiddlewareParametersInterface {
     context: RequestContext;
-    next: NextCallable;
+    next: MiddlewareNextCallable;
 }
 
-export type MiddlewareCallable = (parameters: MiddlewareParameters) => Promise<any> | void
+export type MiddlewareCallable = (parameters: MiddlewareParametersInterface) => Promise<any> | void
 
 export type MiddlewareType = MiddlewareCallable | MiddlewareSetupInterface

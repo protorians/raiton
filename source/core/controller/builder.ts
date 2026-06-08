@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import {BuilderHMRDeclaration} from "../../types";
+import {BuilderHMRDeclarationInterface} from "../../types";
 import {LBadge, Logger} from "@protorians/logger";
 import {compileController} from "./compiler";
 import {RaitonThread} from "../thread";
@@ -21,7 +21,7 @@ export class ControllerBuilder {
         return output.filter(f => typeof f !== 'undefined');
     }
 
-    static async build<T>({filename, version, timestamp}: BuilderHMRDeclaration): Promise<T | undefined> {
+    static async build<T>({filename, version, timestamp}: BuilderHMRDeclarationInterface): Promise<T | undefined> {
         if (!isControllerArtifact(filename))
             return undefined;
 
