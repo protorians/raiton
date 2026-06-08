@@ -41,28 +41,28 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Update version
-        run: bun run scripts/update-version.ts
+#      - name: Update version
+#        run: bun run scripts/update-version.ts
+#
+#      - name: Get new version
+#        id: get_version
+#        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Get new version
-        id: get_version
-        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+#      - name: Git Config
+#        run: |
+#          git config --global user.name "github-actions[bot]"
+#          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Git Config
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Commit and Tag
-        run: |
-          if [ -n "$(git status --porcelain package.json)" ]; then
-            git add package.json
-            git commit -m "chore(release): ${{ steps.get_version.outputs.VERSION }} [skip ci]"
-            git tag v${{ steps.get_version.outputs.VERSION }}
-            git push origin HEAD --tags
-          else
-            echo "No changes in package.json, skipping commit and tag."
-          fi
+#      - name: Commit and Tag
+#        run: |
+#          if [ -n "$(git status --porcelain package.json)" ]; then
+#            git add package.json
+#            git commit -m "chore(release): ${{ steps.get_version.outputs.VERSION }} [skip ci]"
+#            git tag v${{ steps.get_version.outputs.VERSION }}
+#            git push origin HEAD --tags
+#          else
+#            echo "No changes in package.json, skipping commit and tag."
+#          fi
 
       - name: Publish to NPM
         if: github.ref == 'refs/heads/main'
