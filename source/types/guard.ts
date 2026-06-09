@@ -1,8 +1,12 @@
-export interface GuardDeclarationInterface {
-    credential?: boolean;
-    capabilities?: string[];
+import {MiddlewareParametersInterface} from "./middleware";
+
+export interface GuardOptions {
+    name: string;
+    handler: GuardCallable
 }
 
-export interface GuardInterface {
-    handle(credential: string, capabilities: string[]): Promise<boolean>;
+export interface GuardDeclaration extends GuardOptions {
+    enabled: boolean;
 }
+
+export type GuardCallable = (parameters: MiddlewareParametersInterface) => Promise<boolean> | boolean
