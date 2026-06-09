@@ -3,7 +3,7 @@
   "version": "3.0.2",
   "private": false,
   "type": "module",
-  "description": "Protorians Raiton Development Kit",
+  "description": "Modular TypeScript Backend Framework with Dependency Injection, Plugins, Controllers, Middleware and Hot Reloading.",
   "main": "./source/core/index.ts",
   "module": "./source/core/index.ts",
   "types": "./source/core/index.d.ts",
@@ -13,8 +13,7 @@
   "keywords": [
     "protorians",
     "raiton",
-    "development",
-    "kit",
+    "framework",
     "typescript",
     "node",
     "bun",

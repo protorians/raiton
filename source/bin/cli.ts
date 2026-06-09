@@ -6,7 +6,7 @@ const CLI = new Command();
 
 CLI
     .name('raiton')
-    .description('Protorians Raiton development kit for backend microservice')
+    .description('Protorians Raiton framework for backend microservice')
     .version(version);
 
 export default CLI;
