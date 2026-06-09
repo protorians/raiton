@@ -24,12 +24,12 @@ function determineIncrement(commits: string[]) {
   let increment: "major" | "minor" | "patch" | null = null;
 
   for (let commit of commits) {
-    commit = commit.trim();
+    commit = commit.trim().toLowerCase();
     if (
-        commit.includes("BREAKING CHANGE") ||
+        commit.includes("breaking change") ||
         commit.includes("!") ||
-        commit.toLowerCase().startsWith("release") ||
-        commit.toLowerCase().startsWith("upgrade")
+        commit.startsWith("release") ||
+        commit.startsWith("upgrade")
     ) {
       return "major";
     }
@@ -42,7 +42,7 @@ function determineIncrement(commits: string[]) {
         !increment &&
         commit.startsWith("fix") ||
         commit.startsWith("update") ||
-        commit.toLowerCase().startsWith("remove")
+        commit.startsWith("remove")
     ) {
       increment = "patch";
     }
