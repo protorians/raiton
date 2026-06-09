@@ -6,9 +6,14 @@ import {RouteHandlerCallable} from "../types";
 import {Logger} from "@protorians/logger";
 import {RaitonConfig} from "./config";
 import {Artifacts} from "../sdk/artifacts";
+import {Injection} from "./injection";
 
 export class Application implements ApplicationInterface {
     private root: PluginScope
+
+    readonly version: string = RaitonConfig.get('version') || '0.0.1'
+
+    readonly container: Injection = Injection;
 
     constructor(
         readonly config: ApplicationConfigInterface

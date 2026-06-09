@@ -30,13 +30,14 @@ export class Injection {
     }
 
     static clear(): void {
+        Logger.error('Clearing injection container');
         this._classes.clear();
         this._instances.clear();
         this._dependents.clear();
         this._artifactPaths.clear();
     }
 
-    static normalizeName(name: string): string {
+    protected static normalizeName(name: string): string {
         const stableName = camelCase(name);
         return stableName[0].toLowerCase() + stableName.slice(1);
     }
