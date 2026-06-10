@@ -30,6 +30,10 @@ export class Artifacts {
         'strategy-provider',
         'strategy-type',
         'use-case',
+        'dto',
+        'entity',
+        'model',
+        'schema',
     ]
 
     static register(type: string) {
