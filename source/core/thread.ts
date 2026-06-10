@@ -81,33 +81,36 @@ export class RaitonThread implements ThreadInterface {
     }
 
     async run(): Promise<this> {
-
         if (!this.application)
             throw new Throwable('Application not defined');
 
         if (!this.runtime)
             throw new Throwable('Runtime not defined');
 
-        process.on('SIGINT', async () => {
-            await this.stop();
-        });
-
-        process.on('SIGTERM', async () => {
-            await this.stop();
-        });
-
-        const port = this.application.config.port || 5712;
-        const hostname = this.application.config.hostname || '0.0.0.0';
-        const displayHostname = (hostname === '0.0.0.0') ? (this.getNetworkIp() || 'localhost') : hostname;
-        const prefix = this.application.config.prefix
-
-        this.runtimeServer = this.runtime.createServer(this.application.handle.bind(this.application))
-
-        await this.runtimeServer.listen(port, hostname)
         if (this.builder.source) await ControllerBuilder.scan(this.builder.source)
 
-        Logger.log(LBadge.info('Local access:'), `http://localhost:${port}${prefix ?? ''}`,)
-        Logger.log(LBadge.info('LAN access:'), `http://${displayHostname}:${port}${prefix ?? ''}`,)
+        if (this._options.serve) {
+            process.on('SIGINT', async () => {
+                await this.stop();
+            });
+
+            process.on('SIGTERM', async () => {
+                await this.stop();
+            });
+
+            const port = this.application.config.port || 5712;
+            const hostname = this.application.config.hostname || '0.0.0.0';
+            const displayHostname = (hostname === '0.0.0.0') ? (this.getNetworkIp() || 'localhost') : hostname;
+            const prefix = this.application.config.prefix
+
+            this.runtimeServer = this.runtime.createServer(this.application.handle.bind(this.application))
+
+            await this.runtimeServer.listen(port, hostname)
+
+            Logger.log(LBadge.info('Local access:'), `http://localhost:${port}${prefix ?? ''}`,)
+            Logger.log(LBadge.info('LAN access:'), `http://${displayHostname}:${port}${prefix ?? ''}`,)
+        }
+
         return this;
     }
 }

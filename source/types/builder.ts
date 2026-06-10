@@ -1,12 +1,17 @@
 import {WatchEventType} from "node:fs";
 
+export interface StartCommandOptionsInterface {
+    develop?: boolean;
+}
+
 export interface BuildCommandOptionsInterface {
     develop?: boolean;
     bootstrap?: boolean;
 }
 
 export interface BuilderConfigInterface {
-    development?: boolean;
+    serve?: boolean;
+    hmr?: boolean;
 }
 
 export type BuilderBootCallableType = (builder: BuilderInterface) => Promise<void>

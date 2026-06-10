@@ -1,3 +1,4 @@
+/// <reference types="deno" />
 import {Raiton, RaitonCommand} from "../core";
 import {ChildProcess, ChildProcessWithoutNullStreams} from 'node:child_process';
 import {Logger} from "@protorians/logger";

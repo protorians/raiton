@@ -21,7 +21,8 @@ export default class BuildCommand extends RaitonCommand {
         if (options.develop) Logger.warn(LBadge.log("Dev Mode"),);
 
         const builder = new RaitonBuilder(this.workdir, {
-            development: options.develop
+            serve: options.develop,
+            hmr: false
         });
 
         await builder.prepare()

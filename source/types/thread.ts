@@ -28,4 +28,6 @@ export interface ThreadInterface {
 }
 
 
-export interface ThreadOptionsInterface {}
+export interface ThreadOptionsInterface {
+    serve?: boolean;
+}
