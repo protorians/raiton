@@ -16,7 +16,7 @@ export class HttpException extends Error {
             message: this.message,
             statusCode: this.statusCode,
             error: true,
-            stack: Raiton.thread?.builder?.options?.development
+            stack: Raiton.thread?.builder?.options?.serve
                 ? this.stack?.split('\n').map(e => e.trim())
                 : undefined
         }

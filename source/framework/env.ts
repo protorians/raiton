@@ -1,8 +1,8 @@
 import {GenericValueType} from "../types/generic";
 import {getType} from "./utilities";
 
-export function env<T>(key: string, type?: GenericValueType): T | undefined {
-    const value = process.env[key];
+export function env<T>(key: string, defaultValue?: string, type?: GenericValueType): T | undefined {
+    const value = process.env[key] || defaultValue;
     type = type || getType(value) as GenericValueType;
 
     if (value) {
