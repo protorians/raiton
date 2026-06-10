@@ -21,7 +21,8 @@ export class Encryption {
     }
 
     async compare(value: string, hash: string): Promise<boolean> {
-        return this.make(value).then(result => result === hash);
+        const result = await this.make(value)
+        return result === hash;
     }
 
     async make(value: string, options?: DerivationOptionsInterface | ScryptOptionsInterface): Promise<EncryptionResultType> {
