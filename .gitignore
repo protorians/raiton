@@ -137,3 +137,4 @@ dist
 /node_modules/tsup
 /node_modules/typescript
 /bun.lock
+/.idea/ShadcnHelperSettings.xml
