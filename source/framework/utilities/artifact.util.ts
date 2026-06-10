@@ -2,6 +2,9 @@ export function isControllerArtifact(filename: string) {
     return isArtifact(filename, 'controller')
 }
 
+export function isSocketArtifact(filename: string) {
+    return isArtifact(filename, 'socket')
+}
 
 export function isServiceArtifact(filename: string) {
     return isArtifact(filename, 'service')

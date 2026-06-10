@@ -19,6 +19,7 @@ export class Artifacts {
         'utility',
         'source',
         'controller',
+        'socket',
         'middleware',
         'hook',
         'event',

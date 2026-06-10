@@ -7,16 +7,16 @@ import type {
     ThreadSetupOptionsInterface,
     ThreadWaitCallable,
 } from "../types";
-import {EventMessageEnum, RuntimeType} from "../sdk/enums";
+import {EventMessageEnum, RuntimeType} from "../framework/enums";
 import {ProcessUtility} from "@protorians/core";
 import {until} from "./process.util";
 import {ApplicationInterface} from "../types/application";
-import {Runtime} from "../sdk/runtime";
+import {Runtime} from "../framework/runtime";
 import {LBadge, Logger} from "@protorians/logger";
 import {ControllerBuilder} from "./controller";
-import {bodyParserPlugin} from "../sdk/plugins/body-parser.plugin";
+import {bodyParserPlugin} from "../framework/plugins/body-parser.plugin";
 import {Injection} from "./injection/injection";
-import {Throwable} from "../sdk/exceptions";
+import {Throwable} from "../framework/exceptions";
 import os from "os";
 
 

@@ -1,6 +1,6 @@
 import {Command} from 'commander';
 import {RaitonCommands, RaitonConfig} from "../core";
-import {getPackageRoot} from "../sdk";
+import {getPackageRoot} from "../framework";
 import {CliTools} from "./cli-tools";
 
 

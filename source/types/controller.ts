@@ -1,4 +1,4 @@
-import {HttpMethod, Parametrable} from "../sdk/enums";
+import {HttpMethod, Parametrable} from "../framework/enums";
 import {ContextInterface} from "./core";
 import {MiddlewareCallable, MiddlewareType} from "./middleware";
 

@@ -30,8 +30,8 @@
     ".": "./source/core/index.ts",
     "./core/*": "./source/core/*.ts",
     "./commands/*": "./source/commands/*.ts",
-    "./sdk": "./source/sdk/index.ts",
-    "./sdk/*": "./source/sdk/*.ts",
+    "./framework": "./source/framework/index.ts",
+    "./framework/*": "./source/framework/*.ts",
     "./types": "./source/types/index.ts",
     "./types/*": "./source/types/*.ts"
   },

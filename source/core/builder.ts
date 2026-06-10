@@ -5,13 +5,13 @@ import fs, {WatchEventType} from "node:fs";
 import type {BuilderConfigInterface, BuilderInterface,} from "../types";
 import {RaitonThread} from "./thread";
 import {Raiton} from "./raiton";
-import {isControllerArtifact, isServiceArtifact} from "../sdk";
+import {isControllerArtifact, isServiceArtifact} from "../framework";
 import {ControllerBuilder} from "./controller";
 import {watch} from "fs";
 import {LBadge, Logger} from "@protorians/logger";
-import {Throwable} from "../sdk/exceptions";
+import {Throwable} from "../framework/exceptions";
 import {Injection} from "./injection";
-import {Artifacts} from "../sdk/artifacts";
+import {Artifacts} from "../framework/artifacts";
 
 export class RaitonBuilder implements BuilderInterface {
     protected _source: string | null = null;
