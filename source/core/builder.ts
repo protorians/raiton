@@ -147,7 +147,7 @@ export class RaitonBuilder implements BuilderInterface {
         Logger.log(LBadge.info('Source'), source);
         Logger.log(LBadge.info('Output'), output);
 
-        execSync(`cd ${this.workdir} && npx tsc -p ${tsconfig} --outDir ${output}`, {stdio: 'inherit'})
+        execSync(`cd ${this.workdir} && npx tsc -p ${tsconfig} --outDir ${output} --noEmit`, {stdio: 'inherit'})
 
         return this;
     }
