@@ -1,6 +1,6 @@
 {
   "name": "raiton",
-  "version": "4.0.0",
+  "version": "5.0.0-alpha.0",
   "private": false,
   "type": "module",
   "description": "Modular TypeScript Backend Framework with Dependency Injection, Plugins, Controllers, Middleware and Hot Reloading.",
