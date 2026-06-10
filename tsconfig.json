@@ -17,7 +17,8 @@
     "types": [
       "node",
       "bun",
-      "deno"
+      "deno",
+      "bun-types"
     ],
     "baseUrl": "./",
     "rootDir": "source"
