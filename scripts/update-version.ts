@@ -43,13 +43,13 @@ function determineIncrement(commits: string[]) {
     }
     if (
         commit.startsWith("feat") ||
+        commit.startsWith("update") ||
         commit.startsWith("add")
     ) {
       increment = "minor";
     } else if (
         !increment &&
         commit.startsWith("fix") ||
-        commit.startsWith("update") ||
         commit.startsWith("remove")
     ) {
       increment = "patch";
