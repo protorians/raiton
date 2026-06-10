@@ -4,7 +4,7 @@ import {ThrowableResponse} from ".";
 
 
 export class HttpResponse {
-    public static push(response: Partial<HttpResponseInterface>): void {
+    public static push(response: Partial<HttpResponseInterface<any>>): void {
         throw new ThrowableResponse({
             statusCode: response.statusCode || HttpStatus.BAD_REQUEST,
             message: response.message || 'No response message provided',
@@ -14,7 +14,7 @@ export class HttpResponse {
         })
     }
 
-    constructor(public readonly response: HttpResponseInterface) {
+    constructor(public readonly response: HttpResponseInterface<any>) {
     }
 
     status(statusCode: HttpStatus): this {
@@ -42,7 +42,7 @@ export class HttpResponse {
         return this;
     }
 
-    render(): HttpResponseInterface {
+    render(): HttpResponseInterface<any> {
         return (new ThrowableResponse({...this.response})).render()
     }
 }

@@ -12,6 +12,7 @@ export class Artifacts {
         'service',
         'provider',
         'type',
+        'interface',
         'repository',
         'database',
         'db',
@@ -28,6 +29,7 @@ export class Artifacts {
         'strategy',
         'strategy-provider',
         'strategy-type',
+        'use-case',
     ]
 
     static register(type: string) {
@@ -48,7 +50,7 @@ export class Artifacts {
 
     static reload(modulo: any, filename?: string) {
 
-        if (Raiton.thread?.builder.options.development === false)
+        if (Raiton.thread?.builder.options.serve === false)
             return Logger.warn(
                 'Artifact reload is only available in development mode'
             )
