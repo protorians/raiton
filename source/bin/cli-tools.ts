@@ -1,3 +1,4 @@
+/// <reference types="deno" />
 import {spawn} from 'node:child_process';
 import {isBunUsed, isDenoUsed} from "./constants";
 
