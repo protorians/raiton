@@ -1,4 +1,5 @@
 export * from "./controllable.decorator"
+export * from "./socket.decorator"
 export * from "./middleware.decorator"
 export * from "./routable.decorator"
 export * from "./parametrable"

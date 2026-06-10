@@ -1,11 +1,11 @@
 import {ControllerMetaInterface, MiddlewareCallable, ParamMetaInterface, RouteMetaInterface} from "../../types";
-import {METADATA_KEYS, Parametrable} from "../../sdk";
+import {METADATA_KEYS, Parametrable} from "../../framework";
 import {Logger} from "@protorians/logger";
 import {middlewareCompose, Raiton} from "..";
-import {DataTransferObject} from "../../sdk/data-transfer-object";
-import {Throwable} from "../../sdk/exceptions/throwable";
-import {HttpException} from "../../sdk/exceptions";
-import {ThrowableResponse} from "../../sdk/responses/http-throwable";
+import {DataTransferObject} from "../../framework/data-transfer-object";
+import {Throwable} from "../../framework/exceptions/throwable";
+import {HttpException} from "../../framework/exceptions";
+import {ThrowableResponse} from "../../framework/responses/http-throwable";
 
 export function createHandler(
     instance: any,

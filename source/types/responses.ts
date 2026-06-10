@@ -1,4 +1,4 @@
-import {HttpStatus} from "../sdk/enums/http-status.enum";
+import {HttpStatus} from "../framework/enums/http-status.enum";
 import {ParseableEntriesType, ParseableType} from "./parseable";
 
 export interface HttpResponseBaseInterface {

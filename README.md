@@ -30,7 +30,7 @@ npm install raiton reflect-metadata
 ### 1. Créez un contrôleur (`source/controllers/hello.controller.ts`)
 
 ```typescript
-import { Controllable, Get, Param } from "raiton/sdk";
+import { Controllable, Get, Param } from "raiton/framework";
 
 @Controllable('/hello')
 export class HelloController {

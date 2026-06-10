@@ -1,7 +1,7 @@
 import {Raiton, RaitonCommand} from "../core";
 import {ChildProcess, ChildProcessWithoutNullStreams} from 'node:child_process';
 import {Logger} from "@protorians/logger";
-import {EventMessageEnum} from "../sdk";
+import {EventMessageEnum} from "../framework";
 import {CliTools} from "../bin/cli-tools";
 import path from "node:path";
 

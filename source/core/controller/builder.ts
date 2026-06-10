@@ -4,7 +4,7 @@ import {LBadge, Logger} from "@protorians/logger";
 import {compileController} from "./compiler";
 import {RaitonThread} from "../thread";
 import {Injection} from "../injection";
-import {isControllerArtifact} from "../../sdk";
+import {isControllerArtifact} from "../../framework";
 import path from "node:path";
 
 export class ControllerBuilder {

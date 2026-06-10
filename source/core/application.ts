@@ -1,11 +1,11 @@
 import {PluginScope} from './plugins/scope'
 import {RequestContext} from './context'
 import {ApplicationConfigInterface, ApplicationInterface} from "../types/application";
-import {HttpMethod} from "../sdk";
+import {HttpMethod} from "../framework";
 import {RouteHandlerCallable} from "../types";
 import {Logger} from "@protorians/logger";
 import {RaitonConfig} from "./config";
-import {Artifacts} from "../sdk/artifacts";
+import {Artifacts} from "../framework/artifacts";
 import {Injection} from "./injection";
 
 export class Application implements ApplicationInterface {

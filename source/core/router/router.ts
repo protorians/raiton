@@ -1,5 +1,5 @@
 import {RouteHandlerCallable} from '../../types'
-import {HttpMethod} from "../../sdk/enums";
+import {HttpMethod} from "../../framework/enums";
 import {Route} from './route'
 import {RouteMatcher} from './matcher'
 

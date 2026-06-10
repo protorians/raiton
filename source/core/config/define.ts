@@ -1,5 +1,5 @@
 import {ConfigurableInterface} from "../../types/config";
-import {JsonUtil} from "../../sdk/utilities";
+import {JsonUtil} from "../../framework/utilities";
 
 export async function defineConfig(config?: ConfigurableInterface) {
     const workdir = process.cwd();
