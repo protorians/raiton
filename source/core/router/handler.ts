@@ -13,7 +13,7 @@ export function createHandler(
     controllerMeta: ControllerMetaInterface,
 ) {
     return async (ctx: any) => {
-        const isDevelopment = Raiton.thread?.builder?.options?.development || false;
+        const isDevelopment = Raiton.thread?.builder?.options?.serve || false;
         const handlerName = `${instance.constructor.name}.${routeMeta.propertyKey}`
 
         try {
