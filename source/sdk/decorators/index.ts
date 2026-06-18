@@ -1,5 +1,0 @@
-export * from "./controllable.decorator"
-export * from "./middleware.decorator"
-export * from "./routable.decorator"
-export * from "./parametrable"
-export * from "./injection.decorator"
