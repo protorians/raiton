@@ -1,3 +1,4 @@
+/// <reference types="deno" />
 import {spawn} from 'node:child_process';
 import {isBunUsed, isDenoUsed} from "./constants";
 
@@ -49,6 +50,7 @@ export class CliTools {
                     ...options
                 }).spawn();
             }
+
 
             return new Deno.Command(cmd, {
                 args: cmdArgs,

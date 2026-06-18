@@ -17,7 +17,7 @@ export enum CipherAlgoEnum {
 }
 
 export enum PasswordAlgoEnum {
-    ARGON2ID = 'argon2id',
+    ARGON2ID = 'ARGON2ID',
     BCRYPT = 'BCRYPT',
-    SCRYPT = 'SCRYPT',
+    // SCRYPT = 'SCRYPT',
 }

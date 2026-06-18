@@ -13,7 +13,7 @@ export class Application implements ApplicationInterface {
 
     readonly version: string = RaitonConfig.get('version') || '0.0.1'
 
-    readonly container: Injection = Injection;
+    static readonly container: Injection = Injection;
 
     constructor(
         readonly config: ApplicationConfigInterface

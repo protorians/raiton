@@ -2,16 +2,17 @@ import {RaitonConfig} from "./config";
 import path from "node:path";
 import {RaitonDirectories} from "./directories";
 import fs, {WatchEventType} from "node:fs";
-import type {BuilderConfigInterface, BuilderInterface,} from "../types";
+import type {BuilderConfigInterface, BuilderInterface, ThreadInterface,} from "../types";
 import {RaitonThread} from "./thread";
 import {Raiton} from "./raiton";
-import {isControllerArtifact, isServiceArtifact} from "../framework";
+import {isControllerArtifact} from "../framework";
 import {ControllerBuilder} from "./controller";
 import {watch} from "fs";
 import {LBadge, Logger} from "@protorians/logger";
 import {Throwable} from "../framework/exceptions";
-import {Injection} from "./injection";
 import {Artifacts} from "../framework/artifacts";
+import {build} from "esbuild";
+import {execSync, spawn, spawnSync} from "node:child_process";
 
 export class RaitonBuilder implements BuilderInterface {
     protected _source: string | null = null;
@@ -116,14 +117,38 @@ export class RaitonBuilder implements BuilderInterface {
 
     public async prepare(): Promise<this> {
         await this.initialize()
-        Raiton.signals.listen(
-            'hmr:controller',
-            async ({filename, version, timestamp}) => {
-                await ControllerBuilder.build({filename, version, timestamp})
-            }
-        )
-        // this.parsing();
-        this.watching();
+
+        if (this.options.hmr && this.options.serve) {
+            Raiton.signals.listen(
+                'hmr:controller',
+                async ({filename, version, timestamp}) => {
+                    await ControllerBuilder.build({filename, version, timestamp})
+                }
+            )
+            // this.parsing();
+            this.watching();
+        }
+
+        return this;
+    }
+
+    protected async build(thread: ThreadInterface): Promise<this> {
+        if (!this._source) throw new Error('Application source not found');
+        if (!this._out) throw new Error('Application output not found');
+        if (!this.bootstrapper) throw new Error('Bootstrapper not found')
+        if (!this.bootstrapperFile) throw new Error('Bootstrapper file not found')
+
+        const source = path.relative(this.workdir, this._source)
+        const output = path.relative(this.workdir, this._out)
+        const tsconfig = 'tsconfig.json'
+        // const tsconfig = path.join(path.relative(this._source, this.workdir), 'tsconfig.json')
+
+        Logger.log(LBadge.notice('Building'), 'application');
+        Logger.log(LBadge.info('Source'), source);
+        Logger.log(LBadge.info('Output'), output);
+
+        execSync(`cd ${this.workdir} && npx tsc -p ${tsconfig} --outDir ${output} --noEmit`, {stdio: 'inherit'})
+
         return this;
     }
 
@@ -136,9 +161,13 @@ export class RaitonBuilder implements BuilderInterface {
         if (!('default' in bootstrapper))
             throw new Error('Bootstrapper not supported! Please export to "default"')
 
-        const thread = new RaitonThread(this, {})
+        const thread = new RaitonThread(this, {serve: this.options.serve})
         Raiton.thread = thread;
-        return await bootstrapper.default(thread);
+        const app = await bootstrapper.default(thread);
+
+        if (!this.options.serve) await this.build(thread)
+
+        return app;
     }
 
 }
