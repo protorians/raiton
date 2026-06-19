@@ -28,6 +28,7 @@
   },
   "exports": {
     ".": "./source/core/index.ts",
+    "./core": "./source/core/index.ts",
     "./core/*": "./source/core/*.ts",
     "./commands/*": "./source/commands/*.ts",
     "./framework": "./source/framework/index.ts",
@@ -62,7 +63,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/bun": "^1.3.5",
     "@types/deno": "^2.5.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "config": {
     "commitizen": {
