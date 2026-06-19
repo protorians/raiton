@@ -211,10 +211,13 @@ export class Injection {
 
     static resolve<T>(construct: ConstructorType<T>): T {
         const metadata: ContainerDefinitionInterface = Reflect.getMetadata(METADATA_KEYS.CONTAINER, construct);
+        const name = metadata?.name || ('constructor' in construct ? construct.constructor.name || false : false) || construct.name;
 
-        if (!metadata)
-            throw new Throwable(`Cannot resolve ${construct.name} as dependency`);
+        if (!metadata) {
+            if (typeof name === 'undefined') Logger.debug('Cannot resolve', construct);
+            throw new Throwable(`Cannot resolve ${name} as dependency`);
+        }
 
-        return this.get(metadata.name) as T;
+        return this.get(name) as T;
     }
 }
