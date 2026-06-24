@@ -6,11 +6,13 @@ export class PluginScope {
     public hooks: HookStore
     public middleware: MiddlewarePipeline
     public router: Router
+    private parent?: PluginScope
 
     constructor(parent?: PluginScope) {
-        this.hooks = parent ? parent.hooks.clone() : new HookStore()
+        this.parent = parent
+        this.hooks = parent ? parent.hooks : new HookStore()
         this.middleware = parent
-            ? parent.middleware.clone()
+            ? parent.middleware
             : new MiddlewarePipeline()
         this.router = parent ? parent.router : new Router()
     }
@@ -20,11 +22,12 @@ export class PluginScope {
         return this;
     }
 
-    use(mw: any): this {
+    use(mw: any): any {
         if (typeof mw === 'object' && mw !== null && 'setup' in mw && typeof mw.setup === 'function' && mw.setup.length === 1) {
             mw.setup(this)
             return this
         }
+
         this.middleware.use(mw)
         return this;
     }
@@ -38,9 +41,13 @@ export class PluginScope {
         return this.router.add(method, path, handler, version)
     }
 
-    register(plugin: any): PluginScope {
+    register(plugin: any): this {
+        if (typeof plugin === 'object' && plugin !== null && 'setup' in plugin && typeof plugin.setup === 'function' && plugin.setup.length === 1) {
+            plugin.setup(this)
+            return this
+        }
         const child = new PluginScope(this)
         plugin.setup(child)
-        return child
+        return this
     }
 }

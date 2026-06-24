@@ -1,3 +1,4 @@
+import {Security, bodyParserPlugin} from "../framework/plugins";
 import {PluginScope} from './plugins/scope'
 import {RequestContext} from './context'
 import {ApplicationConfigInterface, ApplicationInterface} from "../types/application";
@@ -32,6 +33,10 @@ export class Application implements ApplicationInterface {
         const artifactTypes = [...artifacts?.types || [], ...Artifacts.defaultTypes]
 
         Artifacts.registerMany(...artifactTypes)
+
+        this.register(Security.headers)
+        this.register(bodyParserPlugin())
+
         return this;
     }
 
@@ -117,40 +122,38 @@ export class Application implements ApplicationInterface {
 
         await this.root.hooks.run('onRequest', ctx)
 
-        const url = new URL(req.url, this.hostname)
-        let pathname = url.pathname
+        const handler: any = async ({context}: any) => {
+            const url = new URL(req.url, this.hostname)
+            let pathname = url.pathname
 
-        if (this.config.pathname && this.config.pathname !== '/') {
-            const appPathname = this.config.pathname.endsWith('/') ? this.config.pathname : `${this.config.pathname}/`
-            if (pathname.startsWith(appPathname)) {
-                pathname = pathname.substring(appPathname.length - 1) || '/'
-            } else if (pathname === this.config.pathname) {
-                pathname = '/'
-            } else {
-                // Requête hors du pathname de l'application
+            if (this.config.pathname && this.config.pathname !== '/') {
+                const appPathname = this.config.pathname.endsWith('/') ? this.config.pathname : `${this.config.pathname}/`
+                if (pathname.startsWith(appPathname)) {
+                    pathname = pathname.substring(appPathname.length - 1) || '/'
+                } else if (pathname === this.config.pathname) {
+                    pathname = '/'
+                } else {
+                    if (this.config.verbose) {
+                        Logger.warn(`Request out of application pathname: ${pathname} (expected prefix: ${this.config.pathname})`)
+                    }
+                    reply.status(404)
+                    return reply.send({error: false, statusCode: 404})
+                }
+            }
+
+            const route = this.root.router.match(
+                req.method,
+                pathname
+            )
+
+            if (!route) {
                 if (this.config.verbose) {
-                    Logger.warn(`Request out of application pathname: ${pathname} (expected prefix: ${this.config.pathname})`)
+                    Logger.warn(`Route not found: ${req.method} ${pathname}`)
                 }
                 reply.status(404)
                 return reply.send({error: false, statusCode: 404})
             }
-        }
 
-        const route = this.root.router.match(
-            req.method,
-            pathname
-        )
-
-        if (!route) {
-            if (this.config.verbose) {
-                Logger.warn(`Route not found: ${req.method} ${pathname}`)
-            }
-            reply.status(404)
-            return reply.send({error: false, statusCode: 404})
-        }
-
-        const pipeline = this.root.middleware.clone()
-        pipeline.use(async ({context}) => {
             try {
                 (context as any).params = route.parameters;
                 let responses = await route.handler(context)
@@ -162,9 +165,9 @@ export class Application implements ApplicationInterface {
                     console.error(e)
                 }
             }
-        })
+        }
 
-        await pipeline.run(ctx)
+        await this.root.middleware.run(ctx, handler)
         await this.root.hooks.run('onResponse', ctx)
     }
 }

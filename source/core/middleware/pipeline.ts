@@ -14,14 +14,8 @@ export class MiddlewarePipeline {
     return this;
   }
 
-  run(ctx: any) {
-    const fn = middlewareCompose(this.stack)
+  run(ctx: any, ...extra: MiddlewareType[]) {
+    const fn = middlewareCompose([...this.stack, ...extra])
     return typeof fn == 'function' ? fn(ctx) : undefined;
-  }
-
-  clone() {
-    const pipeline = new MiddlewarePipeline()
-    pipeline.stack = [...this.stack]
-    return pipeline
   }
 }

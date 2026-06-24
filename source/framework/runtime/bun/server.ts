@@ -1,4 +1,5 @@
 import {RuntimeAdapterInterface} from '../../../types'
+import {Logger} from "@protorians/logger";
 
 export const bunRuntime: RuntimeAdapterInterface = {
     createServer(handler) {

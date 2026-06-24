@@ -1,44 +1,78 @@
 import {definePlugin} from "../../../core/plugins";
-import {ContextInterface, MiddlewareParametersInterface, MiddlewareNextCallable} from "../../../types";
+import {MiddlewareParametersInterface} from "../../../types";
+import {Logger} from "@protorians/logger";
 
 export interface CorsOptions {
-    origin?: string | string[]
+    origin?: string | string[] | boolean | ((origin: string) => boolean | Promise<boolean>)
     methods?: string[]
     headers?: string[]
+    credentials?: boolean
+    maxAge?: number
+    exposeHeaders?: string[]
 }
 
-export const secureCors = (opts: CorsOptions = {}) =>
-    definePlugin((scope) => {
-        scope.use(async ({context, next}: MiddlewareParametersInterface) => {
-            const origin = context.req.headers.get('origin')
+export const secureCors = (opts: CorsOptions = {}) => {
 
-            if (opts.origin) {
-                const allowed = Array.isArray(opts.origin)
-                    ? opts.origin.includes(origin!)
-                    : opts.origin === origin
+    return (async ({context, next}: MiddlewareParametersInterface) => {
+        const origin = context.req.headers.get('origin')
 
-                if (allowed) {
-                    context.reply.header('Access-Control-Allow-Origin', origin!)
-                }
-            } else {
-                context.reply.header('Access-Control-Allow-Origin', '*')
+        if (origin) {
+            context.reply.header('Vary', 'Origin')
+        }
+
+        let allowedOrigin: string | null = null
+
+        if (opts.origin === undefined || opts.origin === '*') {
+            allowedOrigin = '*'
+        } else if (opts.origin === true) {
+            allowedOrigin = origin || '*'
+        } else if (typeof opts.origin === 'function') {
+            if (origin && await opts.origin(origin)) {
+                allowedOrigin = origin
             }
+        } else if (Array.isArray(opts.origin)) {
+            if (origin && opts.origin.includes(origin)) {
+                allowedOrigin = origin
+            }
+        } else if (typeof opts.origin === 'string') {
+            if (opts.origin === origin) {
+                allowedOrigin = origin
+            } else if (opts.origin === '*') {
+                allowedOrigin = '*'
+            }
+        }
 
+        if (allowedOrigin) {
+            context.reply.header('Access-Control-Allow-Origin', allowedOrigin)
+        }
+
+        if (opts.credentials) {
+            context.reply.header('Access-Control-Allow-Credentials', 'true')
+        }
+
+        if (opts.exposeHeaders) {
+            context.reply.header('Access-Control-Expose-Headers', opts.exposeHeaders.join(','))
+        }
+
+        if (context.req.method === 'OPTIONS') {
             context.reply.header(
                 'Access-Control-Allow-Methods',
-                (opts.methods ?? ['GET', 'POST', 'PUT', 'DELETE']).join(',')
+                (opts.methods ?? ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']).join(',')
             )
 
             context.reply.header(
                 'Access-Control-Allow-Headers',
-                (opts.headers ?? ['Content-Type', 'Authorization']).join(',')
+                (opts.headers ?? ['Content-Type', 'Authorization', 'X-Requested-With']).join(',')
             )
 
-            if (context.req.method === 'OPTIONS') {
-                context.reply.status(204)
-                return context.send(null)
+            if (opts.maxAge) {
+                context.reply.header('Access-Control-Max-Age', opts.maxAge.toString())
             }
 
-            await next()
-        })
-    }, 'cors')
+            context.reply.status(204)
+            return context.send(null)
+        }
+
+        await next()
+    })
+}

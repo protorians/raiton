@@ -4,7 +4,7 @@ export interface ArtifactEntry {
     size: number;
 }
 
-export interface ArtifactsConfig {
+export interface ArtifactsConfigInterface {
     types: string[]
 }
 

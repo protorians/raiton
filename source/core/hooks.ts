@@ -17,12 +17,4 @@ export class HookStore {
             await hook(ctx)
         }
     }
-
-    clone() {
-        const store = new HookStore()
-        for (const [key, value] of this.hooks) {
-            store.hooks.set(key, [...value])
-        }
-        return store
-    }
 }
