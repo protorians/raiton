@@ -24,12 +24,10 @@ export function createHandler(
 
                 switch (p.type) {
                     case Parametrable.QUERY:
-                        args[p.index] =
-                            ctx.req.query?.[p.key!]
+                        args[p.index] = ctx.req.query?.[p.key!]
                         break
                     case Parametrable.PARAM:
-                        args[p.index] =
-                            ctx.req.params?.[p.key!] ?? ctx.params?.[p.key!]
+                        args[p.index] = ctx.req.params?.[p.key!] ?? ctx.params?.[p.key!]
                         break
                     case Parametrable.BODY:
                         if (p.metatype && 'prototype' in p.metatype) {

@@ -8,21 +8,29 @@ export function bodyParserPlugin(): PluginInterface {
         name: 'body-parser-plugin',
         setup: (scope) => {
             scope.use(async ({context, next}: MiddlewareParametersInterface) => {
-                const contentType = context.req.headers.get('content-type') || '';
+                readQueryBody(context);
 
-                if (context.req.body && !context.state.bodyParsed) {
+                const isGetOrHead = ['GET', 'HEAD'].includes(context.req.method.toUpperCase());
+
+                if (isGetOrHead) {
+                    context.req.body = context.req.query;
+                }
+
+                const hasBody = context.req.body !== undefined && context.req.body !== null;
+
+                if (hasBody && !context.state.bodyParsed && !isGetOrHead) {
                     try {
+                        const contentType = context.req.headers.get('content-type') || '';
                         const rawBody = await readRawBody(context.req.body);
-                        context.req.body = rawBody as unknown as any;
                         const bodyString = decode(rawBody);
 
-                        readQueryBody(context);
-                        await readMultipartBody(context, contentType);
+                        await readMultipartBody(context, contentType, rawBody);
                         readJsonBody(context, contentType, bodyString);
                         readUrlEncodedBody(context, contentType, bodyString);
                         readTextBody(context, contentType, bodyString);
 
                         if (!context.state.bodyParsed) {
+                            context.req.body = rawBody as any;
                             context.state.bodyParsed = true;
                         }
 
@@ -37,22 +45,20 @@ export function bodyParserPlugin(): PluginInterface {
     };
 }
 
-function readJsonBody(ctx: RequestContext, contentType: string, body: any) {
+function readJsonBody(ctx: RequestContext, contentType: string, body: string) {
     if (contentType.includes('application/json')) {
-        ctx.req.body = tryParseJson(body) || {} as unknown as any;
+        ctx.req.body = tryParseJson(body) || {};
         ctx.state.bodyParsed = true;
     }
 }
 
-async function readMultipartBody(ctx: RequestContext, contentType: string) {
+async function readMultipartBody(ctx: RequestContext, contentType: string, rawBody: any) {
     if (contentType.includes('multipart/form-data')) {
-        const body = ctx.req.body;
-
         try {
             const tempRequest = new Request(ctx.req.url, {
                 method: ctx.req.method,
                 headers: ctx.req.headers,
-                body: body as any
+                body: rawBody
             });
 
             const formData = await tempRequest.formData();
@@ -104,6 +110,7 @@ function readTextBody(ctx: RequestContext, contentType: string, body: string) {
 }
 
 function readQueryBody(ctx: RequestContext) {
+
     const searchParams = new URLSearchParams(ctx.req.url.split('?')[1] || '');
     const record = {} as Record<string, any>;
     searchParams.forEach((value, key) => record[key] = value);
@@ -111,6 +118,16 @@ function readQueryBody(ctx: RequestContext) {
 }
 
 async function readRawBody(body: any): Promise<Uint8Array | string> {
+    if (!body) return new Uint8Array(0);
+
+    if (body instanceof Uint8Array || typeof body === 'string') {
+        return body;
+    }
+
+    if (typeof body === 'object' && !('on' in body) && !(body instanceof ReadableStream)) {
+        return JSON.stringify(body);
+    }
+
     if (body instanceof ReadableStream) {
         const reader = body.getReader();
         const chunks: Uint8Array[] = [];

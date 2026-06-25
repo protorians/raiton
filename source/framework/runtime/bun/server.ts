@@ -24,7 +24,7 @@ export const bunRuntime: RuntimeAdapterInterface = {
                                 method: request.method,
                                 url: request.url,
                                 headers: request.headers as any,
-                                body: request.body as any
+                                body: request.body ? request.body : null
                             },
                             {
                                 status(code) {

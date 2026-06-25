@@ -122,7 +122,11 @@ export class Application implements ApplicationInterface {
 
         await this.root.hooks.run('onRequest', ctx)
 
-        const handler: any = async ({context}: any) => {
+        const handler: any = async (param: any) => {
+            const context = param.context ?? param;
+            const req = context.req;
+            const reply = context.reply;
+
             const url = new URL(req.url, this.hostname)
             let pathname = url.pathname
 
