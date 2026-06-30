@@ -1,0 +1,1 @@
+- [Add OpenAPI plugin for configurable /docs route](add-openapi-plugin.md) — hook

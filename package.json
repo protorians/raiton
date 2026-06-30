@@ -65,14 +65,10 @@
     "@types/deno": "^2.5.0",
     "typescript": "^6.0.3"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
   "compilerOptions": {
     "types": [
-      "bun"
+      "bun",
+      "deno"
     ]
   },
   "publishConfig": {

@@ -21,7 +21,11 @@
       "bun-types"
     ],
     "baseUrl": "./",
-    "rootDir": "source"
+    "rootDir": "source",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@/*": ["source/*"],
+    }
   },
   "include": [
     "source"

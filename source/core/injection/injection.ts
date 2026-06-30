@@ -131,7 +131,7 @@ export class Injection {
     static get<T>(name: string, scope?: Symbol): T | undefined {
         const name_ = this.normalizeName(name);
         const cls = this._classes.get(name_);
-        if (!cls) throw new Throwable(`Dependency ${name} not registered`);
+        if (!cls) throw new Throwable(`Dependency ${name_} not registered`);
 
         const effectiveScope = scope || cls.scope || this.defaultScope;
         if (this._resolutionStack.includes(name_)) {

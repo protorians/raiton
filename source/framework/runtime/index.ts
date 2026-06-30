@@ -8,7 +8,7 @@ import {RuntimeType} from "../enums/runtime.enum";
 import {nodeRuntime} from "./node/server";
 import {bunRuntime} from "./bun/server";
 import {denoRuntime} from "./deno/server";
-import {webRuntime} from "./web/server";
+// import {webRuntime} from "./web/server";
 
 
 export class Runtime implements RuntimeInterface {
@@ -21,13 +21,13 @@ export class Runtime implements RuntimeInterface {
         return this.type === RuntimeType.Node;
     }
 
-    get isDeno(): boolean {
-        return this.type === RuntimeType.Deno;
-    }
-
-    get isWeb(): boolean {
-        return this.type === RuntimeType.Web;
-    }
+    // get isDeno(): boolean {
+    //     return this.type === RuntimeType.Deno;
+    // }
+    //
+    // get isWeb(): boolean {
+    //     return this.type === RuntimeType.Web;
+    // }
 
     get isBun(): boolean {
         return this.type === RuntimeType.Bun;
@@ -39,10 +39,10 @@ export class Runtime implements RuntimeInterface {
                 return nodeRuntime
             case RuntimeType.Bun:
                 return bunRuntime
-            case RuntimeType.Deno:
-                return denoRuntime
-            case RuntimeType.Web:
-                return webRuntime
+            // case RuntimeType.Deno:
+            //     return denoRuntime
+            // case RuntimeType.Web:
+            //     return webRuntime
         }
     }
 

@@ -1,6 +1,7 @@
 import {HookStore} from '../hooks'
 import {MiddlewarePipeline} from '../middleware'
 import {Route, Router} from '../router'
+import {HttpMethod} from "../../framework/enums";
 
 export class PluginScope {
     public hooks: HookStore
@@ -39,6 +40,10 @@ export class PluginScope {
         version?: string
     ): Route {
         return this.router.add(method, path, handler, version)
+    }
+
+    get(path: string, handler: any, version?: string): Route {
+        return this.route(HttpMethod.GET, path, handler, version)
     }
 
     register(plugin: any): this {

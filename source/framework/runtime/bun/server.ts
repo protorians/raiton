@@ -50,6 +50,9 @@ export const bunRuntime: RuntimeAdapterInterface = {
                                     headers.set('content-type', 'application/json')
                                     responseBody = JSON.stringify(json)
                                 },
+                                type(contentType: string) {
+                                    headers.set('content-type', contentType)
+                                }
                             }
                         )
 

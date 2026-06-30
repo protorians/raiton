@@ -1,6 +1,6 @@
 export enum RuntimeType {
     Node = "node",
-    Deno = "deno",
+    // Deno = "deno",
     Bun = "bun",
-    Web = "web"
+    // Web = "web"
 }

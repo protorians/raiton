@@ -32,6 +32,8 @@ export interface RuntimeReplyInterface {
     text(text: string | Buffer): void
 
     json(data: any): void
+
+    type(contentType: string): void
 }
 
 export interface RuntimeAdapterInterface {
@@ -44,9 +46,9 @@ export interface RuntimeInterface {
 
     get isNode(): boolean;
 
-    get isDeno(): boolean;
+    // get isDeno(): boolean;
 
-    get isWeb(): boolean;
+    // get isWeb(): boolean;
 
     get isBun(): boolean
 

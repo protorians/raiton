@@ -6,13 +6,14 @@ import {DataTransferObject} from "../../framework/data-transfer-object";
 import {Throwable} from "../../framework/exceptions/throwable";
 import {HttpException} from "../../framework/exceptions";
 import {ThrowableResponse} from "../../framework/responses/http-throwable";
+import {parseCookie} from "@/framework/utilities/cookie.util";
 
 export function createHandler(
     instance: any,
     routeMeta: RouteMetaInterface,
     controllerMeta: ControllerMetaInterface,
 ) {
-    return async (ctx: any) => {
+    const handler = async (ctx: any) => {
         const isDevelopment = Raiton.thread?.builder?.options?.serve || false;
         const handlerName = `${instance.constructor.name}.${routeMeta.propertyKey}`
 
@@ -37,6 +38,11 @@ export function createHandler(
                         break
                     case Parametrable.HEADER:
                         args[p.index] = ctx.req.headers[p.key!.toLowerCase()] as any;
+                        break
+                    case Parametrable.COOKIE:
+                        const cookieHeader = ctx.req.headers.get('cookie');
+                        const cookies = parseCookie(cookieHeader);
+                        args[p.index] = p.key ? cookies[p.key!] : cookies;
                         break
                     case Parametrable.REQ:
                         args[p.index] = ctx.req
@@ -109,5 +115,14 @@ export function createHandler(
                 ,
             }
         }
-    }
+    };
+
+    // Attach metadata for OpenAPI generation
+    (handler as any)._raitonMeta = {
+        routeMeta,
+        controllerMeta,
+        controllerClass: instance.constructor
+    };
+
+    return handler;
 }

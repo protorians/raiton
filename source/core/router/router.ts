@@ -28,4 +28,8 @@ export class Router {
     reset() {
         this.matcher.clear()
     }
+
+    getRoutes(): Route[] {
+        return Array.from(this.matcher.routes.values())
+    }
 }

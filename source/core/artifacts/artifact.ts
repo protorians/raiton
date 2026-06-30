@@ -1,6 +1,6 @@
 import {RaitonConfig} from "@/core";
 
-export class Artifacts {
+export class Artifact {
 
     public static async load(workdir: string) {
         await RaitonConfig.sync(workdir);

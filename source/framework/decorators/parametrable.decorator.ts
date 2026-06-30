@@ -23,6 +23,6 @@ export const Param = createRouteParametrableDecorator(Parametrable.PARAM)
 export const Body = createRouteParametrableDecorator(Parametrable.BODY)
 export const UploadedFile = createRouteParametrableDecorator(Parametrable.UPLOAD_FILE)
 export const Headers = createRouteParametrableDecorator(Parametrable.HEADER)
+export const Cookie = createRouteParametrableDecorator(Parametrable.COOKIE);
 export const Req = createRouteParametrableDecorator(Parametrable.REQ)
 export const Reply = createRouteParametrableDecorator(Parametrable.REPLY)
-
