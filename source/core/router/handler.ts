@@ -1,12 +1,9 @@
-import {ControllerMetaInterface, MiddlewareCallable, ParamMetaInterface, RouteMetaInterface} from "../../types";
-import {METADATA_KEYS, Parametrable} from "../../framework";
+import {ControllerMetaInterface, RouteMetaInterface} from "../../types";
 import {Logger} from "@protorians/logger";
-import {middlewareCompose, Raiton} from "..";
-import {DataTransferObject} from "../../framework/data-transfer-object";
-import {Throwable} from "../../framework/exceptions/throwable";
+import {Raiton} from "..";
 import {HttpException} from "../../framework/exceptions";
 import {ThrowableResponse} from "../../framework/responses/http-throwable";
-import {parseCookie} from "@/framework/utilities/cookie.util";
+import {collectRouteArguments, validateDtoArguments, validateResponse, runMiddlewares} from "./handler.utils";
 
 export function createHandler(
     instance: any,
@@ -18,76 +15,13 @@ export function createHandler(
         const handlerName = `${instance.constructor.name}.${routeMeta.propertyKey}`
 
         try {
-            const args: any[] = []
-            const params: ParamMetaInterface[] = Reflect.getMetadata(METADATA_KEYS.ROUTE_PARAMETERS, instance.constructor)?.[routeMeta.propertyKey] || []
-
-            for (const p of params) {
-
-                switch (p.type) {
-                    case Parametrable.QUERY:
-                        args[p.index] = ctx.req.query?.[p.key!]
-                        break
-                    case Parametrable.PARAM:
-                        args[p.index] = ctx.req.params?.[p.key!] ?? ctx.params?.[p.key!]
-                        break
-                    case Parametrable.BODY:
-                        if (p.metatype && 'prototype' in p.metatype) {
-                            ctx.req.body = new p.metatype(ctx.req.body)
-                        }
-                        args[p.index] = ctx.req.body
-                        break
-                    case Parametrable.HEADER:
-                        args[p.index] = ctx.req.headers[p.key!.toLowerCase()] as any;
-                        break
-                    case Parametrable.COOKIE:
-                        const cookieHeader = ctx.req.headers.get('cookie');
-                        const cookies = parseCookie(cookieHeader);
-                        args[p.index] = p.key ? cookies[p.key!] : cookies;
-                        break
-                    case Parametrable.REQ:
-                        args[p.index] = ctx.req
-                        break
-                    case Parametrable.REPLY:
-                        args[p.index] = ctx.REPLY
-                        break
-                    case Parametrable.UPLOAD_FILE:
-                        args[p.index] = ctx.req.file || ctx.req.files?.[p.key!]
-                        break
-                    case Parametrable.CUSTOM:
-                        args[p.index] = p.callable?.(ctx) ?? null;
-                        break;
-                }
-            }
-
-            if (!(routeMeta.propertyKey in instance))
-                throw new Throwable(`${routeMeta.propertyKey} does not exist`)
-
-            /**
-             * Middlewares running order
-             */
-            const middlewares: MiddlewareCallable[] = [
-                ...controllerMeta.middlewares['@'] || [],
-                ...controllerMeta.middlewares[routeMeta.propertyKey] || []
-            ]
-            if (middlewares.length > 0) await middlewareCompose(middlewares)(ctx)
-
-            /**
-             * Vérification des arguments
-             */
-            for (const input of args) {
-                /** DTO validation */
-                if (input instanceof DataTransferObject) {
-                    const errors = await input.validation(false);
-                    if (errors && errors.length) {
-                        const stack = Object.values(errors[0].constraints || {})
-                        throw new Throwable(stack.join(';'), 500)
-                    }
-                }
-            }
-
-            let responses = instance[routeMeta.propertyKey](...args)
-            if (responses instanceof Promise) responses = await responses
-
+            const args = collectRouteArguments(instance, routeMeta, ctx);
+            const middlewares = [...controllerMeta.middlewares['@'] || [], ...controllerMeta.middlewares[routeMeta.propertyKey] || []];
+            await runMiddlewares(middlewares, ctx);
+            await validateDtoArguments(args);
+            let responses = instance[routeMeta.propertyKey](...args);
+            if (responses instanceof Promise) responses = await responses;
+            await validateResponse(responses, instance, routeMeta);
             return responses;
         } catch (err: any) {
 
@@ -112,8 +46,7 @@ export function createHandler(
                     ? (typeof err.stack === 'string' ? err.stack.split('\n')
                         : [String(err.stack || err.toString() || err.message || err.name || 'Unknown error')])
                         .map((l: any) => typeof l === 'string' ? l.trim() : String(l)) : undefined
-                ,
-            }
+            };
         }
     };
 
