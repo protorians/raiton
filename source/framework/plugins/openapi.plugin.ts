@@ -180,37 +180,42 @@ async function generateOpenApiSpec(scope: PluginScope, opts: OpenApiOptions): Pr
             responses: {}
         };
 
-        // Apply API operation metadata (summary, description, etc.)
         const operationMetadata = Reflect.getMetadata(METADATA_KEYS.API_OPERATION, controllerClass, routeMeta.propertyKey);
         if (operationMetadata) {
             Object.assign(operation, operationMetadata);
         }
 
-        // Apply API tags (method-level)
         const methodTags = Reflect.getMetadata(METADATA_KEYS.API_TAGS, controllerClass, routeMeta.propertyKey);
         if (methodTags) {
             operation.tags = methodTags;
         }
 
-        // Apply API security (method-level)
         const methodSecurity = Reflect.getMetadata(METADATA_KEYS.API_SECURITY, controllerClass, routeMeta.propertyKey);
         if (methodSecurity) {
             operation.security = methodSecurity;
         }
 
-        // Apply class-level tags
         const classTags = Reflect.getMetadata(METADATA_KEYS.API_TAGS, controllerClass);
         if (classTags) {
             operation.tags = [...(operation.tags || []), ...classTags];
         }
 
-        // Apply class-level security
         const classSecurity = Reflect.getMetadata(METADATA_KEYS.API_SECURITY, controllerClass);
         if (classSecurity) {
             operation.security = [...(operation.security || []), ...classSecurity];
         }
 
-        // Process API_PARAMETERS metadata (additional parameters)
+        const params: ParamMetaInterface[] = Reflect.getMetadata(METADATA_KEYS.ROUTE_PARAMETERS, controllerClass)?.[routeMeta.propertyKey] || [];
+
+        let bodyParam: ParamMetaInterface | undefined;
+        const otherParams = params.filter(p => {
+            if (p.type === Parametrable.BODY) {
+                bodyParam = p;
+                return false;
+            }
+            return true;
+        });
+
         const apiParameters = Reflect.getMetadata(METADATA_KEYS.API_PARAMETERS, controllerClass)?.[routeMeta.propertyKey] || [];
         for (const param of apiParameters) {
             let inLocation: string;
@@ -237,11 +242,10 @@ async function generateOpenApiSpec(scope: PluginScope, opts: OpenApiOptions): Pr
                 description: param.description,
                 required: param.required ?? true,
                 schema: {
-                    type: 'string' // Default, will be enhanced below
+                    type: 'string'
                 }
             };
 
-            // Try to improve schema based on type if available
             if (param.type) {
                 const typeName = typeof param.type === 'function' ? param.type.name : typeof param.type;
                 let schemaType = 'string'; // default
@@ -321,6 +325,7 @@ async function generateOpenApiSpec(scope: PluginScope, opts: OpenApiOptions): Pr
             operation.parameters.push(paramObj);
         }
 
+        // Process standard Parametrable decorators (@Param, @Query, etc.)
         for (const p of otherParams) {
             let inLocation: string | undefined;
             switch (p.type) {
@@ -377,13 +382,31 @@ async function generateOpenApiSpec(scope: PluginScope, opts: OpenApiOptions): Pr
             operation.parameters.push(paramObj);
         }
 
-        // Process body parameter
-        if (bodyParam) {
+        // Check for explicit API request body decorator
+        const apiRequestBody = Reflect.getMetadata(METADATA_KEYS.API_REQUEST_BODY, controllerClass, routeMeta.propertyKey);
+        if (apiRequestBody) {
+            // Use explicit API request body definition
+            const bodyRequired = apiRequestBody.required ?? true;
+            let bodySchema = null;
+            if (apiRequestBody.type) {
+                bodySchema = getSchemaFromType(apiRequestBody.type);
+            }
+            if (bodySchema !== null) {
+                operation.requestBody = {
+                    required: bodyRequired,
+                    content: {
+                        'application/json': {
+                            schema: bodySchema
+                        }
+                    }
+                };
+            }
+        } else if (bodyParam) {
+            // Fallback to automatic body parameter detection
             // Determine if the body param has a metatype that is a class (DTO)
             let bodySchema: any = {type: 'object'}; // default
             if (bodyParam.metatype && typeof bodyParam.metatype === 'function' && 'prototype' in bodyParam.metatype) {
-                // It's a class; we could attempt to generate a JSON schema from its properties and class-validator decorators
-                // For simplicity, we'll keep it as object; advanced users can extend this.
+                // It's a class; we treat it as object for simplicity
                 bodySchema = {type: 'object'};
             } else {
                 // If metatype is a primitive type like String, Number, Boolean, etc.

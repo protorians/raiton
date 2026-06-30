@@ -90,6 +90,41 @@ Raiton détecte automatiquement l'environnement d'exécution et adapte son serve
 - **Node.js** : Adaptateur pour serveurs HTTP Node.
 - **Web** : Compatible avec les environnements basés sur les standards Web (Fetch API).
 
+## Documentation API
+
+Example
+```typescript
+  import { Controllable, Get, ApiOkResponse, ApiResponse } from '@protorians/framework';
+
+  @Controllable('/users')
+  export class UserController {
+      @Get()
+      @ApiOkResponse({
+          description: 'Returns a list of users',
+          type: Array,
+          isArray: true
+      })
+      async getUsers() {
+          return [{ id: 1, name: 'John Doe' }, { id: 2, name: 'Jane Smith' }];
+      }
+
+      @Get('/:id')
+      @ApiResponse({
+          status: 200,
+          description: 'Returns the user if found',
+          type: Object
+      })
+      @ApiResponse({
+          status: 404,
+          description: 'User not found'
+      })
+      async getUserById() {
+          // ... implementation
+          return { id: 1, name: 'John Doe' };
+      }
+  }
+```
+
 ## Licence
 
 Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
