@@ -41,9 +41,9 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Release with semantic-release
+      - name: Update version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: bun x semantic-release
+        run: bun run version
