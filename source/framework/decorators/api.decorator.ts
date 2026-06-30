@@ -183,3 +183,37 @@ export function ApiParam(name: string, options: {
         Reflect.defineMetadata(METADATA_KEYS.API_PARAMETERS, params, target, propertyKey);
     };
 }
+/**
+ * Decorator to add query parameter metadata (shortcut for ApiParam with in: 'query')
+ * @param name Parameter name
+ * @param options Parameter options (description, required, type, default, deprecated)
+ */
+export function ApiQuery(name: string, options: {
+    /**
+     * Parameter description
+     */
+    description?: string;
+
+    /**
+     * Whether the parameter is required
+     */
+    required?: boolean;
+
+    /**
+     * Parameter type (for schema generation)
+     */
+    type?: any;
+
+    /**
+     * Default value (optional)
+     */
+    default?: any;
+
+    /**
+     * Whether this parameter should be excluded from documentation (deprecated)
+     * @deprecated
+     */
+    deprecated?: boolean;
+}) {
+    return ApiParam(name, {...options, in: 'query'});
+}

@@ -8,7 +8,7 @@ export interface ApiResponseOptions {
     /**
      * HTTP status code
      */
-    statusCode: number;
+    status: number;
 
     /**
      * Description of the response
@@ -49,7 +49,7 @@ export function ApiResponse(options: ApiResponseOptions) {
  */
 export function ApiOkResponse(description?: string, type?: any, isArray?: boolean) {
     return ApiResponse({
-        statusCode: 200,
+        status: 200,
         description,
         type,
         isArray
@@ -64,7 +64,7 @@ export function ApiOkResponse(description?: string, type?: any, isArray?: boolea
  */
 export function ApiCreatedResponse(description?: string, type?: any, isArray?: boolean) {
     return ApiResponse({
-        statusCode: 201,
+        status: 201,
         description,
         type,
         isArray
@@ -77,7 +77,7 @@ export function ApiCreatedResponse(description?: string, type?: any, isArray?: b
  */
 export function ApiBadRequestResponse(description?: string) {
     return ApiResponse({
-        statusCode: 400,
+        status: 400,
         description
     });
 }
@@ -88,7 +88,7 @@ export function ApiBadRequestResponse(description?: string) {
  */
 export function ApiUnauthorizedResponse(description?: string) {
     return ApiResponse({
-        statusCode: 401,
+        status: 401,
         description
     });
 }
@@ -99,7 +99,7 @@ export function ApiUnauthorizedResponse(description?: string) {
  */
 export function ApiForbiddenResponse(description?: string) {
     return ApiResponse({
-        statusCode: 403,
+        status: 403,
         description
     });
 }
@@ -110,7 +110,7 @@ export function ApiForbiddenResponse(description?: string) {
  */
 export function ApiNotFoundResponse(description?: string) {
     return ApiResponse({
-        statusCode: 404,
+        status: 404,
         description
     });
 }
@@ -121,7 +121,7 @@ export function ApiNotFoundResponse(description?: string) {
  */
 export function ApiInternalServerErrorResponse(description?: string) {
     return ApiResponse({
-        statusCode: 500,
+        status: 500,
         description
     });
 }
