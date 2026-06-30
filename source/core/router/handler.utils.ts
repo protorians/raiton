@@ -1,15 +1,15 @@
-// Helper functions for argument collection and validation
-import {ControllerMetaInterface, MiddlewareCallable, ParamMetaInterface, RouteMetaInterface} from "../../types";
-import {METADATA_KEYS, Parametrable} from "../index";
-import {Logger} from "@protorians/logger";
+import {MiddlewareCallable, ParamMetaInterface, RouteMetaInterface} from "../../types";
 import {middlewareCompose} from "../../core";
-import {DataTransferObject} from "../data-transfer-object";
 import {validate} from "class-validator";
-import {ViewModel} from "../view-model";
-import {Throwable} from "../exceptions/throwable";
 import {parseCookie} from "@/framework/utilities/cookie.util";
+import {DataTransferObject, METADATA_KEYS, Parametrable, Throwable, ViewModel} from "@/framework";
 
-// Helper function for collecting arguments from route parameters
+/**
+ * Helper function for collecting arguments from route parameters
+ * @param instance
+ * @param routeMeta
+ * @param ctx
+ */
 export function collectRouteArguments(instance: any, routeMeta: RouteMetaInterface, ctx: any): any[] {
     const args: any[] = [];
     const params: ParamMetaInterface[] = Reflect.getMetadata(METADATA_KEYS.ROUTE_PARAMETERS, instance.constructor)?.[routeMeta.propertyKey] || [];
@@ -54,7 +54,10 @@ export function collectRouteArguments(instance: any, routeMeta: RouteMetaInterfa
     return args;
 }
 
-// Helper function for validating DTO arguments
+/**
+ * Helper function for validating DTO arguments
+ * @param args
+ */
 export async function validateDtoArguments(args: any[]): Promise<void> {
     for (const input of args) {
         if (input instanceof DataTransferObject) {
@@ -67,6 +70,12 @@ export async function validateDtoArguments(args: any[]): Promise<void> {
     }
 }
 
+/**
+ *
+ * @param responses
+ * @param instance
+ * @param routeMeta
+ */
 export async function validateResponse(responses: any, instance: any, routeMeta: RouteMetaInterface): Promise<void> {
     // Special handling for ViewModel response wrapping: { data: viewModelInstance }
     if (responses && typeof responses === 'object' && 'data' in responses) {
