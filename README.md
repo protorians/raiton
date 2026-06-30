@@ -94,7 +94,7 @@ Raiton détecte automatiquement l'environnement d'exécution et adapte son serve
 
 Example
 ```typescript
-  import { Controllable, Get, ApiOkResponse, ApiResponse } from '@protorians/framework';
+  import { Controllable, Get, ApiOkResponse, ApiResponse } from 'raiton/framework';
 
   @Controllable('/users')
   export class UserController {
@@ -122,6 +122,23 @@ Example
           // ... implementation
           return { id: 1, name: 'John Doe' };
       }
+  }
+```
+
+```typescript
+import { Controllable, Get, ApiQuery } from "raiton/framework";
+
+  @Controllable("/users")
+  export class UserController {
+    @Get()
+    @ApiQuery("name", { description: "Filter by name", required: false, type:
+  String })
+    @ApiQuery("limit", { description: "Max results", required: false, type:
+  Number })
+    async getUsers(ctx) {
+      const { name, limit } = ctx.query;
+      // …
+    }
   }
 ```
 
