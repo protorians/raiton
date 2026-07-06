@@ -34,7 +34,7 @@ export function ApiTags(...tags: (string | ApiTagOptions)[]) {
 
         // Convert string tags to objects
         const processedTags = tags.map(tag =>
-            typeof tag === 'string' ? { name: tag } : tag
+            typeof tag === 'string' ? {name: tag} : tag
         );
 
         if (propertyKey) {
@@ -173,6 +173,11 @@ export function ApiParam(name: string, options: {
      * @deprecated
      */
     deprecated?: boolean;
+
+    /**
+     * enums values (optional)
+     */
+    enum?: any[]
 }) {
     return function (target: any, propertyKey: string | symbol) {
         const params = Reflect.getMetadata(METADATA_KEYS.API_PARAMETERS, target) || {};
@@ -180,9 +185,20 @@ export function ApiParam(name: string, options: {
             params[propertyKey] = [];
         }
         params[propertyKey].push({name, ...options});
+
+        if (options.enum) {
+            Reflect.defineMetadata(
+                METADATA_KEYS.API_ENUMS,
+                {
+                    [propertyKey]: options.enum
+                },
+                target
+            );
+        }
         Reflect.defineMetadata(METADATA_KEYS.API_PARAMETERS, params, target, propertyKey);
     };
 }
+
 /**
  * Decorator to add query parameter metadata (shortcut for ApiParam with in: 'query')
  * @param name Parameter name
@@ -214,6 +230,11 @@ export function ApiQuery(name: string, options: {
      * @deprecated
      */
     deprecated?: boolean;
+
+    /**
+     * enums values (optional)
+     */
+    enum?: any[]
 }) {
     return ApiParam(name, {...options, in: 'query'});
 }

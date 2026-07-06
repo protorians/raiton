@@ -11,6 +11,7 @@ export const METADATA_KEYS = {
     API_RESPONSES: Symbol('api:responses'),
     API_REQUEST_BODY: Symbol('api:requestBody'),
     API_PARAMETERS: Symbol('api:parameters'),
+    API_ENUMS: Symbol('api:enums'),
     API_TAGS: Symbol('api:tags'),
     API_OPERATION: Symbol('api:operation'),
     API_SECURITY: Symbol('api:security'),
