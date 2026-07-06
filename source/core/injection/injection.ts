@@ -214,7 +214,7 @@ export class Injection {
         const name = metadata?.name || ('constructor' in construct ? construct.constructor.name || false : false) || construct.name;
 
         if (!metadata) {
-            if (typeof name === 'undefined') Logger.debug('Cannot resolve', construct);
+            if (typeof name === 'undefined') Logger.debug('Cannot resolve', name, ':', construct);
             throw new Throwable(`Cannot resolve ${name} as dependency`);
         }
 
