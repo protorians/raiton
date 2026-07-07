@@ -1,5 +1,6 @@
 import { IncomingMessage } from 'node:http'
 import type { RuntimeRequestInterface } from '../../../types'
+import {getRealIp} from "../../utilities";
 
 export class NodeRequest implements RuntimeRequestInterface {
     constructor(public req: IncomingMessage) {
@@ -43,5 +44,9 @@ export class NodeRequest implements RuntimeRequestInterface {
 
     get remoteAddress(): string | undefined {
         return this.req.socket?.remoteAddress
+    }
+
+    get ip(): string | undefined {
+        return getRealIp(this.headers, this.remoteAddress)
     }
 }

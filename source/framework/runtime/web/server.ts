@@ -1,5 +1,6 @@
 // import {RuntimeAdapterInterface} from '../../../types'
 // import {Logger} from "@protorians/logger";
+// import {getRealIp} from "../../utilities";
 //
 // export const webRuntime: RuntimeAdapterInterface = {
 //     createServer(handler) {
@@ -18,7 +19,9 @@
 //                     method: request.method,
 //                     url: request.url,
 //                     headers: request.headers,
-//                     body: request.body ? request.body : null
+//                     body: request.body ? request.body : null,
+//                     remoteAddress: undefined,
+//                     ip: getRealIp(request.headers, undefined)
 //                 },
 //                 {
 //                     status(code) {

@@ -18,6 +18,7 @@ export interface RuntimeRequestInterface {
     file?: any
     files?: any
     remoteAddress?: string
+    ip?: string
 }
 
 export type RuntimeHandlerCallable = (req: RuntimeRequestInterface, reply: RuntimeReplyInterface) => Promise<void>

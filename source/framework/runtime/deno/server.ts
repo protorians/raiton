@@ -1,5 +1,6 @@
 import {RuntimeAdapterInterface, RuntimeRequestInterface, RuntimeReplyInterface} from '../../../types'
 import {Logger} from "@protorians/logger";
+import {getRealIp} from "../../utilities";
 
 // class DenoRequest implements RuntimeRequestInterface {
 //   constructor(private req: Request) {}
@@ -12,6 +13,7 @@ import {Logger} from "@protorians/logger";
 //   get file(): any { return undefined; }
 //   get files(): any { return undefined; }
 //   get remoteAddress(): string | undefined { return undefined; }
+//   get ip(): string | undefined { return getRealIp(this.headers, this.remoteAddress); }
 // }
 
 // class DenoReply implements RuntimeReplyInterface {
