@@ -24,18 +24,18 @@ function createSocketEventDecorator(type: SocketEventType, name?: string) {
     }
 }
 
-export function OnConnect() {
+export function OnSocketConnect() {
     return createSocketEventDecorator('connect')
 }
 
-export function OnDisconnect() {
+export function OnSocketDisconnect() {
     return createSocketEventDecorator('disconnect')
 }
 
-export function OnMessage(name?: string) {
+export function OnSocketMessage(name?: string) {
     return createSocketEventDecorator('message', name)
 }
 
-export function OnEvent(name: string) {
+export function OnSocketEvent(name: string) {
     return createSocketEventDecorator('event', name)
 }
