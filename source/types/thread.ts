@@ -1,5 +1,5 @@
 import {BuilderInterface} from "./builder";
-import {RuntimeAdapterInterface} from "./runtime";
+import {RuntimeAdapterInterface, RuntimeServerInterface} from "./runtime";
 import {ApplicationInterface} from "./application";
 import {RuntimeType} from "../framework/enums/runtime.enum";
 
@@ -13,6 +13,9 @@ export type ThreadWaitCallable = () => (boolean | Promise<boolean>)
 export interface ThreadInterface {
     readonly appDir: string;
     readonly builder: BuilderInterface;
+    application: ApplicationInterface | null;
+    runtime: RuntimeAdapterInterface | null;
+    runtimeServer: RuntimeServerInterface | null;
 
     setup(options: ThreadSetupOptionsInterface): this
 
