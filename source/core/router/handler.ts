@@ -27,15 +27,14 @@ export function createHandler(
 
             if (!(err instanceof ThrowableResponse)) {
                 Logger.error(`Failed to execute ${handlerName} handler`, err.message ?? err);
-                ctx.reply.status(500)
+                ctx.reply.status(err.statusCode ?? 500)
             }
 
-            if (err instanceof ThrowableResponse) {
-                ctx.reply.status(err.statusCode || 201)
-            }
-
-            if (err instanceof HttpException || err instanceof ThrowableResponse)
+            if (err instanceof HttpException || err instanceof ThrowableResponse) {
+                Logger.error(`Failed to execute ${handlerName} handler`, err.message ?? err);
+                ctx.reply.status(err.statusCode ?? 500)
                 return err.render()
+            }
 
             return {
                 statusCode: 500,
