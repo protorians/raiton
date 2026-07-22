@@ -25,11 +25,6 @@ export function createHandler(
             return responses;
         } catch (err: any) {
 
-            if (!(err instanceof ThrowableResponse)) {
-                Logger.error(`Failed to execute ${handlerName} handler`, err.message ?? err);
-                ctx.reply.status(err.statusCode ?? 500)
-            }
-
             if (err instanceof HttpException || err instanceof ThrowableResponse) {
                 Logger.error(`Failed to execute ${handlerName} handler`, err.message ?? err);
                 ctx.reply.status(err.statusCode ?? 500)
