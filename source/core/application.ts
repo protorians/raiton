@@ -2,7 +2,7 @@ import {Security, bodyParserPlugin} from "../framework/plugins";
 import {PluginScope} from './plugins/scope'
 import {RequestContext} from './context'
 import {ApplicationConfigInterface, ApplicationInterface} from "../types/application";
-import {HttpMethod} from "../framework";
+import {HttpException, HttpMethod, ThrowableResponse} from "../framework";
 import {RouteHandlerCallable} from "../types";
 import {Logger} from "@protorians/logger";
 import {RaitonConfig} from "./config";
@@ -14,7 +14,7 @@ export class Application implements ApplicationInterface {
 
     readonly version: string = RaitonConfig.get('version') || '0.0.1'
 
-    static get container(): typeof Injection{
+    static get container(): typeof Injection {
         return Injection;
     }
 
@@ -162,16 +162,39 @@ export class Application implements ApplicationInterface {
                 (context as any).params = route.parameters;
                 let responses = await route.handler(context)
 
+                if (responses instanceof ThrowableResponse) {
+                    context.reply.status(responses.statusCode ?? 500)
+                }
+                if (responses instanceof HttpException) {
+                    context.reply.status(responses.statusCode ?? 500)
+                }
+
                 context.reply.send(responses)
             } catch (e: any) {
-                Logger.error('Failed to handle request', e.message ?? e)
+                Logger.error('Failed to execute handle', e.message ?? e)
                 if (this.config.develop) {
                     console.error(e)
                 }
+                context.reply.status(500)
+                context.reply.send({error: true, statusCode: 500, data: null})
             }
         }
 
-        await this.root.middleware.run(ctx, handler)
-        await this.root.hooks.run('onResponse', ctx)
+        try {
+            await this.root.middleware.run(ctx, handler)
+            await this.root.hooks.run('onResponse', ctx)
+        } catch (err: any) {
+            if (err instanceof HttpException || err instanceof ThrowableResponse) {
+                Logger.error(`Server error`, err.message ?? err);
+                ctx.reply.status(err.statusCode ?? 500)
+                return ctx.reply.send(err.render())
+            }
+            ctx.reply.send({
+                statusCode: 500,
+                error: true,
+                message: err.message ?? err,
+                data: null
+            })
+        }
     }
 }
