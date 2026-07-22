@@ -9,3 +9,8 @@ export interface RouteDefinitionInterface {
     version?: string
     handler: RouteHandlerCallable
 }
+
+export interface RouteInteractionsSubscriber{
+    target: Function;
+    propertyKey: string;
+}

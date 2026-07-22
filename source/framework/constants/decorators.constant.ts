@@ -15,4 +15,6 @@ export const METADATA_KEYS = {
     API_TAGS: Symbol('api:tags'),
     API_OPERATION: Symbol('api:operation'),
     API_SECURITY: Symbol('api:security'),
+    // Route interaction metadata key
+    ROUTE_INTERACTION: Symbol('route:interaction'),
 }
