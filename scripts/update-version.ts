@@ -49,6 +49,7 @@ function determineIncrement(commits: string[]) {
       increment = "minor";
     } else if (
         !increment &&
+        commit.startsWith("refactor") ||
         commit.startsWith("fix") ||
         commit.startsWith("remove")
     ) {
