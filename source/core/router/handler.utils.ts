@@ -1,8 +1,7 @@
 import {MiddlewareCallable, ParamMetaInterface, RouteMetaInterface} from "../../types";
 import {middlewareCompose} from "../../core";
 import {validate} from "class-validator";
-import {parseCookie} from "@/framework/utilities/cookie.util";
-import {DataTransferObject, METADATA_KEYS, Parametrable, Throwable, ViewModel} from "@/framework";
+import {DataTransferObject, METADATA_KEYS, Parametrable, parseCookie, Throwable, ViewModel} from "../../framework";
 
 /**
  * Helper function for collecting arguments from route parameters

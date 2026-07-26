@@ -1,4 +1,4 @@
-import {RaitonConfig} from "@/core";
+import {RaitonConfig} from "../config/config";
 
 export class Artifact {
 

@@ -1,9 +1,8 @@
 import "reflect-metadata";
 import {METADATA_KEYS} from "../constants/decorators.constant";
 import {getControllerMetadata} from "../../core/controller";
-import {Logger} from "@protorians/logger";
-import {RouteInteractionsSubscriber} from "@/types";
-import { Raiton } from "@/core/raiton";
+import {RouteInteractionsSubscriber} from "../../types/router";
+import { Raiton } from "../../core/raiton";
 
 /**
  * Represents a route interaction that can be rendered with context data
