@@ -171,6 +171,7 @@ export class Application implements ApplicationInterface {
 
                 context.reply.send(responses)
             } catch (e: any) {
+                Logger.info(`${req.method} ${req.url}`)
                 Logger.error('Failed to execute handle', e.message ?? e)
                 if (this.config.develop) {
                     console.error(e)
@@ -184,6 +185,7 @@ export class Application implements ApplicationInterface {
             await this.root.middleware.run(ctx, handler)
             await this.root.hooks.run('onResponse', ctx)
         } catch (err: any) {
+            Logger.info(`${req.method} ${req.url}`)
             if (err instanceof HttpException || err instanceof ThrowableResponse) {
                 Logger.error(`Server error`, err.message ?? err);
                 ctx.reply.status(err.statusCode ?? 500)
