@@ -8,7 +8,7 @@ import { Raiton } from "../../core/raiton";
  * Represents a route interaction that can be rendered with context data
  */
 export class RouteInteractionDescriptor {
-    constructor(private template: string) {
+    constructor(public readonly template: string) {
     }
 
     /**

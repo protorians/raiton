@@ -118,7 +118,12 @@ bun raiton dev
 | `raiton/types/*` | `source/types/*.ts` |
 | `raiton/commands/*` | `source/commands/*.ts` |
 
-## Conventions de commits
+## Conventions 
+
+### Fonctionnalités
+Il faut toujours prioriser sur l'existant des fonctionnalités existantes avant de créer de nouvelles fonctionnalités.
+
+### Commits
 
 | Préfixe | Domaine |
 |---------|---------|
