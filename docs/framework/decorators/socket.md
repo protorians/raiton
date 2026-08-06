@@ -141,11 +141,39 @@ interface SocketMetaInterface {
 }
 ```
 
+Utilisez `getSocketMetadata(target)` de `source/core/socket/metadata.ts` pour lire les métadonnées d'une classe socket.
+
 ## Notes
 
-- La fonctionnalité socket est en développement — le runtime sous-jacent est à implémenter
-- Les décorateurs stockent les métadonnées mais le traitement effectif dépendra de l'adaptateur socket
-- Utilisez `getSocketMetadata(target)` de `source/core/socket/metadata.ts` pour lire les métadonnées
+- Le runtime socket est implémenté pour l'adaptateur **Bun** (`source/framework/runtime/bun/server.ts`). Les requests avec l'en-tête `Upgrade: websocket` sont routées vers le namespace socket correspondant ; les autres restent traitées par le router HTTP.
+- Le namespace est matché sur le `pathname` de la request. Le préfixe d'application (`prefix`, ex. `/api`) est automatiquement pris en compte : `ws://host/notifications` et `ws://host/api/notifications` atteignent tous deux un socket enregistré sur `/notifications`.
+- Une **instance transiente** de la classe socket est créée par connexion via le conteneur d'injection : chaque client possède son propre état. La même instance reçoit `connect`, `message` et `disconnect`.
+- Les artifacts `.socket.ts` sont scannés automatiquement au boot (comme les contrôleurs) et rechargés en HMR.
+
+### Protocole de messages
+
+Le client envoie des trames JSON `{ event, data }` :
+
+```typescript
+ws.send(JSON.stringify({
+  event: 'mon-evenement',
+  data: { cle: 'valeur' }
+}))
+```
+
+- `event` : nom de l'événement (`@OnSocketEvent(name)`) ou du message (`@OnSocketMessage(name)`).
+- `data` : payload passé au handler.
+- Sans champ `event`, la trame est routée vers un handler de type `message` (payload brut).
+
+Si un handler **retourne une valeur** (par ex. `RaitonResponses(...)`), le runtime l'envoie automatiquement au client sous forme de trame JSON.
+
+| Cas | Comportement |
+|-----|--------------|
+| Événement trouvé | Appel du handler, réponse éventuelle renvoyée au client |
+| Événement inconnu | Réponse `{ statusCode: 404, message: "Socket event \"...\" not found", data: null }` |
+| Erreur dans le handler | Réponse `{ statusCode: 500, message: "Internal server error", data: null }` |
+
+### Métadonnées socket
 
 ---
 

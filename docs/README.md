@@ -118,19 +118,26 @@ bun raiton dev
 | `raiton/types/*` | `source/types/*.ts` |
 | `raiton/commands/*` | `source/commands/*.ts` |
 
-## Conventions 
-
 ### Fonctionnalités
 Il faut toujours prioriser sur l'existant des fonctionnalités existantes avant de créer de nouvelles fonctionnalités.
 
 ### Commits
+Les commits doivent être des commits logiques séparés par domaine, par fonctionnalité ou par objectif dans l'ordre de modifications des fichiers. 
+Utiliser les préfixes suivants :
 
-| Préfixe | Domaine |
-|---------|---------|
-| `core:` | Noyau (Application, Router, DI, etc.) |
-| `framework:` | Décorateurs, runtime, plugins |
-| `cli:` | Ligne de commande |
-| `docs:` | Documentation |
-| `types:` | Définitions de types |
-| `fix:` | Correction de bug |
-| `chore:` | Maintenance |
+| Préfixe          | Usage |
+|------------------|-------|
+| `feat`           | Nouvelle fonctionnalité |
+| `fix`            | Correction de bug |
+| `breaking change`| Changement cassant (rétro-incompatible) |
+| `release`        | Préparation de release |
+| `upgrade`        | Mise à jour de dépendances |
+| `update`         | Mise à jour de code existant (sans ajout de fonctionnalité) |
+| `add`            | Ajout de code mineur (logs, helpers, fichiers de config) |
+| `refactor`       | Refactoring sans changement de comportement |
+| `chore`          | Tâches internes (build, config, CI, workspace) |
+| `docs`           | Documentation uniquement |
+| `remove`         | Suppression de code ou de fichiers |
+| `deprecate`      | Marquage d'une fonctionnalité comme dépréciée |
+
+Executer ```bun run version``` pour mettre à jour la version de l'application automatiquement
