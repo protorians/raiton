@@ -1,4 +1,4 @@
-import {getSocketMetadata} from "../../core/socket";
+import {getSocketMetadata, registerSocket} from "../../core/socket";
 import {Injectable} from "..";
 import {LifetimeEnum} from "@protorians/core";
 import {SocketEventType} from "../../types";
@@ -10,6 +10,7 @@ export function Socket(namespace = '/') {
 
         const meta = getSocketMetadata(target.prototype || target)
         meta.namespace = namespace;
+        registerSocket(target)
     }
 }
 
