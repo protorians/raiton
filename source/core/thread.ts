@@ -103,7 +103,10 @@ export class RaitonThread implements ThreadInterface {
             const displayHostname = (hostname === '0.0.0.0') ? (this.getNetworkIp() || 'localhost') : hostname;
             const prefix = this.application.config.prefix
 
-            this.runtimeServer = this.runtime.createServer(this.application.handle.bind(this.application))
+            this.runtimeServer = this.runtime.createServer(
+                this.application.handle.bind(this.application),
+                {prefix}
+            )
 
             await this.runtimeServer.listen(port, hostname)
 

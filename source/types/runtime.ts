@@ -8,6 +8,10 @@ export interface RuntimeServerInterface {
     handle?(request: Request): Promise<Response>
 }
 
+export interface RuntimeServerOptionsInterface {
+    prefix?: string;
+}
+
 export interface RuntimeRequestInterface {
     method: string
     url: string
@@ -38,7 +42,7 @@ export interface RuntimeReplyInterface {
 }
 
 export interface RuntimeAdapterInterface {
-    createServer(handler: RuntimeHandlerCallable): RuntimeServerInterface
+    createServer(handler: RuntimeHandlerCallable, options?: RuntimeServerOptionsInterface): RuntimeServerInterface
 }
 
 

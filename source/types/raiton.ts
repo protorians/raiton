@@ -4,4 +4,5 @@ export interface RaitonSignalMapInterface {
     ready?: undefined;
     errors: any;
     'hmr:controller': BuilderHMRDeclarationInterface;
+    'hmr:socket': BuilderHMRDeclarationInterface;
 }

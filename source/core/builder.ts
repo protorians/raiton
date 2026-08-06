@@ -5,7 +5,7 @@ import fs, {WatchEventType} from "node:fs";
 import type {BuilderConfigInterface, BuilderInterface, ThreadInterface,} from "../types";
 import {RaitonThread} from "./thread";
 import {Raiton} from "./raiton";
-import {isControllerArtifact} from "../framework";
+import {isControllerArtifact, isSocketArtifact} from "../framework";
 import {ControllerBuilder} from "./controller";
 import {watch} from "fs";
 import {LBadge, Logger} from "@protorians/logger";
@@ -66,6 +66,10 @@ export class RaitonBuilder implements BuilderInterface {
             Raiton.signals.dispatch('hmr:controller', payload)
         }
 
+        if (isSocketArtifact(filename)) {
+            Raiton.signals.dispatch('hmr:socket', payload)
+        }
+
         if (Artifacts.is(filename))
             Artifacts.reload(
                 await import(`${filename}?v=${payload.version || 1}&t=${payload.timestamp || Date.now()}`),
@@ -121,6 +125,12 @@ export class RaitonBuilder implements BuilderInterface {
         if (this.options.hmr && this.options.serve) {
             Raiton.signals.listen(
                 'hmr:controller',
+                async ({filename, version, timestamp}) => {
+                    await ControllerBuilder.build({filename, version, timestamp})
+                }
+            )
+            Raiton.signals.listen(
+                'hmr:socket',
                 async ({filename, version, timestamp}) => {
                     await ControllerBuilder.build({filename, version, timestamp})
                 }

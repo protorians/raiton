@@ -2,9 +2,10 @@ import fs from "node:fs";
 import {BuilderHMRDeclarationInterface} from "../../types";
 import {LBadge, Logger} from "@protorians/logger";
 import {compileController} from "./compiler";
+import {compileSocket} from "../socket/builder";
 import {RaitonThread} from "../thread";
 import {Injection} from "../injection";
-import {isControllerArtifact} from "../../framework";
+import {isControllerArtifact, isSocketArtifact} from "../../framework";
 import path from "node:path";
 
 export class ControllerBuilder {
@@ -22,19 +23,26 @@ export class ControllerBuilder {
     }
 
     static async build<T>({filename, version, timestamp}: BuilderHMRDeclarationInterface): Promise<T | undefined> {
-        if (!isControllerArtifact(filename))
+        const isController = isControllerArtifact(filename);
+        const isSocket = isSocketArtifact(filename);
+
+        if (!isController && !isSocket)
             return undefined;
 
         const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
-        const controller = imported.default || imported || undefined;
+        const artifact = imported.default || imported || undefined;
 
-        if (!controller) return undefined;
+        if (!artifact) return undefined;
         if (!RaitonThread.current?.application) return undefined;
 
-        const compilated = compileController(controller, RaitonThread.current.application);
-        const name = controller.name || (typeof controller === 'function' ? controller.name : undefined);
+        const name = artifact.name || (typeof artifact === 'function' ? artifact.name : undefined);
         if (name) Injection.registerArtifactPath(name, filename);
 
+        if (isSocket) {
+            return compileSocket(artifact) as any;
+        }
+
+        const compilated = compileController(artifact, RaitonThread.current.application);
         return compilated;
     }
 

@@ -2,7 +2,8 @@ import type {
     RuntimeAdapterInterface,
     RuntimeHandlerCallable,
     RuntimeInterface,
-    RuntimeServerInterface
+    RuntimeServerInterface,
+    RuntimeServerOptionsInterface
 } from "../../types";
 import {RuntimeType} from "../enums/runtime.enum";
 import {nodeRuntime} from "./node/server";
@@ -46,7 +47,7 @@ export class Runtime implements RuntimeInterface {
         }
     }
 
-    createServer(handler: RuntimeHandlerCallable): RuntimeServerInterface {
-        return this.adapter().createServer(handler)
+    createServer(handler: RuntimeHandlerCallable, options?: RuntimeServerOptionsInterface): RuntimeServerInterface {
+        return this.adapter().createServer(handler, options)
     }
 }
