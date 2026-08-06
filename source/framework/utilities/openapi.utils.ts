@@ -2,6 +2,8 @@ import type {ParamMetaInterface} from "../../types";
 import {METADATA_KEYS, Parametrable} from "../index";
 import {PluginScope} from "../../core";
 import {RaitonConfig} from "../../core/config";
+import {getSocketRegistry} from "../../core/socket";
+import {RaitonThread} from "../../core/thread";
 
 /**
  * Generate the OpenAPI specification object
@@ -78,17 +80,19 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
             responses: {}
         };
 
-        const operationMetadata = Reflect.getMetadata(METADATA_KEYS.API_OPERATION, controllerClass, routeMeta.propertyKey);
+        const controllerPrototype = controllerClass?.prototype ?? controllerClass;
+
+        const operationMetadata = Reflect.getMetadata(METADATA_KEYS.API_OPERATION, controllerPrototype, routeMeta.propertyKey);
         if (operationMetadata) {
             Object.assign(operation, operationMetadata);
         }
 
-        const methodTags = Reflect.getMetadata(METADATA_KEYS.API_TAGS, controllerClass, routeMeta.propertyKey);
+        const methodTags = Reflect.getMetadata(METADATA_KEYS.API_TAGS, controllerPrototype, routeMeta.propertyKey);
         if (methodTags) {
             operation.tags = methodTags;
         }
 
-        const methodSecurity = Reflect.getMetadata(METADATA_KEYS.API_SECURITY, controllerClass, routeMeta.propertyKey);
+        const methodSecurity = Reflect.getMetadata(METADATA_KEYS.API_SECURITY, controllerPrototype, routeMeta.propertyKey);
         if (methodSecurity) {
             operation.security = methodSecurity;
         }
@@ -103,7 +107,7 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
             operation.security = [...(operation.security || []), ...classSecurity];
         }
 
-        const params: ParamMetaInterface[] = Reflect.getMetadata(METADATA_KEYS.ROUTE_PARAMETERS, controllerClass)?.[routeMeta.propertyKey] || [];
+        const params: ParamMetaInterface[] = Reflect.getMetadata(METADATA_KEYS.ROUTE_PARAMETERS, controllerPrototype)?.[routeMeta.propertyKey] || [];
 
         let bodyParam: ParamMetaInterface | undefined;
         const otherParams = params.filter(p => {
@@ -114,7 +118,7 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
             return true;
         });
 
-        const apiParameters = Reflect.getMetadata(METADATA_KEYS.API_PARAMETERS, controllerClass)?.[routeMeta.propertyKey] || [];
+        const apiParameters = Reflect.getMetadata(METADATA_KEYS.API_PARAMETERS, controllerPrototype, routeMeta.propertyKey)?.[routeMeta.propertyKey] || [];
         for (const param of apiParameters) {
             let inLocation: string;
             switch (param.in) {
@@ -145,78 +149,9 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
             };
 
             if (param.type) {
-                const typeName = typeof param.type === 'function' ? param.type.name : typeof param.type;
-                let schemaType = 'string'; // default
-
-                if (typeof param.type === 'function' && param.type.name) {
-                    switch (param.type.name) {
-                        case 'String':
-                            schemaType = 'string';
-                            break;
-                        case 'Number':
-                            schemaType = 'number';
-                            break;
-                        case 'Boolean':
-                            schemaType = 'boolean';
-                            break;
-                        case 'Object':
-                            schemaType = 'object';
-                            break;
-                        case 'Array':
-                            schemaType = 'array';
-                            break;
-                        default:
-                            // For custom classes, treat as object
-                            schemaType = 'object';
-                            break;
-                    }
-                } else if (typeof param.type === 'string') {
-                    switch (param.type.toLowerCase()) {
-                        case 'string':
-                            schemaType = 'string';
-                            break;
-                        case 'number':
-                        case 'int':
-                        case 'float':
-                        case 'double':
-                            schemaType = 'number';
-                            break;
-                        case 'boolean':
-                            schemaType = 'boolean';
-                            break;
-                        case 'object':
-                            schemaType = 'object';
-                            break;
-                        case 'array':
-                            schemaType = 'array';
-                            break;
-                        default:
-                            schemaType = 'string'; // fallback
-                            break;
-                    }
-                }
-
-                paramObj.schema = {
-                    type: schemaType,
-                    ...(param.default !== undefined ? {default: param.default} : {})
-                };
-
-                // Handle array items if needed (simplified)
-                if (schemaType === 'array' && param.type && typeof param.type === 'function' && param.type.name) {
-                    switch (param.type.name) {
-                        case 'String':
-                            paramObj.schema.items = {type: 'string'};
-                            break;
-                        case 'Number':
-                            paramObj.schema.items = {type: 'number'};
-                            break;
-                        case 'Boolean':
-                            paramObj.schema.items = {type: 'boolean'};
-                            break;
-                        default:
-                            paramObj.schema.items = {type: 'string'}; // generic
-                            break;
-                    }
+                paramObj.schema = getSchemaFromType(param.type);
+                if (param.default !== undefined) {
+                    paramObj.schema.default = param.default;
                 }
             }
 
@@ -281,7 +216,7 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
         }
 
         // Check for explicit API request body decorator
-        const apiRequestBody = Reflect.getMetadata(METADATA_KEYS.API_REQUEST_BODY, controllerClass, routeMeta.propertyKey);
+        const apiRequestBody = Reflect.getMetadata(METADATA_KEYS.API_REQUEST_BODY, controllerPrototype, routeMeta.propertyKey);
         if (apiRequestBody) {
             // Use explicit API request body definition
             const bodyRequired = apiRequestBody.required ?? true;
@@ -303,31 +238,8 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
             // Fallback to automatic body parameter detection
             // Determine if the body param has a metatype that is a class (DTO)
             let bodySchema: any = {type: 'object'}; // default
-            if (bodyParam.metatype && typeof bodyParam.metatype === 'function' && 'prototype' in bodyParam.metatype) {
-                // It's a class; we treat it as object for simplicity
-                bodySchema = {type: 'object'};
-            } else {
-                // If metatype is a primitive type like String, Number, Boolean, etc.
-                const typeName = bodyParam.metatype?.name;
-                switch (typeName) {
-                    case 'String':
-                        bodySchema = {type: 'string'};
-                        break;
-                    case 'Number':
-                        bodySchema = {type: 'number'};
-                        break;
-                    case 'Boolean':
-                        bodySchema = {type: 'boolean'};
-                        break;
-                    case 'Object':
-                        bodySchema = {type: 'object'};
-                        break;
-                    case 'Array':
-                        bodySchema = {type: 'array', items: {type: 'string'}}; // generic
-                        break;
-                    default:
-                        bodySchema = {type: 'object'};
-                }
+            if (bodyParam.metatype) {
+                bodySchema = getSchemaFromType(bodyParam.metatype);
             }
             operation.requestBody = {
                 required: true,
@@ -340,7 +252,7 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
         }
 
         // Check for API response decorators first
-        const apiResponses = Reflect.getMetadata(METADATA_KEYS.API_RESPONSES, controllerClass)?.[routeMeta.propertyKey] || [];
+        const apiResponses = Reflect.getMetadata(METADATA_KEYS.API_RESPONSES, controllerPrototype)?.[routeMeta.propertyKey] || [];
 
         if (apiResponses.length > 0) {
             // Use decorator-defined responses
@@ -367,7 +279,7 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
             }
         } else {
             // Fallback to return type detection
-            const returnType = Reflect.getMetadata('design:returntype', controllerClass, routeMeta.propertyKey);
+            const returnType = Reflect.getMetadata('design:returntype', controllerPrototype, routeMeta.propertyKey);
             if (returnType) {
                 // Handle Promise<T> -> T
                 let resolvedType = returnType;
@@ -395,6 +307,94 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
         (spec.paths[path] as any)[method] = operation;
     }
 
+    // Document registered WebSocket sockets as POST operations (one per event)
+    const prefix = RaitonThread.current?.application?.config?.prefix ?? '';
+    const sockets = getSocketRegistry();
+
+    for (const [, socketEntry] of sockets) {
+        const {namespace, construct, metadata} = socketEntry;
+        const classTags = Reflect.getMetadata(METADATA_KEYS.API_TAGS, construct) || [];
+        const socketPrototype = construct?.prototype ?? construct;
+
+        for (const event of metadata.events) {
+            if (event.type !== 'event' && event.type !== 'message') continue;
+            if (!event.name) continue;
+
+            const channelPath = `${prefix}${namespace}`.replace(/\/+/g, '/') || '/';
+            const eventPath = `${channelPath}/${event.name}`.replace(/\/+/g, '/');
+
+            if (!spec.paths[eventPath]) {
+                spec.paths[eventPath] = {};
+            }
+
+            const operation: any = {
+                parameters: [],
+                responses: {}
+            };
+
+            const operationMetadata = Reflect.getMetadata(METADATA_KEYS.API_OPERATION, socketPrototype, event.propertyKey);
+            if (operationMetadata) {
+                Object.assign(operation, operationMetadata);
+            }
+
+            const methodTags = Reflect.getMetadata(METADATA_KEYS.API_TAGS, socketPrototype, event.propertyKey);
+            operation.tags = [...(methodTags || []), ...classTags];
+
+            const apiResponses = Reflect.getMetadata(METADATA_KEYS.API_RESPONSES, socketPrototype)?.[event.propertyKey] || [];
+
+            if (apiResponses.length > 0) {
+                for (const response of apiResponses) {
+                    const statusCode = String(response.status);
+                    let responseContent = undefined;
+
+                    if (response.type) {
+                        const responseSchema = getSchemaFromType(response.type);
+                        responseContent = response.isArray
+                            ? {type: 'array', items: responseSchema}
+                            : responseSchema;
+                    }
+
+                    operation.responses[statusCode] = {
+                        description: response.description || '',
+                        ...(responseContent ? {content: {'application/json': {schema: responseContent}}} : {})
+                    };
+                }
+            } else {
+                operation.responses['200'] = {
+                    description: 'Successful response'
+                };
+            }
+
+            const apiRequestBody = Reflect.getMetadata(METADATA_KEYS.API_REQUEST_BODY, socketPrototype, event.propertyKey);
+            const dataSchema = apiRequestBody?.type
+                ? getSchemaFromType(apiRequestBody.type)
+                : {type: 'object'};
+
+            operation.requestBody = {
+                required: apiRequestBody?.required ?? true,
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                event: {type: 'string', enum: [event.name], example: event.name},
+                                data: dataSchema
+                            },
+                            required: ['event', 'data']
+                        }
+                    }
+                }
+            };
+
+            operation['x-websocket'] = {
+                channel: channelPath,
+                event: event.name
+            };
+
+            (spec.paths[eventPath] as any).post = operation;
+        }
+    }
+
     return spec;
 }
 
@@ -403,10 +403,14 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
  * This is a simplified implementation; for production use, consider using
  * a library like @sinclair/typebox or class-transformer to generate schemas.
  */
-export function getSchemaFromType(type: any): any {
+export function getSchemaFromType(type: any, visited: Set<any> = new Set()): any {
     if (typeof type !== 'function') {
         // Not a constructor; fallback to basic type detection
         return getPrimitiveTypeSchema(typeof type);
+    }
+
+    if (visited.has(type)) {
+        return {type: 'object', description: 'Circular reference'};
     }
 
     const typeName = type.name;
@@ -430,9 +434,50 @@ export function getSchemaFromType(type: any): any {
                 format: 'date-time'
             };
         default:
-            // For custom classes (DTOs, entities, etc.), we treat as object.
-            // In a more advanced implementation, we could inspect the class properties
-            // and generate properties from them (especially if decorated with @ApiProperty etc.)
+            // For custom classes (DTOs, entities, etc.), check for @ApiProperty
+            // We use Reflect.getMetadata to support inheritance of properties
+            const properties = Reflect.getMetadata(METADATA_KEYS.API_PROPERTY, type);
+
+            if (properties) {
+                visited.add(type);
+                const schema: any = {
+                    type: 'object',
+                    properties: {},
+                    required: []
+                };
+
+                for (const [key, options] of Object.entries(properties) as [string, any][]) {
+                    let propSchema: any;
+                    const propType = options.type;
+
+                    if (options.isArray) {
+                        propSchema = {
+                            type: 'array',
+                            items: propType ? getSchemaFromType(propType, new Set(visited)) : {type: 'string'}
+                        };
+                    } else if (propType) {
+                        propSchema = getSchemaFromType(propType, new Set(visited));
+                    } else {
+                        propSchema = {type: 'string'};
+                    }
+
+                    if (options.description) propSchema.description = options.description;
+                    if (options.example) propSchema.example = options.example;
+                    if (options.enum) propSchema.enum = options.enum;
+
+                    schema.properties[key] = propSchema;
+                    if (options.required) {
+                        schema.required.push(key);
+                    }
+                }
+
+                if (schema.required.length === 0) {
+                    delete schema.required;
+                }
+
+                return schema;
+            }
+
             return {type: 'object'};
     }
 }

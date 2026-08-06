@@ -30,8 +30,6 @@ export interface ApiTagOptions {
  */
 export function ApiTags(...tags: (string | ApiTagOptions)[]) {
     return function (target: any, propertyKey?: string | symbol) {
-        const tagsMetadata = Reflect.getMetadata(METADATA_KEYS.API_TAGS, target) || [];
-
         // Convert string tags to objects
         const processedTags = tags.map(tag =>
             typeof tag === 'string' ? {name: tag} : tag
@@ -39,11 +37,12 @@ export function ApiTags(...tags: (string | ApiTagOptions)[]) {
 
         if (propertyKey) {
             // Method-level decorator
-            const methodTags = Reflect.getMetadata(METADATA_KEYS.API_TAGS, target, propertyKey) || [];
-            Reflect.defineMetadata(METADATA_KEYS.API_TAGS, [...methodTags, ...processedTags], target, propertyKey);
+            const existingTags = Reflect.getOwnMetadata(METADATA_KEYS.API_TAGS, target, propertyKey) || [];
+            Reflect.defineMetadata(METADATA_KEYS.API_TAGS, [...existingTags, ...processedTags], target, propertyKey);
         } else {
             // Class-level decorator
-            Reflect.defineMetadata(METADATA_KEYS.API_TAGS, [...tagsMetadata, ...processedTags], target);
+            const existingTags = Reflect.getOwnMetadata(METADATA_KEYS.API_TAGS, target) || [];
+            Reflect.defineMetadata(METADATA_KEYS.API_TAGS, [...existingTags, ...processedTags], target);
         }
     };
 }
@@ -108,14 +107,13 @@ export interface ApiSecurityOptions {
  */
 export function ApiSecurity(...security: ApiSecurityOptions[]) {
     return function (target: any, propertyKey?: string | symbol) {
-        const securities = Reflect.getMetadata(METADATA_KEYS.API_SECURITY, target) || [];
-
         if (propertyKey) {
             // Method-level decorator
-            const methodSecurities = Reflect.getMetadata(METADATA_KEYS.API_SECURITY, target, propertyKey) || [];
+            const methodSecurities = Reflect.getOwnMetadata(METADATA_KEYS.API_SECURITY, target, propertyKey) || [];
             Reflect.defineMetadata(METADATA_KEYS.API_SECURITY, [...methodSecurities, ...security], target, propertyKey);
         } else {
             // Class-level decorator
+            const securities = Reflect.getOwnMetadata(METADATA_KEYS.API_SECURITY, target) || [];
             Reflect.defineMetadata(METADATA_KEYS.API_SECURITY, [...securities, ...security], target);
         }
     };
@@ -180,22 +178,40 @@ export function ApiParam(name: string, options: {
     enum?: any[]
 }) {
     return function (target: any, propertyKey: string | symbol) {
-        const params = Reflect.getMetadata(METADATA_KEYS.API_PARAMETERS, target) || {};
-        if (!params[propertyKey]) {
-            params[propertyKey] = [];
-        }
-        params[propertyKey].push({name, ...options});
+        const params = Reflect.getOwnMetadata(METADATA_KEYS.API_PARAMETERS, target, propertyKey) || {};
+        const methodParams = params[propertyKey] ? [...params[propertyKey]] : [];
+        methodParams.push({name, ...options});
+        params[propertyKey] = methodParams;
 
         if (options.enum) {
-            Reflect.defineMetadata(
-                METADATA_KEYS.API_ENUMS,
-                {
-                    [propertyKey]: options.enum
-                },
-                target
-            );
+            const enums = Reflect.getOwnMetadata(METADATA_KEYS.API_ENUMS, target) || {};
+            enums[propertyKey] = options.enum;
+            Reflect.defineMetadata(METADATA_KEYS.API_ENUMS, enums, target);
         }
         Reflect.defineMetadata(METADATA_KEYS.API_PARAMETERS, params, target, propertyKey);
+    };
+}
+
+/**
+ * Decorator to define a property of a DTO for OpenAPI
+ * @param options Property options
+ */
+export function ApiProperty(options: {
+    type?: any;
+    description?: string;
+    example?: any;
+    required?: boolean;
+    enum?: any[];
+    isArray?: boolean;
+} = {}) {
+    return function (target: any, propertyKey: string | symbol) {
+        const properties = Reflect.getOwnMetadata(METADATA_KEYS.API_PROPERTY, target.constructor) || {};
+        properties[propertyKey] = {
+            ...options,
+            // If type is not provided, try to infer it using design:type
+            type: options.type || Reflect.getMetadata('design:type', target, propertyKey)
+        };
+        Reflect.defineMetadata(METADATA_KEYS.API_PROPERTY, properties, target.constructor);
     };
 }
 

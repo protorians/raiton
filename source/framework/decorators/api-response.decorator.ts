@@ -32,11 +32,10 @@ export interface ApiResponseOptions {
  */
 export function ApiResponse(options: ApiResponseOptions) {
     return function (target: any, propertyKey: string | symbol) {
-        const responses = Reflect.getMetadata(METADATA_KEYS.API_RESPONSES, target) || {};
-        if (!responses[propertyKey]) {
-            responses[propertyKey] = [];
-        }
-        responses[propertyKey].push(options);
+        const responses = Reflect.getOwnMetadata(METADATA_KEYS.API_RESPONSES, target) || {};
+        const methodResponses = responses[propertyKey] ? [...responses[propertyKey]] : [];
+        methodResponses.push(options);
+        responses[propertyKey] = methodResponses;
         Reflect.defineMetadata(METADATA_KEYS.API_RESPONSES, responses, target);
     };
 }
