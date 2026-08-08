@@ -26,11 +26,11 @@ class RaitonBuilder {
 
 Initialise les chemins et active le HMR si demandé :
 
-```typescript
+```
 async prepare(): Promise<this> {
   1. initialize() → résout source, out, bootstrapper
   2. Si options.hmr && options.serve:
-     - Écoute le signal 'hmr:controller'
+     - Écoute le signal 'hmr:artifact'
      - Active le watcher sur le dossier source
 }
 ```
@@ -78,11 +78,8 @@ protected watching(): this {
 }
 
 protected async parse(filename: string) {
-  if (isControllerArtifact(filename)) {
-    Raiton.signals.dispatch('hmr:controller', {filename, ...})
-  }
-  if (Artifacts.is(filename)) {
-    Artifacts.reload(await import(`${filename}?v=${version}&t=${timestamp}`), filename)
+  if (Artifacts.is(filename) || isControllerArtifact(filename) || isSocketArtifact(filename)) {
+    Raiton.signals.dispatch('hmr:artifact', {filename, ...})
   }
 }
 ```

@@ -3,7 +3,7 @@
 **Dossier :** `source/types/`
 **Import :** `import { ... } from "raiton/types"` ou `import type { ... } from "raiton/types"`
 
-> **Navigation :** [← docs/](../README.md) | [↑ Index](../README.md)
+> **Navigation :** [← docs contributeur](../README.md) | [↑ Index](../README.md)
 
 ## Table des matières
 

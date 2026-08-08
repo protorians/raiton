@@ -179,13 +179,40 @@ Registre des types d'artifacts avec support HMR.
 import { Artifacts } from "raiton/framework"
 
 // Types par défaut
-Artifacts.defaultTypes  // ["controller", "socket", "service"]
+Artifacts.defaultTypes  // [
+//   "service",
+//   "provider",
+//   "type",
+//   "interface",
+//   "repository",
+//   "database",
+//   "db",
+//   "util",
+//   "utility",
+//   "source",
+//   "controller",
+//   "socket",
+//   "middleware",
+//   "hook",
+//   "event",
+//   "listener",
+//   "validator",
+//   "strategy",
+//   "strategy-provider",
+//   "strategy-type",
+//   "use-case",
+//   "dto",
+//   "entity",
+//   "model",
+//   "schema",
+// ]
 
 // Enregistrer des types supplémentaires
 Artifacts.registerMany("command", "event")
 
 // Vérifier si un fichier est un artifact
-Artifacts.is("user.controller.ts")  // true (contient "controller")
+Artifacts.is("user.controller.ts")  // true
+Artifacts.is("user.controller.js")  // true
 Artifacts.is("user.service.ts")     // true
 Artifacts.is("README.md")           // false
 
@@ -204,6 +231,7 @@ import {
 } from "raiton/framework"
 
 isControllerArtifact("user.controller.ts")   // true
+isControllerArtifact("user.controller.js")   // true
 isSocketArtifact("chat.socket.ts")            // true
 isServiceArtifact("auth.service.ts")          // true
 isArtifact("user.controller.ts")              // true (n'importe quel type)

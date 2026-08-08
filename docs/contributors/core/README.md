@@ -2,7 +2,7 @@
 
 Le noyau de Raiton gère le cycle de vie de l'application, le routage, le middleware, l'injection de dépendances, les plugins et la configuration.
 
-> **Navigation :** [← docs/](../README.md) | [↑ Index](../README.md) | [application.md →](application.md)
+> **Navigation :** [← docs contributeur](../README.md) | [↑ Index](../README.md) | [application.md →](application.md)
 
 ## Table des matières
 

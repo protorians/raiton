@@ -18,15 +18,10 @@ Watcher (fs.watch, recursive)
     v
 builder.parse(filename)
     │
-    ├── isControllerArtifact(filename)
-    │       → dispatch 'hmr:controller'
-    │           → ControllerBuilder.build({filename, version, timestamp})
-    │               → Réimporte et recompile le contrôleur
-    │               → Remplace la route dans le router
-    │
-    └── Artifacts.is(filename)
-            → Artifacts.reload(module, filename)
-                → Met à jour le registre des artifacts
+    └── dispatch 'hmr:artifact'
+            ├── si contrôleur / socket → ControllerBuilder.build({filename, version, timestamp})
+            └── sinon → Artifacts.reload(module, filename)
+                    → Met à jour le registre des artifacts
 ```
 
 ## Watcher
@@ -50,13 +45,19 @@ Le watcher utilise `fs.watch()` de Node.js avec l'option `recursive: true`.
 ```typescript
 // Réception du signal (dans builder.prepare())
 if (this.options.hmr && this.options.serve) {
-  Raiton.signals.listen('hmr:controller', async ({filename, version, timestamp}) => {
-    await ControllerBuilder.build({filename, version, timestamp})
+  Raiton.signals.listen('hmr:artifact', async ({filename, version, timestamp}) => {
+    const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
+    if (isControllerArtifact(filename) || isSocketArtifact(filename)) {
+      await ControllerBuilder.build({filename, version, timestamp})
+      return
+    }
+
+    Artifacts.reload(imported, filename)
   })
 }
 ```
 
-Le signal `hmr:controller` est dispatché via `Raiton.signals` (EventBus de `@protorians/events-bus`).
+Le signal `hmr:artifact` est le seul point d'entrée du HMR côté runtime. Le type de fichier est résolu localement.
 
 ## Rechargement avec cache busting
 
@@ -71,15 +72,9 @@ protected async parse(filename: string) {
     type,
   }
 
-  if (isControllerArtifact(filename)) {
-    Raiton.signals.dispatch('hmr:controller', payload)
+  if (Artifacts.is(filename) || isControllerArtifact(filename) || isSocketArtifact(filename)) {
+    Raiton.signals.dispatch('hmr:artifact', payload)
   }
-
-  if (Artifacts.is(filename))
-    Artifacts.reload(
-      await import(`${filename}?v=${payload.version}&t=${payload.timestamp}`),
-      filename
-    )
 }
 ```
 
@@ -89,8 +84,9 @@ protected async parse(filename: string) {
 
 | Type de fichier | Comportement |
 |----------------|-------------|
-| `*.controller.ts` | Recompilation du contrôleur, remplacement de ses routes |
-| Artifacts connus (service, socket) | Rechargement du module dans le registre |
+| `*.controller.ts` / `*.controller.js` | Recompilation du contrôleur via `ControllerBuilder.build()` |
+| `*.socket.ts` / `*.socket.js` | Recompilation du socket via `ControllerBuilder.build()` |
+| Tous les artifacts listés dans `Artifacts.defaultTypes` | Rechargement du module dans le registre |
 | Autres fichiers | Ignorés (ne déclenchent pas de rechargement) |
 
 ## Exemple
@@ -111,7 +107,8 @@ $ echo "  @Get('/new') newRoute() { return 'ajouté à chaud' }" >> source/contr
 
 ## Limitations
 
-- Le HMR ne recharge que les **contrôleurs** et les **artifacts enregistrés**
+- Le HMR ne passe que par `hmr:artifact`
+- Les contrôleurs et sockets sont rechargés via le même signal, mais traités selon leur suffixe
 - Les modifications de **configuration** (`raiton.config.json`) nécessitent un redémarrage
 - Les modifications de **middlewares globaux** (`app.use()`) nécessitent un redémarrage
 - Le HMR dépend de `fs.watch` — peut ne pas fonctionner sur certains systèmes de fichiers distants (NFS, Docker volumes sur macOS)

@@ -3,7 +3,7 @@
 **Fichiers :** `source/bin/`, `source/commands/`
 **Import CLI :** `bun raiton <commande>`
 
-> **Navigation :** [← docs/](../README.md) | [↑ Index](../README.md) | [commands.md →](commands.md)
+> **Navigation :** [← docs contributeur](../README.md) | [↑ Index](../README.md) | [commands.md →](commands.md)
 
 ## Table des matières
 

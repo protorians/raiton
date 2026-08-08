@@ -62,7 +62,7 @@ await ControllerBuilder.scan("./source")
 Recompile un seul contrôleur (utilisé par le HMR lors d'un changement de fichier) :
 
 ```typescript
-// Appelé par le watcher HMR via le signal 'hmr:controller'
+// Appelé par le watcher HMR via le signal 'hmr:artifact'
 await ControllerBuilder.build({
   filename: "./source/controllers/user.controller.ts",
   version: 2,
