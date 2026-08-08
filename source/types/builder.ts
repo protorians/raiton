@@ -1,4 +1,5 @@
 import {WatchEventType} from "node:fs";
+import type {HmrChannel} from "../framework/artifacts";
 
 export interface StartCommandOptionsInterface {
     develop?: boolean;
@@ -46,4 +47,6 @@ export interface BuilderHMRDeclarationInterface {
     timestamp?: number;
     version?: number;
     type?: WatchEventType
+    channel?: HmrChannel
+    artifactType?: string
 }

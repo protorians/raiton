@@ -5,12 +5,11 @@ import fs, {WatchEventType} from "node:fs";
 import type {BuilderConfigInterface, BuilderInterface, ThreadInterface,} from "../types";
 import {RaitonThread} from "./thread";
 import {Raiton} from "./raiton";
-import {isControllerArtifact, isSocketArtifact} from "../framework";
 import {ControllerBuilder} from "./controller";
 import {watch} from "fs";
 import {LBadge, Logger} from "@protorians/logger";
 import {Throwable} from "../framework/exceptions";
-import {Artifacts} from "../framework/artifacts";
+import {Artifacts, HMR_CHANNELS, HmrChannel} from "../framework/artifacts";
 import {build} from "esbuild";
 import {execSync, spawn, spawnSync} from "node:child_process";
 
@@ -53,18 +52,19 @@ export class RaitonBuilder implements BuilderInterface {
     protected async parse(filename: string, type?: WatchEventType) {
         if (!fs.existsSync(filename)) return;
 
+        const classification = Artifacts.classify(filename)
+        if (!classification) return
+
         const payload = {
             filename,
             timestamp: Date.now(),
             version: this._compiledVersionNumber,
-            type
+            type,
+            channel: classification.channel,
+            artifactType: classification.artifactType,
         }
 
-        // Logger.log(LBadge.info('HMR'), 'activated');
-
-        if (Artifacts.is(filename) || isControllerArtifact(filename) || isSocketArtifact(filename))
-            Raiton.signals.dispatch('hmr:artifact', payload)
-
+        Raiton.signals.dispatch(classification.channel as any, payload)
         return payload;
     }
 
@@ -112,25 +112,70 @@ export class RaitonBuilder implements BuilderInterface {
         await this.initialize()
 
         if (this.options.hmr && this.options.serve) {
-            Raiton.signals.listen(
-                'hmr:artifact',
-                async ({filename, version, timestamp}) => {
-                    const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
-
-                    if (isControllerArtifact(filename) || isSocketArtifact(filename)) {
-                        await ControllerBuilder.build({filename, version, timestamp})
-                    } else if (Artifacts.is(filename)) {
-                        Artifacts.reload(imported, filename)
-                    }
-
-                    Logger.log(LBadge.debug('HMR'), (path.relative(this.workdir, filename)))
-                }
-            )
-            // this.parsing();
+            this.listenHmrDi()
+            this.listenHmrController()
+            this.listenHmrSocket()
+            this.listenHmrMiddleware()
+            this.listenHmrHook()
             this.watching();
         }
 
         return this;
+    }
+
+    protected listenHmrDi(): void {
+        Raiton.signals.listen(
+            'hmr:di',
+            async ({filename, version, timestamp}) => {
+                const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
+                Artifacts.reloadDi(imported, filename)
+                Logger.log(LBadge.debug('HMR'), `[di] ${path.relative(this.workdir, filename)}`)
+            }
+        )
+    }
+
+    protected listenHmrController(): void {
+        Raiton.signals.listen(
+            'hmr:controller',
+            async ({filename, version, timestamp}) => {
+                const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
+                await ControllerBuilder.recompile(imported, filename)
+                Logger.log(LBadge.debug('HMR'), `[controller] ${path.relative(this.workdir, filename)}`)
+            }
+        )
+    }
+
+    protected listenHmrSocket(): void {
+        Raiton.signals.listen(
+            'hmr:socket',
+            async ({filename, version, timestamp}) => {
+                const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
+                await ControllerBuilder.build({filename, version, timestamp})
+                Logger.log(LBadge.debug('HMR'), `[socket] ${path.relative(this.workdir, filename)}`)
+            }
+        )
+    }
+
+    protected listenHmrMiddleware(): void {
+        Raiton.signals.listen(
+            'hmr:middleware',
+            async ({filename, version, timestamp}) => {
+                const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
+                Artifacts.reloadMiddleware(imported, filename)
+                Logger.log(LBadge.debug('HMR'), `[middleware] ${path.relative(this.workdir, filename)}`)
+            }
+        )
+    }
+
+    protected listenHmrHook(): void {
+        Raiton.signals.listen(
+            'hmr:hook',
+            async ({filename, version, timestamp}) => {
+                const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
+                Artifacts.reloadHook(imported, filename)
+                Logger.log(LBadge.debug('HMR'), `[hook] ${path.relative(this.workdir, filename)}`)
+            }
+        )
     }
 
     protected async build(thread: ThreadInterface): Promise<this> {

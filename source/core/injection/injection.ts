@@ -61,6 +61,29 @@ export class Injection {
         return this;
     }
 
+    static invalidate(name: string): typeof this {
+        const name_ = this.normalizeName(name);
+        if (this._instances.has(name_)) {
+            const scopeInstances = this._instances.get(name_)!;
+            for (const [scope, instance] of scopeInstances) {
+                if (typeof instance.onUnmount === 'function') {
+                    try { instance.onUnmount() } catch { /* noop */ }
+                }
+            }
+            this._instances.delete(name_);
+        }
+        return this;
+    }
+
+    static invalidateCascade(name: string): typeof this {
+        this.invalidate(name);
+        const dependents = this.getDependents(name);
+        for (const dep of dependents) {
+            this.invalidateCascade(dep);
+        }
+        return this;
+    }
+
     static getDependents(name: string): string[] {
         return Array.from(this._dependents.get(this.normalizeName(name)) || []);
     }
