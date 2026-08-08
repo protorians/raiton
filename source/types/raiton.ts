@@ -3,6 +3,5 @@ import {BuilderHMRDeclarationInterface} from "./builder";
 export interface RaitonSignalMapInterface {
     ready?: undefined;
     errors: any;
-    'hmr:controller': BuilderHMRDeclarationInterface;
-    'hmr:socket': BuilderHMRDeclarationInterface;
+    'hmr:artifact': BuilderHMRDeclarationInterface;
 }

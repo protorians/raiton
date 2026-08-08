@@ -60,21 +60,10 @@ export class RaitonBuilder implements BuilderInterface {
             type
         }
 
-        Logger.log(LBadge.info('HMR'), 'activated');
+        // Logger.log(LBadge.info('HMR'), 'activated');
 
-        if (isControllerArtifact(filename)) {
-            Raiton.signals.dispatch('hmr:controller', payload)
-        }
-
-        if (isSocketArtifact(filename)) {
-            Raiton.signals.dispatch('hmr:socket', payload)
-        }
-
-        if (Artifacts.is(filename))
-            Artifacts.reload(
-                await import(`${filename}?v=${payload.version || 1}&t=${payload.timestamp || Date.now()}`),
-                filename
-            )
+        if (Artifacts.is(filename) || isControllerArtifact(filename) || isSocketArtifact(filename))
+            Raiton.signals.dispatch('hmr:artifact', payload)
 
         return payload;
     }
@@ -124,15 +113,17 @@ export class RaitonBuilder implements BuilderInterface {
 
         if (this.options.hmr && this.options.serve) {
             Raiton.signals.listen(
-                'hmr:controller',
+                'hmr:artifact',
                 async ({filename, version, timestamp}) => {
-                    await ControllerBuilder.build({filename, version, timestamp})
-                }
-            )
-            Raiton.signals.listen(
-                'hmr:socket',
-                async ({filename, version, timestamp}) => {
-                    await ControllerBuilder.build({filename, version, timestamp})
+                    const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
+
+                    if (isControllerArtifact(filename) || isSocketArtifact(filename)) {
+                        await ControllerBuilder.build({filename, version, timestamp})
+                    } else if (Artifacts.is(filename)) {
+                        Artifacts.reload(imported, filename)
+                    }
+
+                    Logger.log(LBadge.debug('HMR'), (path.relative(this.workdir, filename)))
                 }
             )
             // this.parsing();

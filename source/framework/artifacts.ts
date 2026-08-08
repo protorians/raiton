@@ -2,7 +2,7 @@ import {Injection} from "../core/injection";
 import {Logger} from "@protorians/logger";
 import type {ConstructorType} from "../types";
 import {Raiton} from "../core/raiton";
-import {isArtifact, isControllerArtifact} from "./utilities";
+import {isArtifact} from "./utilities";
 
 export class Artifacts {
 
@@ -34,6 +34,7 @@ export class Artifacts {
         'entity',
         'model',
         'schema',
+        'socket',
     ]
 
     static register(type: string) {
@@ -68,17 +69,6 @@ export class Artifacts {
                 if (filename) Injection.registerArtifactPath(name, filename);
                 Injection.updateConstruct(name, mod as ConstructorType)
 
-                const dependents = Injection.getDependents(name);
-                for (const dependent of dependents) {
-                    const dependentPath = Injection.getArtifactPath(dependent);
-                    if (dependentPath && isControllerArtifact(dependentPath)) {
-                        Raiton.signals.dispatch('hmr:controller', {
-                            filename: dependentPath,
-                            timestamp: Date.now(),
-                            version: 1
-                        })
-                    }
-                }
             }
         }
 

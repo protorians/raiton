@@ -22,7 +22,7 @@ export default class BuildCommand extends RaitonCommand {
 
         const builder = new RaitonBuilder(this.workdir, {
             serve: options.develop,
-            hmr: false
+            hmr: options.develop
         });
 
         await builder.prepare()
