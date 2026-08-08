@@ -50,22 +50,24 @@ export class HelloController {
 
 ```typescript
 import "reflect-metadata";
-import {ThreadInterface} from "raiton/types";
-import {Application} from "raiton/core";
+import { ThreadInterface } from "raiton/types";
+import { Application } from "raiton/core";
+import { RuntimeType } from "raiton/framework";
 
-export default async function (thread: ThreadInterface) {
+export default async (thread: ThreadInterface) => {
     const app = new Application({
-        port: 3000,
+        port: 5711,
         prefix: '/api'
     });
 
-    // Enregistrez vos plugins, middlewares et contrôleurs ici
-    // ...
-
-    // Lier son application au thread
-    return await thread.setup({application: app}).run()
+    return await thread.setup({
+        application: app,
+        runtime: RuntimeType.Bun
+    }).run()
 }
 ```
+
+> **Note :** selon la configuration du projet, le bootstrapper est chargé depuis `source/main.ts` et la racine du projet peut être définie par `raiton.config.ts` via `rootDir`.
 
 ## Utilisation du CLI
 
@@ -91,6 +93,8 @@ Raiton détecte automatiquement l'environnement d'exécution et adapte son serve
 - **Web** : Compatible avec les environnements basés sur les standards Web (Fetch API).
 
 ## Documentation API
+
+Pour l’usage applicatif, voir le guide développeur : [docs/user-guide/README.md](docs/user-guide/README.md)
 
 Example
 ```typescript
