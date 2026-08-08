@@ -31,6 +31,7 @@ export class Artifacts {
         'strategy-type',
         'use-case',
         'dto',
+        'vm',
         'entity',
         'model',
         'schema',
