@@ -28,6 +28,15 @@ export function registerSocket(construct: any): SocketRegistryEntryInterface {
     return entry;
 }
 
+export function unregisterSocket(constructOrNamespace: string | any): boolean {
+    if (typeof constructOrNamespace === 'string') {
+        return registry.delete(constructOrNamespace);
+    }
+    const metadata = getSocketMetadata(constructOrNamespace.prototype || constructOrNamespace);
+    const namespace = metadata.namespace || '/';
+    return registry.delete(namespace);
+}
+
 export function getSocketRegistry(): Map<string, SocketRegistryEntryInterface> {
     return registry;
 }
