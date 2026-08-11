@@ -2,7 +2,7 @@ import {Security, bodyParserPlugin} from "../framework/plugins";
 import {PluginScope} from './plugins/scope'
 import {RequestContext} from './context'
 import {ApplicationConfigInterface, ApplicationInterface} from "../types/application";
-import {HttpException, HttpMethod, ThrowableResponse} from "../framework";
+import {HttpException, HttpMethod, ThrowableResponse, RaitonResponses, HttpStatus} from "../framework";
 import {RouteHandlerCallable} from "../types";
 import {Logger} from "@protorians/logger";
 import {RaitonConfig} from "./config";
@@ -141,7 +141,7 @@ export class Application implements ApplicationInterface {
                         Logger.warn(`Request out of application pathname: ${pathname} (expected prefix: ${this.config.pathname})`)
                     }
                     reply.status(404)
-                    return reply.send({error: false, statusCode: 404})
+                    return reply.send(RaitonResponses('Not Found', null, HttpStatus.NOT_FOUND, {error: false}))
                 }
             }
 
@@ -155,7 +155,7 @@ export class Application implements ApplicationInterface {
                     Logger.warn(`Route not found: ${req.method} ${pathname}`)
                 }
                 reply.status(404)
-                return reply.send({error: false, statusCode: 404})
+                return reply.send(RaitonResponses('Not Found', null, HttpStatus.NOT_FOUND, {error: false}))
             }
 
             try {
@@ -177,7 +177,7 @@ export class Application implements ApplicationInterface {
                     console.error(e)
                 }
                 context.reply.status(500)
-                context.reply.send({error: true, statusCode: 500, data: null})
+                context.reply.send(RaitonResponses('Internal Server Error', null, HttpStatus.INTERNAL_SERVER_ERROR, {error: true}))
             }
         }
 
@@ -191,12 +191,7 @@ export class Application implements ApplicationInterface {
                 ctx.reply.status(err.statusCode ?? 500)
                 return ctx.reply.send(err.render())
             }
-            ctx.reply.send({
-                statusCode: 500,
-                error: true,
-                message: err.message ?? err,
-                data: null
-            })
+            ctx.reply.send(RaitonResponses(err.message ?? err, null, HttpStatus.INTERNAL_SERVER_ERROR, {error: true}))
         }
     }
 }

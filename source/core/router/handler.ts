@@ -4,6 +4,7 @@ import {Raiton} from "..";
 import {HttpException} from "../../framework/exceptions";
 import {ThrowableResponse} from "../../framework/responses/http-throwable";
 import {collectRouteArguments, validateDtoArguments, validateResponse, runMiddlewares} from "./handler.utils";
+import {RaitonResponses, HttpStatus} from "../../framework";
 
 export function createHandler(
     instance: any,
@@ -33,16 +34,18 @@ export function createHandler(
                 return err.render()
             }
 
-            return {
-                statusCode: 500,
-                error: true,
-                message: err.message ?? err,
-                data: null,
-                stack: isDevelopment
-                    ? (typeof err.stack === 'string' ? err.stack.split('\n')
-                        : [String(err.stack || err.toString() || err.message || err.name || 'Unknown error')])
-                        .map((l: any) => typeof l === 'string' ? l.trim() : String(l)) : undefined
-            };
+            return RaitonResponses(
+                err.message ?? err,
+                null,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                {
+                    error: true,
+                    errorStack: isDevelopment
+                        ? (typeof err.stack === 'string' ? err.stack.split('\n')
+                            : [String(err.stack || err.toString() || err.message || err.name || 'Unknown error')])
+                            .map((l: any) => typeof l === 'string' ? l.trim() : String(l)) : undefined
+                }
+            );
         }
     };
 

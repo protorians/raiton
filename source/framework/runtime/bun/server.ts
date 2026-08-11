@@ -6,6 +6,7 @@ import {Logger} from "@protorians/logger";
 import {getRealIp} from "../../utilities";
 import {findSocketForPath} from "../../../core/socket";
 import {Injection} from "../../../core/injection";
+import {RaitonResponses, HttpStatus} from "../..";
 
 export const bunRuntime: RuntimeAdapterInterface = {
     createServer(handler, options?: RuntimeServerOptionsInterface) {
@@ -50,11 +51,11 @@ export const bunRuntime: RuntimeAdapterInterface = {
                         : entry.metadata.events.find((item: any) => item.type === 'message')
 
                     if (!event) {
-                        ws.send(JSON.stringify({
-                            statusCode: 404,
-                            message: `Socket event "${eventName ?? 'message'}" not found`,
-                            data: null
-                        }))
+                        ws.send(JSON.stringify(RaitonResponses(
+                            `Socket event "${eventName ?? 'message'}" not found`,
+                            null,
+                            HttpStatus.NOT_FOUND
+                        )))
                         return
                     }
 
@@ -64,11 +65,11 @@ export const bunRuntime: RuntimeAdapterInterface = {
                     }
                 } catch (e: any) {
                     Logger.error('Socket message failed', e.message ?? e)
-                    ws.send(JSON.stringify({
-                        statusCode: 500,
-                        message: 'Internal server error',
-                        data: null
-                    }))
+                    ws.send(JSON.stringify(RaitonResponses(
+                        'Internal server error',
+                        null,
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                    )))
                 }
             },
             async close(ws: any) {

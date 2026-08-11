@@ -12,7 +12,9 @@ export function RaitonResponses(
 ) {
 
     if (metadata) {
-        metadata.error = typeof data?.error === 'boolean' ? data?.error : false
+        if (metadata.error === undefined) {
+            metadata.error = typeof data?.error === 'boolean' ? data?.error : false
+        }
         metadata.errorStack = (metadata.errorStack instanceof Error)
             ? metadata.errorStack
             : (Raiton.thread?.builder?.options?.serve

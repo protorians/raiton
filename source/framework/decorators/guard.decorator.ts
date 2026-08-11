@@ -1,7 +1,7 @@
 import {GuardOptions} from "../../types";
 import {Middleware} from "./middleware.decorator";
 import {RaitonGuards} from "../../core/guards";
-import {HttpStatus} from "../enums";
+import {HttpStatus, RaitonResponses} from "..";
 
 export function createGuardDecoration({name, handler}: GuardOptions) {
     return Middleware(async ({next, context}) => {
@@ -15,9 +15,6 @@ export function createGuardDecoration({name, handler}: GuardOptions) {
         if (response) return next()
 
         context.reply.status(HttpStatus.FORBIDDEN)
-        return context.reply.send({
-            error: true,
-            message: 'Forbidden'
-        });
+        return         context.reply.send(RaitonResponses('Forbidden', null, HttpStatus.FORBIDDEN, {error: true}));
     });
 }

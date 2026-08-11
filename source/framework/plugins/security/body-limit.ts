@@ -1,5 +1,6 @@
 import {definePlugin} from "../../../core/plugins";
 import {MiddlewareParametersInterface} from "../../../types";
+import {RaitonResponses, HttpStatus} from "../..";
 
 
 export const secureBodyLimit = (maxBytes = 1_000_000) =>
@@ -10,8 +11,7 @@ export const secureBodyLimit = (maxBytes = 1_000_000) =>
       )
 
       if (len > maxBytes) {
-        context.reply.status(413)
-        return context.send({ error: 'Payload too large' })
+        return context.send(RaitonResponses('Payload too large', null, HttpStatus.PAYLOAD_TOO_LARGE, {error: true}))
       }
 
       await next()

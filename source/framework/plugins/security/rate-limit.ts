@@ -1,5 +1,6 @@
 import {definePlugin} from "../../../core/plugins";
 import {ContextInterface, MiddlewareParametersInterface, MiddlewareNextCallable} from "../../../types";
+import {RaitonResponses, HttpStatus} from "../..";
 
 
 export interface RateLimitOptions {
@@ -33,8 +34,7 @@ export const secureRateLimit = (
             hits.set(ip, entry)
 
             if (entry.count > max) {
-                context.reply.status(429)
-                return context.send({error: 'Too many requests'})
+                return context.send(RaitonResponses('Too many requests', null, HttpStatus.TOO_MANY_REQUESTS, {error: true}))
             }
 
             await next()
