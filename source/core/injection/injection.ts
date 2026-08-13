@@ -30,7 +30,7 @@ export class Injection {
     }
 
     static clear(): void {
-        Logger.error('Clearing injection container');
+        Logger.info('Clearing injection container');
         this._classes.clear();
         this._instances.clear();
         this._dependents.clear();
