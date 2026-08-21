@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const bin = path.resolve(__dirname, 'source/bin/index.ts');
 const workdir = path.dirname(bin);

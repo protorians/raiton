@@ -41,7 +41,7 @@
     "start": "bun run build/bin/index.mjs",
     "build": "bun build source/bin/index.ts --target=node --format=esm --outfile=build/bin/index.mjs",
     "version": "bun run scripts/update-version.ts",
-    "postinstall": "chmod +x source/bin/index.ts",
+    "postinstall": "bun run scripts/postinstall.js",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
