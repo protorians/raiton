@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const bin = path.resolve(__dirname, 'source/bin/index.ts');
+const bin = path.resolve(__dirname, '../source/bin/index.ts');
 const workdir = path.dirname(bin);
 const base = path.basename(bin, '.ts');
 
