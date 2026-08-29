@@ -16,6 +16,7 @@ interface CliOptions {
     json: boolean;
     cwd: string;
     allowNonConventional: boolean;
+    noTag: boolean;
     base?: string;
 }
 
@@ -26,6 +27,7 @@ function parseArgs(argv: string[]): CliOptions {
         dryRun: argv.includes("--dry-run"),
         json: argv.includes("--json"),
         allowNonConventional: argv.includes("--allow-non-conventional"),
+        noTag: argv.includes("--no-tag"),
         base,
         cwd: process.cwd(),
     };
@@ -56,6 +58,7 @@ function getCurrentBranch(): string {
 }
 
 interface CommitInfo {
+    hash: string;
     subject: string;
     body: string;
 }
@@ -64,32 +67,98 @@ function getCommitsInRange(range: string): CommitInfo[] {
     const SEP = "\u0000";
     const END = "\u0001";
     try {
-        const output = run(`git log ${range} --format=%s%x00%b%x01`);
+        const output = run(`git log ${range} --format=%H%x00%s%x00%b%x01`);
         if (!output) return [];
         return output
             .split(END)
             .map((entry) => entry.replace(/^\n/, "").trim())
             .filter(Boolean)
             .map((entry) => {
-                const [subject, body = ""] = entry.split(SEP);
-                return {subject: subject?.trim() || '', body: body.trim()};
+                const [hash, subject, body = ""] = entry.split(SEP);
+                return {
+                    hash: hash?.trim() || "",
+                    subject: subject?.trim() || "",
+                    body: body.trim(),
+                };
             });
     } catch {
         return [];
     }
 }
 
-interface UnpushedCommits {
+interface VersionRange {
     base: string | null;
+    label: string | null;
     commits: CommitInfo[];
 }
 
-function getUnpushedCommits(baseOverride?: string): UnpushedCommits {
-    const base = baseOverride || getUpstreamRef();
-    if (!base) {
-        return {base: null, commits: []};
+// Correspond aux tags de release de type "vX.Y.Z..." ou "vX.Y.Z-beta.N"...
+const RELEASE_TAG_RE = /^v?\d+\.\d+\.\d+/;
+
+function getLastReleaseTag(): string | null {
+    try {
+        // Tag le plus récent atteignable depuis HEAD
+        const tag = run("git describe --tags --abbrev=0");
+        return tag && RELEASE_TAG_RE.test(tag) ? tag : null;
+    } catch {
+        return null;
     }
-    return {base, commits: getCommitsInRange(`${base}..HEAD`)};
+}
+
+function getRepoUrl(): string {
+    try {
+        const url = run("git config --get remote.origin.url");
+        return url.replace(/\.git$/, "").trim();
+    } catch {
+        return "";
+    }
+}
+
+function commitUrl(repoUrl: string, hash: string): string {
+    if (!repoUrl) return `${hash.slice(0, 7)}`;
+    return `[${hash.slice(0, 7)}](${repoUrl}/commit/${hash})`;
+}
+
+function getCommitsSinceTag(tag: string): CommitInfo[] {
+    // Commit d'ancêtre commun le plus récent entre le tag et HEAD,
+    // pour ne prendre que les commits réellement nouveaux depuis le tag.
+    try {
+        const mergeBase = run(`git merge-base "${tag}" HEAD`);
+        return getCommitsInRange(`${mergeBase}..HEAD`);
+    } catch {
+        return getCommitsInRange(`${tag}..HEAD`);
+    }
+}
+
+function getAllCommits(): CommitInfo[] {
+    return getCommitsInRange("--root HEAD");
+}
+
+/**
+ * Détection de la base de comparaison, par ordre de pertinence :
+ *  1. --base explicite
+ *  2. dernier tag de release atteignable (détermine réellement les nouveaux commits)
+ *  3. branche amont (commits non poussés)
+ *  4. historique complet (aucune base configurée)
+ */
+function getCommitsForVersion(
+    baseOverride?: string
+): VersionRange {
+    if (baseOverride) {
+        return {base: baseOverride, label: "base explicite (--base)", commits: getCommitsInRange(`${baseOverride}..HEAD`)};
+    }
+
+    const tag = getLastReleaseTag();
+    if (tag) {
+        return {base: tag, label: "dernier tag de release", commits: getCommitsSinceTag(tag)};
+    }
+
+    const upstream = getUpstreamRef();
+    if (upstream) {
+        return {base: upstream, label: "branche amont (commits non poussés)", commits: getCommitsInRange(`${upstream}..HEAD`)};
+    }
+
+    return {base: null, label: "historique complet", commits: getAllCommits()};
 }
 
 // @ts-ignore
@@ -157,6 +226,90 @@ function determineIncrement(commits: CommitInfo[]): Increment | null {
     return result;
 }
 
+type ChangelogSection = "breaking" | "features" | "bugfixes" | "others";
+
+function sectionForCommit(commit: CommitInfo): ChangelogSection {
+    const subject = commit.subject.trim();
+    const body = commit.body.trim();
+    const fullText = `${subject}\n${body}`;
+
+    if (/^BREAKING[ -]CHANGE:/im.test(fullText)) return "breaking";
+
+    const match = subject.match(CONVENTIONAL_COMMIT_RE);
+    const type = match?.groups?.type?.toLowerCase() ?? "";
+
+    // un "!" dans le type (ex. feat!) marque aussi un breaking change
+    if (type && subject.includes(`${type}!`)) return "breaking";
+    if (MINOR_TYPES.has(type)) return "features";
+    if (PATCH_TYPES.has(type)) return "bugfixes";
+
+    return "others";
+}
+
+function renderCommitLine(commit: CommitInfo, repoUrl: string): string {
+    return `* ${commit.subject} (${commitUrl(repoUrl, commit.hash)})`;
+}
+
+const SECTION_TITLES: Record<ChangelogSection, string> = {
+    breaking: "Breaking Changes",
+    features: "Features",
+    bugfixes: "Bug Fixes",
+    others: "Other Changes",
+};
+
+/**
+ * Construit une section de CHANGELOG pour la version `next` à partir des commits
+ * analysés, en imitant le format conventional-changelog existant.
+ */
+function renderChangelogSection(
+    version: string,
+    previousTag: string | null,
+    commits: CommitInfo[],
+    repoUrl: string
+): string {
+    const date = new Date().toISOString().slice(0, 10);
+    const title = previousTag
+        ? `## [${version}](${repoUrl}/compare/${previousTag}...v${version}) (${date})`
+        : `# ${version} (${date})`;
+
+    const sections: ChangelogSection[] = ["breaking", "features", "bugfixes", "others"];
+    const lines: string[] = [title, ""];
+
+    // La section breaking vient en premier et porte tous les commits classés
+    // "other" restent en dernier.
+    for (const section of sections) {
+        const entries = commits.filter((c) => sectionForCommit(c) === section);
+        if (entries.length === 0) continue;
+        lines.push(`### ${SECTION_TITLES[section]}`, "");
+        for (const commit of entries) {
+            lines.push(renderCommitLine(commit, repoUrl));
+        }
+        lines.push("");
+    }
+
+    while (lines.length && lines[lines.length - 1] === "") lines.pop();
+    return lines.join("\n");
+}
+
+function writeChangelog(
+    version: string,
+    previousTag: string | null,
+    commits: CommitInfo[],
+    cwd: string
+): void {
+    const repoUrl = getRepoUrl();
+    const changelogPath = path.resolve(cwd, "CHANGELOG.md");
+    const section = renderChangelogSection(version, previousTag, commits, repoUrl);
+
+    let existing = "";
+    if (existsSync(changelogPath)) {
+        existing = readFileSync(changelogPath, "utf-8").trim();
+    }
+
+    const newContent = existing ? `${section}\n\n${existing}\n` : `${section}\n`;
+    writeFileSync(changelogPath, newContent);
+}
+
 interface SemVer {
     major: number;
     minor: number;
@@ -215,11 +368,27 @@ function computeNextVersion(current: string, increment: Increment, branch: strin
     return `${base}-${branchPreType}.${nextPreReleaseNum}`;
 }
 
+function createVersionTag(version: string): boolean {
+    const tag = `v${version}`;
+    try {
+        // Déjà présent (re-run) : on le déplace proprement sur HEAD.
+        if (run(`git rev-parse -q --verify "refs/tags/${tag}"`)) {
+            return false;
+        }
+    } catch {
+        // le tag n'existe pas, on va le créer
+    }
+    run(`git tag "${tag}"`);
+    return true;
+}
+
 function updateVersion(
     increment: Increment,
     branch: string,
+    commits: CommitInfo[],
+    previousTag: string | null,
     options: CliOptions
-): { previous: string; next: string } {
+): { previous: string; next: string; tag: string | null; changelog: boolean } {
     const packageJsonPath = path.resolve(options.cwd, "package.json");
     if (!existsSync(packageJsonPath)) {
         throw new Error(`package.json introuvable à l'emplacement : ${packageJsonPath}`);
@@ -234,12 +403,25 @@ function updateVersion(
 
     const nextVersion = computeNextVersion(currentVersion, increment, branch);
 
+    let tag: string | null = null;
+    let changelog = false;
     if (!options.dryRun) {
         packageJson.version = nextVersion;
         writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n");
+
+        // Un tag accompagne toute nouvelle version : c'est la source de vérité
+        // sur laquelle s'appuie la déduction (base = dernier tag).
+        if (!options.noTag) {
+            tag = `v${nextVersion}`;
+            createVersionTag(nextVersion);
+        }
+
+        // Le CHANGELOG est synchronisé en parallèle avec la version.
+        writeChangelog(nextVersion, previousTag, commits, options.cwd);
+        changelog = true;
     }
 
-    return {previous: currentVersion, next: nextVersion};
+    return {previous: currentVersion, next: nextVersion, tag, changelog};
 }
 
 function logValidationError(options: CliOptions, invalid: CommitInfo[]) {
@@ -278,43 +460,35 @@ function log(options: CliOptions, data: Record<string, unknown>) {
         console.log(`Aucune mise à jour : ${data.reason}`);
         return;
     }
-    console.log(`Base de comparaison : ${data.base ?? "aucune"}`);
-    console.log(`Commits non poussés analysés : ${data.commitCount}`);
+    console.log(`Base de comparaison : ${data.base ?? "aucune"}${data.label ? ` (${data.label})` : ""}`);
+    console.log(`Commits analysés : ${data.commitCount}`);
     console.log(`Increment déterminé : ${data.increment}`);
     const prefix = data.status === "dry-run" ? "[dry-run] " : "";
     console.log(
         `${prefix}Version : ${data.previousVersion} -> ${data.nextVersion} (branche: ${data.branch})`
     );
+    if (data.tag) {
+        console.log(`Tag créé : ${data.tag}`);
+    }
+    if (data.changelog) {
+        console.log(`CHANGELOG.md synchronisé`);
+    }
 }
 
 function main() {
     const options = parseArgs(process.argv.slice(2));
     const branch = getCurrentBranch();
-    const {base, commits} = getUnpushedCommits(options.base);
-
-    if (!base) {
-        log(options, {
-            base: null,
-            commitCount: 0,
-            branch,
-            dryRun: options.dryRun,
-            status: "skipped",
-            reason:
-                "aucune branche amont configurée (fais 'git push -u origin " +
-                branch +
-                "' une première fois, ou précise --base <ref>)",
-        });
-        return;
-    }
+    const {base, label, commits} = getCommitsForVersion(options.base);
 
     if (commits.length === 0) {
         log(options, {
             base,
+            label,
             commitCount: 0,
             branch,
             dryRun: options.dryRun,
             status: "skipped",
-            reason: `aucun commit non poussé par rapport à ${base}`,
+            reason: `aucun commit à analyser (base: ${base ?? "historique complet"})`,
         });
         return;
     }
@@ -332,6 +506,7 @@ function main() {
 
     const summary = {
         base,
+        label,
         commitCount: commits.length,
         increment,
         branch,
@@ -347,13 +522,22 @@ function main() {
         return;
     }
 
-    const {previous, next} = updateVersion(increment, branch, options);
+    const previousTag = (base && RELEASE_TAG_RE.test(base)) ? base : null;
+    const {previous, next, tag, changelog} = updateVersion(
+        increment,
+        branch,
+        commits,
+        previousTag,
+        options
+    );
 
     log(options, {
         ...summary,
         status: options.dryRun ? "dry-run" : "updated",
         previousVersion: previous,
         nextVersion: next,
+        tag,
+        changelog,
     });
 }
 

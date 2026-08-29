@@ -100,4 +100,11 @@ Utiliser les préfixes suivants :
 | `remove`         | Suppression de code ou de fichiers |
 | `deprecate`      | Marquage d'une fonctionnalité comme dépréciée |
 
-Executer ```bun run version``` pour mettre à jour la version de l'application automatiquement
+Executer ```bun run version``` pour mettre à jour la version de l'application automatiquement.
+
+Ce script :
+- détecte la base de comparaison la plus pertinente (dernier tag de release, sinon branche amont, sinon historique complet) ;
+- déduit le type d'incrément (major / minor / patch) à partir des commits depuis cette base ;
+- met à jour `package.json`, **crée le tag git `v<version>`** et **synchronise `CHANGELOG.md`** sur chaque nouvelle version, afin que les versions publiées sur npm soient toujours traçables.
+
+Utiliser `--dry-run` pour prévisualiser sans rien modifier, `--no-tag` pour ne pas créer de tag, et `--base <ref>` pour forcer la base de comparaison.
