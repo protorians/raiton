@@ -1,3 +1,27 @@
+## [6.3.0-beta.10](https://github.com/protorians/raiton/compare/v6.1.1-beta.5...v6.3.0-beta.10) (2026-08-29)
+
+### Features
+
+* feat: add postinstall script for Windows compatibility and bin file permissions setup ([8a819e4](https://github.com/protorians/raiton/commit/8a819e44d71e0208b00457264e668fc4570cd573))
+
+### Bug Fixes
+
+* refactor: enhance version updater with tag synchronization, changelog generation, and improved commit handling ([6000800](https://github.com/protorians/raiton/commit/600080096ed1fe8ce07e5acd605bff5af849eee7))
+* refactor: optimize route matching to prioritize matches with fewer parameters ([add1559](https://github.com/protorians/raiton/commit/add1559589501db8e2e665677524993aede93d55))
+* fix: correct path resolution in postinstall script ([52b6c67](https://github.com/protorians/raiton/commit/52b6c67770d9be81eea1f13cffc1c6dfdea4a582))
+* refactor: migrate postinstall script to TypeScript and update package.json accordingly ([041d041](https://github.com/protorians/raiton/commit/041d041b0a062aebd6acf5de0918045b4f8453ec))
+* refactor: clean up version updater with consistent formatting, minor readability improvements, and extended type handling ([4789d8b](https://github.com/protorians/raiton/commit/4789d8b5d65da0638f5f63162294c3a573c90bc9))
+* refactor: update injection container logging to use `Logger.info` for clear operation messaging ([a656751](https://github.com/protorians/raiton/commit/a65675180e58d6bd90413c61268099dac887de8d))
+* refactor: improve version updater with upstream branch detection, enhanced commit range parsing, and base overrides for CI usage ([dc264e7](https://github.com/protorians/raiton/commit/dc264e74d65bb6007891734dd71a0a35282ef59e))
+* refactor: improve version updater with upstream branch detection, enhanced commit range parsing, and base overrides for CI usage ([1ac6eee](https://github.com/protorians/raiton/commit/1ac6eeee8b8bfe6b12b685a1fd51a392bc73a15d))
+* refactor: enhance version updater with validation, logging improvements, and support for non-conventional commits ([e8b3b86](https://github.com/protorians/raiton/commit/e8b3b86540663117f1c0e770593f7563cd18661c))
+* refactor: overhaul version updater to support pre-releases, conventional commits, and enhanced CLI functionality ([b9e8d28](https://github.com/protorians/raiton/commit/b9e8d281387670ff19474b55d073708595cd201e))
+
+### Other Changes
+
+* release: downgrade version to 6.2.2-beta.9 ([2ffca7b](https://github.com/protorians/raiton/commit/2ffca7b081106ad1b284c222e3e8419345b3704e))
+* release: bump version to 6.1.3-beta.7 ([bc82e15](https://github.com/protorians/raiton/commit/bc82e15fece69bf3074d9e1831651801bf458b12))
+
 # [1.0.0-alpha.4](https://github.com/protorians/raiton/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2026-02-17)
 
 ## Breaking Changes
