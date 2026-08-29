@@ -42,10 +42,22 @@ export class RouteMatcher {
     }
 
     match(method: string, url: string): Route | null {
-        for (const route of this._routes.values())
-            if (route.match(method, url))
-                return route.extractParams(url)
-        return null
+        let best: Route | null = null
+        let bestParamCount = Number.MAX_SAFE_INTEGER
+
+        for (const route of this._routes.values()) {
+            if (!route.match(method, url)) continue
+
+            const paramCount = route.params.length
+            if (paramCount < bestParamCount) {
+                bestParamCount = paramCount
+                best = route
+
+                if (paramCount === 0) break
+            }
+        }
+
+        return best ? best.extractParams(url) : null
     }
 
     clear(): this {
