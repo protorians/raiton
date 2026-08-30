@@ -1,3 +1,9 @@
+## [6.3.1-beta.11](https://github.com/protorians/raiton/compare/v6.3.0-beta.10...v6.3.1-beta.11) (2026-08-30)
+
+### Bug Fixes
+
+* refactor: improve `env` function type handling and ensure consistent value parsing ([f855d1e](https://github.com/protorians/raiton/commit/f855d1effc6c8c81beef73dbbaccbcbe7bcc9cc1))
+
 ## [6.3.0-beta.10](https://github.com/protorians/raiton/compare/v6.1.1-beta.5...v6.3.0-beta.10) (2026-08-29)
 
 ### Features
