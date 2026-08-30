@@ -1,7 +1,7 @@
 import {GenericValueType} from "../types/generic";
 import {getType} from "./utilities";
 
-export function env<T>(key: string, defaultValue?: string, type?: GenericValueType): T | undefined {
+export function env<T>(key: string, defaultValue?: T, type?: GenericValueType): T | undefined {
     const value = process.env[key] || defaultValue;
     type = type || getType(value) as GenericValueType;
 
@@ -9,16 +9,16 @@ export function env<T>(key: string, defaultValue?: string, type?: GenericValueTy
         switch (type) {
 
             case "bigInt":
-                return BigInt(value) as any;
+                return BigInt(value.toString()) as any;
 
             case 'float':
-                return parseFloat(value) as any;
+                return parseFloat(value.toString()) as any;
 
             case 'boolean':
                 return Boolean(value) as any;
 
             case "int":
-                return parseInt(value) as any;
+                return parseInt(value.toString()) as any;
 
             default:
                 return value as any;
