@@ -77,6 +77,7 @@ export class Artifacts {
         'model',
         'schema',
         'socket',
+        'mcp',
     ]
 
     static register(type: string) {
