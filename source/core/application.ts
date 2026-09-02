@@ -8,9 +8,11 @@ import {Logger} from "@protorians/logger";
 import {RaitonConfig} from "./config";
 import {Artifacts} from "../framework/artifacts";
 import {Injection} from "./injection";
+import {HttpsConfigInterface, resolveHttpsConfig} from "../framework/utilities/https";
 
 export class Application implements ApplicationInterface {
     private root: PluginScope
+    private _resolvedHttps: HttpsConfigInterface | undefined
 
     readonly version: string = RaitonConfig.get('version') || '0.0.1'
 
@@ -22,6 +24,7 @@ export class Application implements ApplicationInterface {
         readonly config: ApplicationConfigInterface
     ) {
         this.root = new PluginScope()
+        this._resolvedHttps = resolveHttpsConfig(this.config.https)
         if (this.config.workdir) {
             process.chdir(this.config.workdir)
         }
@@ -41,8 +44,12 @@ export class Application implements ApplicationInterface {
     }
 
     public get hostname(): string {
+        const protocol = this._resolvedHttps?.enabled
+            ? 'https'
+            : (this.config.protocole || 'http')
+
         return `${
-            this.config.protocole || 'http'
+            protocol
         }://${
             this.config.hostname || 'localhost'
         }${
@@ -50,6 +57,10 @@ export class Application implements ApplicationInterface {
         }${
             this.config.pathname || '/'
         }`
+    }
+
+    public get https(): HttpsConfigInterface | undefined {
+        return this._resolvedHttps
     }
 
     public setOption<K extends keyof ApplicationConfigInterface>(key: K, value: ApplicationConfigInterface[K]): this {

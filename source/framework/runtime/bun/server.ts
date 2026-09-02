@@ -88,7 +88,7 @@ export const bunRuntime: RuntimeAdapterInterface = {
 
         return {
             async listen(port, hostname) {
-                server = Bun.serve({
+                const serveOptions: any = {
                     port,
                     hostname,
                     websocket: socketHandlers,
@@ -170,7 +170,18 @@ export const bunRuntime: RuntimeAdapterInterface = {
                             {status: statusCode, headers}
                         )
                     }
-                })
+                }
+
+                if (options?.https?.enabled && options.https.certificate) {
+                    serveOptions.tls = {
+                        cert: options.https.certificate.cert,
+                        key: options.https.certificate.key,
+                        ca: options.https.certificate.ca,
+                        passphrase: options.https.certificate.passphrase,
+                    }
+                }
+
+                server = Bun.serve(serveOptions)
             },
             async close() {
                 server?.stop()

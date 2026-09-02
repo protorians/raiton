@@ -1,4 +1,5 @@
 import {HttpMethod} from "../framework";
+import {HttpsConfigInput, HttpsConfigInterface} from "../framework/utilities/https";
 
 export interface ApplicationConfigInterface {
     workdir?: string;
@@ -9,12 +10,15 @@ export interface ApplicationConfigInterface {
     prefix?: string;
     develop?: boolean;
     verbose?: boolean;
+    https?: HttpsConfigInput;
 }
 
 export interface ApplicationInterface {
     readonly config: ApplicationConfigInterface;
 
     get hostname(): string;
+
+    get https(): HttpsConfigInterface | undefined;
 
     setOption<K extends keyof ApplicationConfigInterface>(key: K, value: ApplicationConfigInterface[K]): this;
 

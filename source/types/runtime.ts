@@ -1,4 +1,5 @@
 import {RuntimeType} from "../framework/enums/runtime.enum";
+import {HttpsCertificateConfig, HttpsEnvironment} from "../framework/utilities/https";
 
 export interface RuntimeServerInterface {
     listen(port: number, hostname?: string): Promise<void>
@@ -8,8 +9,15 @@ export interface RuntimeServerInterface {
     handle?(request: Request): Promise<Response>
 }
 
+export interface RuntimeServerHttpsInterface {
+    enabled: boolean
+    environment?: HttpsEnvironment
+    certificate: HttpsCertificateConfig
+}
+
 export interface RuntimeServerOptionsInterface {
     prefix?: string;
+    https?: RuntimeServerHttpsInterface;
 }
 
 export interface RuntimeRequestInterface {

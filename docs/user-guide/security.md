@@ -1,6 +1,6 @@
 # Sécurité
 
-> **Navigation :** [← body-parser](body-parser.md) | [openapi →](openapi/README.md)
+> **Navigation :** [← body-parser](body-parser.md) | [https →](https.md)
 
 Les plugins de sécurité servent à protéger une API exposée publiquement.
 
@@ -43,4 +43,4 @@ app.register({
 
 ---
 
-[← body-parser](body-parser.md) | [openapi →](openapi/README.md)
+[← body-parser](body-parser.md) | [https →](https.md)

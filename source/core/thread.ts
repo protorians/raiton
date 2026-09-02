@@ -2,6 +2,7 @@ import type {
     BuilderInterface,
     RuntimeAdapterInterface,
     RuntimeServerInterface,
+    RuntimeServerHttpsInterface,
     ThreadInterface,
     ThreadOptionsInterface,
     ThreadSetupOptionsInterface,
@@ -102,16 +103,31 @@ export class RaitonThread implements ThreadInterface {
             const hostname = this.application.config.hostname || '0.0.0.0';
             const displayHostname = (hostname === '0.0.0.0') ? (this.getNetworkIp() || 'localhost') : hostname;
             const prefix = this.application.config.prefix
+            const httpsConfig = this.application.https
+
+            const httpsServerOptions: RuntimeServerHttpsInterface | undefined = httpsConfig?.enabled
+                ? {
+                    enabled: true,
+                    environment: httpsConfig.environment,
+                    certificate: httpsConfig.certificate!,
+                }
+                : undefined
 
             this.runtimeServer = this.runtime.createServer(
                 this.application.handle.bind(this.application),
-                {prefix}
+                {prefix, https: httpsServerOptions}
             )
+
+            const protocol = httpsConfig?.enabled ? 'https' : 'http'
 
             await this.runtimeServer.listen(port, hostname)
 
-            Logger.log(LBadge.info('Local access:'), `http://localhost:${port}${prefix ?? ''}`,)
-            Logger.log(LBadge.info('LAN access:'), `http://${displayHostname}:${port}${prefix ?? ''}`,)
+            Logger.log(LBadge.info('Local access:'), `${protocol}://localhost:${port}${prefix ?? ''}`,)
+            Logger.log(LBadge.info('LAN access:'), `${protocol}://${displayHostname}:${port}${prefix ?? ''}`,)
+
+            if (httpsConfig?.enabled) {
+                Logger.log(LBadge.info('HTTPS:'), `enabled (${httpsConfig.environment ?? 'custom'})`,)
+            }
         }
 
         return this;
