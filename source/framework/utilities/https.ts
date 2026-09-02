@@ -114,11 +114,21 @@ function generateWithOpenSSL(domain: string, certDir: string): HttpsCertificateC
 
     ensureDirectorySync(certDir)
 
+    const sanHosts = new Set<string>([domain])
+    sanHosts.add('localhost')
+    sanHosts.add('*.localhost')
+
+    const sans = [
+        ...[...sanHosts].map(d => `DNS:${d}`),
+        'IP:127.0.0.1',
+        'IP:::1',
+    ].join(',')
+
     execSync(
         `openssl req -x509 -newkey rsa:2048 -nodes ` +
         `-keyout "${keyPath}" -out "${certPath}" ` +
         `-days 365 -subj "/CN=${domain}/O=Raiton Dev/C=US" ` +
-        `-addext "subjectAltName=DNS:${domain},DNS:*.${domain},IP:127.0.0.1,IP:::1"`,
+        `-addext "subjectAltName=${sans}"`,
         {stdio: 'pipe'}
     )
 
@@ -137,9 +147,13 @@ function generateWithMkcert(domain: string, certDir: string): HttpsCertificateCo
 
     ensureDirectorySync(certDir)
 
+    const hosts = new Set<string>([domain])
+    hosts.add('localhost')
+    hosts.add('127.0.0.1')
+
     execSync(
         `mkcert -cert-file "${certPath}" -key-file "${keyPath}" ` +
-        `-days 365 "${domain}" "*.${domain}"`,
+        `${[...hosts].map(h => `"${h}"`).join(' ')}`,
         {stdio: 'pipe'}
     )
 

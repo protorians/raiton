@@ -9,17 +9,32 @@ import {RaitonThread} from "../../core/thread";
  * Generate the OpenAPI specification object
  */
 export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promise<any> {
-    // Load application config from RaitonConfig singleton
-    // Ensure config is synced with current working directory (set by Application)
-    await RaitonConfig.sync(process.cwd());
+    // Use application config directly (includes HTTPS, port, hostname)
+    const appConfig = RaitonThread.current?.application?.config;
+    const appHttps = RaitonThread.current?.application?.https;
 
-    const config: Map<keyof any, any> = RaitonConfig.current as any;
+    let protocole: string;
+    let hostname: string;
+    let port: number | undefined;
+    let pathname: string;
+    let prefix: string;
 
-    // Build base URL
-    const protocole = (config.get('protocole') as string) ?? 'http';
-    const hostname = (config.get('hostname') as string) ?? 'localhost';
-    const port = config.get('port') as number;
-    const pathname = (config.get('pathname') as string) ?? '/';
+    if (appConfig) {
+        protocole = appHttps?.enabled ? 'https' : (appConfig.protocole || 'http');
+        hostname = appConfig.hostname || 'localhost';
+        port = appConfig.port;
+        pathname = appConfig.pathname || '/';
+        prefix = appConfig.prefix || '';
+    } else {
+        // Fallback to RaitonConfig
+        await RaitonConfig.sync(process.cwd());
+        const config: Map<keyof any, any> = RaitonConfig.current as any;
+        protocole = (config.get('protocole') as string) ?? 'http';
+        hostname = (config.get('hostname') as string) ?? 'localhost';
+        port = config.get('port') as number;
+        pathname = (config.get('pathname') as string) ?? '/';
+        prefix = (config.get('prefix') as string) ?? '';
+    }
     const basePath = pathname.endsWith('/') ? pathname : pathname + '/';
 
     let baseUrl = `${protocole}://${hostname}`;
@@ -27,6 +42,10 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
         baseUrl += `:${port}`;
     }
     baseUrl += basePath;
+    if (prefix) {
+        baseUrl += prefix.startsWith('/') ? prefix.slice(1) : prefix;
+        if (!baseUrl.endsWith('/')) baseUrl += '/';
+    }
 
     // Initialize OpenAPI document
     const spec: any = {
@@ -308,7 +327,6 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
     }
 
     // Document registered WebSocket sockets as POST operations (one per event)
-    const prefix = RaitonThread.current?.application?.config?.prefix ?? '';
     const sockets = getSocketRegistry();
 
     for (const [, socketEntry] of sockets) {
@@ -320,7 +338,7 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
             if (event.type !== 'event' && event.type !== 'message') continue;
             if (!event.name) continue;
 
-            const channelPath = `${prefix}${namespace}`.replace(/\/+/g, '/') || '/';
+            const channelPath = `${namespace}`.replace(/\/+/g, '/') || '/';
             const eventPath = `${channelPath}/${event.name}`.replace(/\/+/g, '/');
 
             if (!spec.paths[eventPath]) {

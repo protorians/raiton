@@ -84,8 +84,7 @@ export class Application implements ApplicationInterface {
     }
 
     route(method: HttpMethod, path: string, handler: RouteHandlerCallable, version?: string): this {
-        const prefix = this.config.prefix ?? ''
-        const fullPath = `${prefix}${path}`.replace(/\/+/g, '/') || '/'
+        const fullPath = path.replace(/\/+/g, '/') || '/'
         this.root.route(method, fullPath, handler, version)
         return this
     }
@@ -140,6 +139,17 @@ export class Application implements ApplicationInterface {
 
             const url = new URL(req.url, this.hostname)
             let pathname = url.pathname
+
+            if (this.config.prefix) {
+                const prefix = this.config.prefix.endsWith('/') ? this.config.prefix.slice(0, -1) : this.config.prefix
+                if (pathname === prefix) {
+                    pathname = '/'
+                } else if (pathname.startsWith(prefix + '/')) {
+                    pathname = pathname.substring(prefix.length) || '/'
+                } else if (this.config.verbose) {
+                    Logger.warn(`Request out of application prefix: ${pathname} (expected: ${prefix}/*)`)
+                }
+            }
 
             if (this.config.pathname && this.config.pathname !== '/') {
                 const appPathname = this.config.pathname.endsWith('/') ? this.config.pathname : `${this.config.pathname}/`
