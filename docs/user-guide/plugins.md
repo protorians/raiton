@@ -9,6 +9,7 @@ Les plugins servent à brancher des fonctionnalités réutilisables à l’éche
 - [body-parser.md](body-parser.md)
 - [security.md](security.md)
 - [openapi/README.md](openapi/README.md)
+- [mcp.md](mcp.md) (plugin optionnel `mcpPlugin()`)
 
 ## Vue d’ensemble
 

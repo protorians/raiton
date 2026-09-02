@@ -3,6 +3,7 @@ import {Logger} from "@protorians/logger";
 import type {ConstructorType} from "../types";
 import {Raiton} from "../core/raiton";
 import {isArtifact} from "./utilities";
+import {compileMcp} from "../core/mcp/builder";
 
 export type HmrChannel =
     | 'hmr:di'
@@ -10,6 +11,7 @@ export type HmrChannel =
     | 'hmr:socket'
     | 'hmr:middleware'
     | 'hmr:hook'
+    | 'hmr:mcp'
 
 export interface ArtifactClassification {
     channel: HmrChannel
@@ -43,6 +45,7 @@ export const HMR_CHANNELS: Record<HmrChannel, readonly string[]> = {
     'hmr:socket': ['socket'],
     'hmr:middleware': ['middleware'],
     'hmr:hook': ['hook', 'event', 'listener'],
+    'hmr:mcp': ['mcp'],
 }
 
 export class Artifacts {
@@ -202,6 +205,32 @@ export class Artifacts {
                 } else if (typeof mod === 'object' && mod !== null) {
                     rootScope.hooks.replace(name, mod)
                 }
+            }
+        }
+    }
+
+    static reloadMcp(modulo: any, filename?: string) {
+
+        if (Raiton.thread?.builder.options.serve === false)
+            return Logger.warn(
+                'Artifact reload is only available in development mode'
+            )
+
+        const app = Raiton.thread?.application
+        if (!app) return
+
+        const rootScope = (app as any).root
+        if (!rootScope?.router) return
+
+        for (const mod of Object.values(modulo)) {
+            const name = (mod && typeof mod === 'object' && 'name' in mod) ? mod.name : (
+                typeof mod === 'function' ? mod.name ?? mod.constructor.name : undefined
+            );
+
+            if (typeof name === 'string' && typeof mod === 'function') {
+                Injection.invalidateCascade(name)
+                if (filename) Injection.registerArtifactPath(name, filename)
+                compileMcp(mod)
             }
         }
     }

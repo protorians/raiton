@@ -3,9 +3,10 @@ import {BuilderHMRDeclarationInterface} from "../../types";
 import {LBadge, Logger} from "@protorians/logger";
 import {compileController} from "./compiler";
 import {compileSocket} from "../socket/builder";
+import {compileMcp} from "../mcp/builder";
 import {RaitonThread} from "../thread";
 import {Injection} from "../injection";
-import {isControllerArtifact, isSocketArtifact} from "../../framework";
+import {isControllerArtifact, isSocketArtifact, isMcpArtifact} from "../../framework";
 import path from "node:path";
 import {ControllerRouteTracker} from "./tracker";
 
@@ -26,8 +27,9 @@ export class ControllerBuilder {
     static async build<T>({filename, version, timestamp}: BuilderHMRDeclarationInterface): Promise<T | undefined> {
         const isController = isControllerArtifact(filename);
         const isSocket = isSocketArtifact(filename);
+        const isMcp = isMcpArtifact(filename);
 
-        if (!isController && !isSocket)
+        if (!isController && !isSocket && !isMcp)
             return undefined;
 
         const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
@@ -41,6 +43,10 @@ export class ControllerBuilder {
 
         if (isSocket) {
             return compileSocket(artifact) as any;
+        }
+
+        if (isMcp) {
+            return compileMcp(artifact) as any;
         }
 
         const compilated = compileController(artifact, RaitonThread.current.application);

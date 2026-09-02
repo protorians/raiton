@@ -10,6 +10,10 @@ export function isServiceArtifact(filename: string) {
     return isArtifact(filename, 'service')
 }
 
+export function isMcpArtifact(filename: string) {
+    return isArtifact(filename, 'mcp')
+}
+
 export function isArtifact(filename: string, artifact: string) {
     return [
         filename.endsWith(`.${artifact}.ts`),

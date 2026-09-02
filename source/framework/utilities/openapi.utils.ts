@@ -3,6 +3,7 @@ import {METADATA_KEYS, Parametrable} from "../index";
 import {PluginScope} from "../../core";
 import {RaitonConfig} from "../../core/config";
 import {getSocketRegistry} from "../../core/socket";
+import {getMcpServerRegistry} from "../../core/mcp";
 import {RaitonThread} from "../../core/thread";
 
 /**
@@ -411,6 +412,86 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
 
             (spec.paths[eventPath] as any).post = operation;
         }
+    }
+
+    // Document registered MCP servers as streamable HTTP (POST JSON-RPC) operations
+    const mcpServers = getMcpServerRegistry();
+
+    for (const [, mcpEntry] of mcpServers) {
+        const mcpPath = mcpEntry.path;
+        if (!spec.paths[mcpPath]) {
+            spec.paths[mcpPath] = {};
+        }
+
+        const elements = [
+            ...mcpEntry.metadata.tools.map(t => ({kind: 'tool', ...t})),
+            ...mcpEntry.metadata.prompts.map(p => ({kind: 'prompt', ...p})),
+            ...mcpEntry.metadata.resources.map(r => ({kind: 'resource', ...r})),
+            ...mcpEntry.metadata.resourceTemplates.map(r => ({kind: 'resource-template', ...r})),
+        ];
+
+        (spec.paths[mcpPath] as any).post = {
+            summary: `MCP server: ${mcpEntry.name} (${mcpEntry.version})`,
+            description: mcpEntry.metadata.description
+                || `Model Context Protocol server. Exposes ${
+                    elements.map(e => `${e.kind}s`).filter((v, i, a) => a.indexOf(v) === i).join(', ') || 'no elements'
+                }.`,
+            parameters: [],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                jsonrpc: {type: 'string', const: '2.0'},
+                                id: {type: ['number', 'string', 'null']},
+                                method: {type: 'string', enum: [...new Set(elements.map(e => e.kind === 'tool' ? 'tools/call' : e.kind === 'prompt' ? 'prompts/get' : 'resources/read'))]},
+                                params: {type: 'object'}
+                            },
+                            required: ['jsonrpc', 'method']
+                        }
+                    }
+                }
+            },
+            responses: {
+                '200': {
+                    description: 'Successful JSON-RPC response',
+                    content: {'application/json': {schema: {type: 'object'}}}
+                },
+                '202': {
+                    description: 'Request accepted (notification)'
+                },
+                '406': {
+                    description: 'Unsupported protocol version'
+                }
+            },
+            'x-mcp': {
+                name: mcpEntry.name,
+                version: mcpEntry.version,
+                transport: 'streamable-http',
+                tools: mcpEntry.metadata.tools.map(t => ({
+                    name: t.name,
+                    description: t.description,
+                    inputSchema: {
+                        type: 'object',
+                        properties: Object.fromEntries(
+                            t.arguments.map(a => [a.name, {type: a.schema?.type || 'string', description: a.description}])
+                        ),
+                        ...(t.arguments.some(a => a.required) ? {required: t.arguments.filter(a => a.required).map(a => a.name)} : {})
+                    }
+                })),
+                prompts: mcpEntry.metadata.prompts.map(p => ({
+                    name: p.name,
+                    description: p.description,
+                    arguments: p.arguments.map(a => ({name: a.name, description: a.description, required: a.required}))
+                })),
+                resources: [
+                    ...mcpEntry.metadata.resources.map(r => ({uri: r.uri, name: r.name, mimeType: r.mimeType})),
+                    ...mcpEntry.metadata.resourceTemplates.map(r => ({uriTemplate: r.uri, name: r.name, mimeType: r.mimeType})),
+                ]
+            }
+        };
     }
 
     return spec;

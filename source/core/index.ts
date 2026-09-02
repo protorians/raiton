@@ -10,6 +10,7 @@ export * from "./thread";
 export * from "./application";
 export * from "./controller";
 export * from "./socket";
+export * from "./mcp";
 export * from "./plugins";
 export * from "./middleware";
 export * from "./router";

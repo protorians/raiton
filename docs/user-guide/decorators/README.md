@@ -21,11 +21,13 @@ Cette section regroupe les décorateurs que vous utilisez pour définir vos cont
 - [api-query.md](api-query.md)
 - [route-interaction.md](route-interaction.md)
 - [guard.md](guard.md)
+- [mcp.md](mcp.md)
 
 ## Comment lire cette section
 
 - commencez par `controllable.md` et `routes.md`
 - utilisez ensuite `parameters.md`, `injection.md` et `middleware.md`
+- documentez vos endpoints temps réel et IA avec `socket.md` et `mcp.md`
 - terminez par les décorateurs OpenAPI si vous documentez votre API
 
 ---

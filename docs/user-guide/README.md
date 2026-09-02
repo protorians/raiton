@@ -22,6 +22,7 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 | [https.md](https.md) | HTTPS, certificats et environnements |
 | [openapi/README.md](openapi/README.md) | Générer et documenter l'API |
 | [sockets.md](sockets.md) | Déclarer et gérer les sockets |
+| [mcp.md](mcp.md) | Exposer outils, prompts et ressources via le protocole MCP |
 | [tutorial.md](tutorial.md) | Construire une mini API complète de bout en bout |
 | [plugins.md](plugins.md) | Vue d'ensemble des plugins intégrés |
 | [types.md](types.md) | Comprendre les types utiles au développeur |
@@ -46,10 +47,11 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 14. lire [https.md](https.md)
 15. lire [openapi/README.md](openapi/README.md)
 16. lire [sockets.md](sockets.md)
-17. lire [types.md](types.md)
-18. lire [tutorial.md](tutorial.md)
-19. lire [plugins.md](plugins.md)
-20. lire [cli.md](cli.md)
+17. lire [mcp.md](mcp.md)
+18. lire [types.md](types.md)
+19. lire [tutorial.md](tutorial.md)
+20. lire [plugins.md](plugins.md)
+21. lire [cli.md](cli.md)
 
 ## Ce que couvre ce guide
 

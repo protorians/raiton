@@ -18,4 +18,8 @@ export const METADATA_KEYS = {
     API_PROPERTY: Symbol('api:property'),
     // Route interaction metadata key
     ROUTE_INTERACTION: Symbol('route:interaction'),
+    // MCP metadata keys
+    MCP: Symbol('mcp:meta'),
+    MCP_ELEMENTS: Symbol('mcp:elements'),
+    MCP_ARGUMENTS: Symbol('mcp:arguments'),
 }
