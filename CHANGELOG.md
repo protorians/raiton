@@ -1,3 +1,14 @@
+## [6.4.0-beta.12](https://github.com/protorians/raiton/compare/v6.3.1-beta.11...v6.4.0-beta.12) (2026-09-02)
+
+### Features
+
+* feat: add HTTPS configuration with certificate management, auto-generation, and runtime support ([0e9aacb](https://github.com/protorians/raiton/commit/0e9aacb74a37db61a3b57dcf0a12cf64f8ae61cb))
+
+### Bug Fixes
+
+* refactor: improve HTTPS certificate generation and refine routing configuration handling ([8206e6f](https://github.com/protorians/raiton/commit/8206e6f2e98208c49d0ecdb55bb06d93d623191f))
+* refactor: include `mcp` in artifact registration list ([7ccc5b9](https://github.com/protorians/raiton/commit/7ccc5b9d8fa3d01ec0ee2d3a86c5f985e5ca752f))
+
 ## [6.3.1-beta.11](https://github.com/protorians/raiton/compare/v6.3.0-beta.10...v6.3.1-beta.11) (2026-08-30)
 
 ### Bug Fixes
