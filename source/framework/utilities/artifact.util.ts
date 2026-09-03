@@ -14,6 +14,10 @@ export function isMcpArtifact(filename: string) {
     return isArtifact(filename, 'mcp')
 }
 
+export function isHealthCheckArtifact(filename: string) {
+    return isArtifact(filename, 'health-check')
+}
+
 export function isArtifact(filename: string, artifact: string) {
     return [
         filename.endsWith(`.${artifact}.ts`),
