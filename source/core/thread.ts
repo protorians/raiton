@@ -15,6 +15,7 @@ import {ApplicationInterface} from "../types/application";
 import {Runtime} from "../framework/runtime";
 import {LBadge, Logger} from "@protorians/logger";
 import {ControllerBuilder} from "./controller";
+import {registerDefaultHealthCheck} from "../framework/health-check";
 import {bodyParserPlugin} from "../framework/plugins/body-parser.plugin";
 import {Injection} from "./injection/injection";
 import {Throwable} from "../framework/exceptions";
@@ -88,7 +89,10 @@ export class RaitonThread implements ThreadInterface {
         if (!this.runtime)
             throw new Throwable('Runtime not defined');
 
-        if (this.builder.source) await ControllerBuilder.scan(this.builder.source)
+        if (this.builder.source) {
+            await ControllerBuilder.scan(this.builder.source)
+            registerDefaultHealthCheck(this.application)
+        }
 
         if (this._options.serve) {
             process.on('SIGINT', async () => {
