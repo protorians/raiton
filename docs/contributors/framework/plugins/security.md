@@ -5,12 +5,13 @@
 
 > **Navigation :** [← openapi.md](openapi.md) | [↑ plugins/](README.md)
 
-La classe `Security` regroupe 5 middlewares de sécurité.
+La classe `Security` regroupe 6 middlewares de sécurité.
 
 ```typescript
 class Security {
   static headers       // secureHeaders (activé automatiquement)
   static cors          // secureCors(options?)
+  static csrf          // secureCsrf(options?) — [Documentation CSRF](csrf.md)
   static rateLimit     // secureRateLimit(options?)
   static bodyLimit     // secureBodyLimit(options?)
   static methodGuard   // secureMethodGuard(options?)
@@ -83,6 +84,33 @@ Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH
 Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
 ```
 
+## `Security.csrf(options?)`
+
+Middleware de protection CSRF. Supporte deux modes : `double-submit` (stateless) et `synchronizer` (stateful).
+
+```typescript
+app.use(Security.csrf({
+  mode: CSRFModeEnum.DOUBLE_SUBMIT,  // CSRFModeEnum.DOUBLE_SUBMIT | CSRFModeEnum.SYNCHRONIZER
+  secret: process.env.CSRF_SECRET, // Secret HMAC (min 32 chars)
+  cookieName: '_csrf',             // Nom du cookie
+  headerName: 'X-CSRF-Token',     // Nom du header
+  ttl: 3600_000,                   // TTL en ms (défaut: 1h)
+  methods: ['POST', 'PUT', 'PATCH', 'DELETE'],
+  skipPaths: ['/health'],
+  clientDetection: {
+    headerName: 'X-Client-Type',
+    skipClients: ['mobile', 'desktop'],
+  },
+}))
+```
+
+**Fichiers associés :**
+- `source/framework/plugins/security/csrf.ts` — Plugin principal
+- `source/framework/utilities/csrf.util.ts` — Utilitaire tokens
+- `source/framework/decorators/csrf-guard.decorator.ts` — Decorator `@CsrfGuard`
+- `source/framework/decorators/csrf-token.decorator.ts` — Decorator `@CsrfToken`
+- [Documentation CSRF complète](csrf.md)
+
 ## `Security.bodyLimit(options?)`
 
 Limite la taille du corps des requêtes.
@@ -132,6 +160,11 @@ app
     origin: "https://frontend.example.com",
     credentials: true,
   }))
+  .use(Security.csrf({
+    mode: CSRFModeEnum.DOUBLE_SUBMIT,
+    secret: process.env.CSRF_SECRET,
+    cookieOptions: { secure: true, sameSite: 'strict' }
+  }))
   .use(Security.bodyLimit({ maxSize: "5MB" }))
   .use(Security.rateLimit({
     windowMs: 60_000,
@@ -147,11 +180,12 @@ app
 ```
 1. Security.cors              → CORS preflight
 2. Security.methodGuard       → Méthodes autorisées
-3. Security.bodyLimit         → Taille max
-4. Security.rateLimit         → Rate limiting
-5. Security.headers           → En-têtes de sécurité (automatique)
-6. bodyParserPlugin           → Parsing body (automatique)
-7. Middleware personnalisés
+3. Security.csrf              → Protection CSRF
+4. Security.bodyLimit         → Taille max
+5. Security.rateLimit         → Rate limiting
+6. Security.headers           → En-têtes de sécurité (automatique)
+7. bodyParserPlugin           → Parsing body (automatique)
+8. Middleware personnalisés
 ```
 
 ---
