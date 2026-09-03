@@ -143,4 +143,20 @@ export class CsrfUtil {
 
         return cookie
     }
+
+    static extractCookieValue(cookieHeader: string, name: string): string | undefined {
+        const cookies = cookieHeader.split(';')
+        for (const cookie of cookies) {
+            const [key, ...valueParts] = cookie.trim().split('=')
+            if (key === name) {
+                return valueParts.join('=')
+            }
+        }
+        return undefined
+    }
+
+    static timingSafeEqual(a: string, b: string): boolean {
+        if (a.length !== b.length) return false
+        return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b))
+    }
 }

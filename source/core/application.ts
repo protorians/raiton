@@ -8,7 +8,7 @@ import {Logger} from "@protorians/logger";
 import {RaitonConfig} from "./config";
 import {Artifacts} from "../framework/artifacts";
 import {Injection} from "./injection";
-import {HttpsConfigInterface, resolveHttpsConfig} from "../framework/utilities/https";
+import {HttpsConfigInterface, resolveHttpsConfig} from "../framework/utilities/https.util";
 
 export class Application implements ApplicationInterface {
     private root: PluginScope

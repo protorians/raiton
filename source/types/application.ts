@@ -1,5 +1,5 @@
 import {HttpMethod} from "../framework";
-import {HttpsConfigInput, HttpsConfigInterface} from "../framework/utilities/https";
+import {HttpsConfigInput, HttpsConfigInterface} from "../framework/utilities/https.util";
 
 export interface ApplicationConfigInterface {
     workdir?: string;

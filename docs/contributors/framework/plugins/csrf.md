@@ -122,6 +122,19 @@ Détermine si la requête vient d'un navigateur :
 
 Sérialise un cookie avec les attributs de sécurité.
 
+### `CsrfUtil.extractCookieValue(cookieHeader, name)`
+
+Extrait la valeur d'un cookie spécifique depuis l'en-tête `Cookie`.
+- Retourne `undefined` si le cookie n'est pas trouvé
+- Partagé entre le plugin et le decorator `@CsrfGuard`
+
+### `CsrfUtil.timingSafeEqual(a, b)`
+
+Compare deux chaînes de manière résistante aux attaques par timing.
+- Utilise `crypto.timingSafeEqual` de Node.js
+- Retourne `false` immédiatement si les longueurs diffèrent
+- Partagé entre le plugin et le decorator `@CsrfGuard`
+
 ## Plugin Middleware
 
 ### Pipeline d'exécution

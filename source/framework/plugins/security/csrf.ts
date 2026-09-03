@@ -90,7 +90,7 @@ export const secureCsrf = (opts: CsrfOptions = {}) => {
             }
 
             const cookieHeader = context.req.headers.get('cookie') ?? ''
-            const cookieToken = extractCookieValue(cookieHeader, cookieName)
+            const cookieToken = CsrfUtil.extractCookieValue(cookieHeader, cookieName)
             const headerToken = context.req.headers.get(headerName.toLowerCase())
 
             if (!cookieToken || !headerToken) {
@@ -109,10 +109,10 @@ export const secureCsrf = (opts: CsrfOptions = {}) => {
 
             if (mode === CSRF_MODE_DOUBLE_SUBMIT) {
                 valid = CsrfUtil.validateDoubleSubmitToken(secret, cookieToken, ttl)
-                    && timingSafeEqual(cookieToken, headerToken)
+                    && CsrfUtil.timingSafeEqual(cookieToken, headerToken)
             } else {
                 const storeValid = tokenStore?.validate(cookieToken) ?? false
-                valid = storeValid && timingSafeEqual(cookieToken, headerToken)
+                valid = storeValid && CsrfUtil.timingSafeEqual(cookieToken, headerToken)
             }
 
             if (!valid) {
@@ -134,24 +134,6 @@ export const secureCsrf = (opts: CsrfOptions = {}) => {
         })
 
     }, 'csrf')
-}
-
-function extractCookieValue(cookieHeader: string, name: string): string | undefined {
-    const cookies = cookieHeader.split(';')
-    for (const cookie of cookies) {
-        const [key, ...valueParts] = cookie.trim().split('=')
-        if (key === name) {
-            return valueParts.join('=')
-        }
-    }
-    return undefined
-}
-
-function timingSafeEqual(a: string, b: string): boolean {
-    if (a.length !== b.length) return false
-    const bufA = Buffer.from(a)
-    const bufB = Buffer.from(b)
-    return crypto.timingSafeEqual(bufA, bufB)
 }
 
 function cryptoRandomSecret(): string {
