@@ -12,6 +12,7 @@ export type HmrChannel =
     | 'hmr:middleware'
     | 'hmr:hook'
     | 'hmr:mcp'
+    | 'hmr:health-check'
 
 export interface ArtifactClassification {
     channel: HmrChannel
@@ -46,6 +47,7 @@ export const HMR_CHANNELS: Record<HmrChannel, readonly string[]> = {
     'hmr:middleware': ['middleware'],
     'hmr:hook': ['hook', 'event', 'listener'],
     'hmr:mcp': ['mcp'],
+    'hmr:health-check': ['health-check'],
 }
 
 export class Artifacts {
@@ -81,6 +83,7 @@ export class Artifacts {
         'schema',
         'socket',
         'mcp',
+        'health-check',
     ]
 
     static register(type: string) {

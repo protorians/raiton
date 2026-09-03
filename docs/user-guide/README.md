@@ -19,6 +19,7 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 | [responses.md](responses.md) | Structurer les réponses et les erreurs |
 | [body-parser.md](body-parser.md) | Lire JSON, formulaires et fichiers |
 | [security.md](security.md) | Sécurité HTTP, CORS, rate-limit, body-limit |
+| [health-check.md](health-check.md) | Endpoint de contrôle et vérifications de santé |
 | [https.md](https.md) | HTTPS, certificats et environnements |
 | [openapi/README.md](openapi/README.md) | Générer et documenter l'API |
 | [sockets.md](sockets.md) | Déclarer et gérer les sockets |
@@ -48,10 +49,11 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 15. lire [openapi/README.md](openapi/README.md)
 16. lire [sockets.md](sockets.md)
 17. lire [mcp.md](mcp.md)
-18. lire [types.md](types.md)
-19. lire [tutorial.md](tutorial.md)
-20. lire [plugins.md](plugins.md)
-21. lire [cli.md](cli.md)
+18. lire [health-check.md](health-check.md)
+19. lire [types.md](types.md)
+20. lire [tutorial.md](tutorial.md)
+21. lire [plugins.md](plugins.md)
+22. lire [cli.md](cli.md)
 
 ## Ce que couvre ce guide
 
@@ -62,6 +64,7 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 - l'injection de services
 - les plugins de sécurité et de documentation
 - le protocole HTTPS et la gestion des certificats
+- les endpoints et vérifications de santé (health-check)
 - le cycle local `dev` / `build` / `start`
 
 > **Navigation :** [← docs/](../README.md) | [← contributeurs](../contributors/README.md)
