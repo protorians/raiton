@@ -1,5 +1,4 @@
 import {getControllerMetadata} from "../../core";
-import {METADATA_KEYS} from "../constants";
 
 export function CsrfToken() {
     return (target: any, propertyKey?: string) => {
