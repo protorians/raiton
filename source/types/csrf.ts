@@ -12,8 +12,8 @@ export interface CsrfOptions {
     headerName?: string
     ttl?: number
     methods?: string[]
-    skipPaths?: string[]
-    clientDetection?: CsrfClientDetectionConfig
+    skip?: string[]
+    client?: CsrfClientDetectionConfig
     cookieOptions?: CsrfCookieOptions
 }
 

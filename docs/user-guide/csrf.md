@@ -151,8 +151,8 @@ app.register(Security.csrf({
 | `headerName` | `string` | `'X-CSRF-Token'` | Nom du header contenant le token |
 | `ttl` | `number` | `3600000` | Durée de vie du token en millisecondes |
 | `methods` | `string[]` | `['POST','PUT','PATCH','DELETE']` | Méthodes HTTP protégées |
-| `skipPaths` | `string[]` | `[]` | Chemins exclus de la protection |
-| `clientDetection` | `CsrfClientDetectionConfig` | `{}` | Configuration de détection client |
+| `skip` | `string[]` | `[]` | Chemins exclus de la protection |
+| `client` | `CsrfClientDetectionConfig` | `{}` | Configuration de détection client |
 | `cookieOptions` | `CsrfCookieOptions` | voir ci-dessous | Options du cookie |
 
 ### Options du cookie

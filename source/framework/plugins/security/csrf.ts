@@ -20,7 +20,7 @@ export const secureCsrf = (opts: CsrfOptions = {}) => {
         const headerName = opts.headerName ?? DEFAULT_HEADER_NAME
         const ttl = opts.ttl ?? DEFAULT_TTL
         const methods = (opts.methods ?? DEFAULT_METHODS).map(m => m.toUpperCase())
-        const skipPaths = opts.skipPaths ?? []
+        const skipPaths = opts.skip ?? []
         const cookieOpts: CsrfCookieOptions = {
             httpOnly: false,
             secure: false,
@@ -84,7 +84,7 @@ export const secureCsrf = (opts: CsrfOptions = {}) => {
                 return next()
             }
 
-            const isBrowser = CsrfUtil.isBrowserClient(context.req.headers, opts.clientDetection)
+            const isBrowser = CsrfUtil.isBrowserClient(context.req.headers, opts.client)
             if (!isBrowser) {
                 return next()
             }
