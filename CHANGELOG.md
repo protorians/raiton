@@ -1,3 +1,9 @@
+## [6.5.0-beta.13](https://github.com/protorians/raiton/compare/v6.4.0-beta.12...v6.5.0-beta.13) (2026-09-03)
+
+### Features
+
+* feat: integrate MCP (Model Context Protocol) support, including server registration, routing, OpenAPI documentation, and artifact handling ([436464c](https://github.com/protorians/raiton/commit/436464c166b8123a291b868e48b711866f09bc8b))
+
 ## [6.4.0-beta.12](https://github.com/protorians/raiton/compare/v6.3.1-beta.11...v6.4.0-beta.12) (2026-09-02)
 
 ### Features
