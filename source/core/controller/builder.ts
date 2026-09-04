@@ -7,6 +7,7 @@ import {compileMcp} from "../mcp/builder";
 import {RaitonThread} from "../thread";
 import {Injection} from "../injection";
 import {isControllerArtifact, isSocketArtifact, isMcpArtifact} from "../../framework";
+import {Artifacts} from "../../framework/artifacts";
 import path from "node:path";
 import {ControllerRouteTracker} from "./tracker";
 
@@ -16,12 +17,34 @@ export class ControllerBuilder {
         const files = fs.readdirSync(workdir, {recursive: true})
             .map(file => file.toString());
         const output: any[] = []
+        const timestamp = Date.now()
+
+        for (const file of files) {
+            const filename = path.join(workdir, file);
+            const classification = Artifacts.classify(filename);
+            if (classification?.channel !== 'hmr:di') continue;
+            await this.loadDiArtifact(filename, 1, timestamp);
+        }
 
         for (const file of files) {
             output.push(await this.build<any>({filename: path.join(workdir, file), version: 1, timestamp: Date.now()}))
         }
 
         return output.filter(f => typeof f !== 'undefined');
+    }
+
+    static async loadDiArtifact(filename: string, version = 1, timestamp = Date.now()): Promise<void> {
+        const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
+
+        for (const mod of Object.values(imported)) {
+            const name = (mod && typeof mod === 'object' && 'name' in mod) ? mod.name : (
+                typeof mod === 'function' ? mod.name ?? mod.constructor.name : undefined
+            );
+
+            if (typeof name === 'string' && Injection.has(name)) {
+                Injection.registerArtifactPath(name, filename)
+            }
+        }
     }
 
     static async build<T>({filename, version, timestamp}: BuilderHMRDeclarationInterface): Promise<T | undefined> {
