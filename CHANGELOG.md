@@ -1,3 +1,24 @@
+## [6.6.0-beta.14](https://github.com/protorians/raiton/compare/v6.5.0-beta.13...v6.6.0-beta.14) (2026-09-04)
+
+### Features
+
+* feat: add DI artifact loading with artifact classification and timestamp-based caching ([fa30f50](https://github.com/protorians/raiton/commit/fa30f501a49161559faea0ca594de56edba45916))
+* feat: add health-check support with default endpoint, decorator, and customizable configurations (#17) ([c6ca71d](https://github.com/protorians/raiton/commit/c6ca71dc62c99ce5ee0ec77de3bada333fcddfe6))
+* feat: Add CSRF protection middleware and improve related utilities (#16) ([de401f4](https://github.com/protorians/raiton/commit/de401f49a71af4088426990007934fa354ad0549))
+* feat: add DI artifact loading with artifact classification and timestamp-based caching ([eed2a57](https://github.com/protorians/raiton/commit/eed2a5798d1b692718a5fc1d28ab34a408012a59))
+* feat: add health-check support with default endpoint, decorator, and customizable configurations (#17) ([69c6a62](https://github.com/protorians/raiton/commit/69c6a62106d9eaf47eae2637a3816082fa7efdd9))
+
+### Bug Fixes
+
+* chore(workflows): allow non-conventional commits in publish step ([792adff](https://github.com/protorians/raiton/commit/792adff7555042da6a427bd57e2410df8f8c300d))
+* docs(user-guide): recommend import type for type-only symbols ([6d2655b](https://github.com/protorians/raiton/commit/6d2655b8f682b48b1a846f63ba764bb27e3e9629))
+* docs(user-guide): recommend import type for type-only symbols ([98afa0f](https://github.com/protorians/raiton/commit/98afa0f6f62db8fecdb0fe62b1463f47d8777618))
+
+### Other Changes
+
+* Merge remote-tracking branch 'origin/beta' into beta ([d312e8a](https://github.com/protorians/raiton/commit/d312e8ad801ebf0a14687e28b80d5f022c1e543f))
+* Add CSRF protection middleware and improve related utilities (#16) ([ba48340](https://github.com/protorians/raiton/commit/ba4834036ef0a4e363d36135dbba82b12b3638b7))
+
 ## [6.5.0-beta.13](https://github.com/protorians/raiton/compare/v6.4.0-beta.12...v6.5.0-beta.13) (2026-09-03)
 
 ### Features
