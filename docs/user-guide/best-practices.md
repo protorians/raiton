@@ -12,6 +12,7 @@ Dans un projet Raiton, gardez ces règles simples :
 - activez les plugins de sécurité dès que l’API est exposée publiquement
 - centralisez les conventions par domaine
 - utilisez une structure modulaire quand plusieurs fonctionnalités métier cohabitent
+- importez les interfaces et types avec `import type` (ou `import {type X}` en inline pour un mélange) quand ils ne servent qu’à la compilation : avec Bun et `emitDecoratorMetadata`, un import de valeur d’un symbole type-only lève `SyntaxError: Export named '…' not found` au démarrage — laissez les entités/classes runtime en import de valeur
 
 ## Exemple de découpage
 
