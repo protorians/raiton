@@ -127,6 +127,7 @@ export class RaitonBuilder implements BuilderInterface {
             this.listenHmrMiddleware()
             this.listenHmrHook()
             this.listenHmrMcp()
+            this.listenHmrScheduler()
             this.watching();
         }
 
@@ -195,6 +196,17 @@ export class RaitonBuilder implements BuilderInterface {
                 const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
                 Artifacts.reloadMcp(imported, filename)
                 Logger.log(LBadge.debug('HMR'), `[mcp] ${path.relative(this.workdir, filename)}`)
+            }
+        )
+    }
+
+    protected listenHmrScheduler(): void {
+        Raiton.signals.listen(
+            'hmr:scheduler',
+            async ({filename, version, timestamp}) => {
+                const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
+                Artifacts.reloadScheduler(imported, filename)
+                Logger.log(LBadge.debug('HMR'), `[scheduler] ${path.relative(this.workdir, filename)}`)
             }
         )
     }

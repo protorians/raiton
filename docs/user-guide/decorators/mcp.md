@@ -1,6 +1,6 @@
 # `@McpServer()` et décorateurs MCP
 
-> **Navigation :** [← guard](guard.md) | [README →](README.md)
+> **Navigation :** [← guard](guard.md) | [scheduler →](scheduler.md)
 
 Les décorateurs MCP servent à définir un serveur **Model Context Protocol** : outils, prompts et ressources accessibles aux clients IA.
 
@@ -67,4 +67,4 @@ export class MathServer {
 
 ---
 
-[← guard](guard.md) | [README →](README.md)
+[← guard](guard.md) | [scheduler →](scheduler.md)

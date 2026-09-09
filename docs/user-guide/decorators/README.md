@@ -24,12 +24,14 @@ Cette section regroupe les décorateurs que vous utilisez pour définir vos cont
 - [guard.md](guard.md)
 - [health-check.md](health-check.md)
 - [mcp.md](mcp.md)
+- [scheduler.md](scheduler.md)
 
 ## Comment lire cette section
 
 - commencez par `controllable.md` et `routes.md`
 - utilisez ensuite `parameters.md`, `injection.md` et `middleware.md`
 - documentez vos endpoints temps réel et IA avec `socket.md` et `mcp.md`
+- planifiez des tâches avec `scheduler.md`
 - qualifiez un endpoint de santé avec `health-check.md`
 - terminez par les décorateurs OpenAPI si vous documentez votre API
 

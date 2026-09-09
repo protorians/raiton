@@ -13,6 +13,7 @@ Le noyau de Raiton gère le cycle de vie de l'application, le routage, le middle
 | [middleware.md](middleware.md) | Pipeline middleware — `MiddlewarePipeline` |
 | [controller.md](controller.md) | Contrôleurs — `ControllerBuilder`, compilation |
 | [injection.md](injection.md) | Injection de dépendances — `Injection`, scopes |
+| [scheduler.md](scheduler.md) | Task scheduler — `SchedulerManager`, cron, files d'attente |
 | [plugin-scope.md](plugin-scope.md) | Système de plugins — `PluginScope` |
 | [config.md](config.md) | Configuration — `RaitonConfig` |
 | [builder-thread.md](builder-thread.md) | Build et thread — `RaitonBuilder`, `RaitonThread` |
@@ -55,6 +56,13 @@ core/
 │   └── injection.ts   → Injection (conteneur DI)
 ├── socket/
 │   └── metadata.ts    → getSocketMetadata
+├── scheduler/
+│   ├── cron.ts        → parseur cron + prochain run
+│   ├── duration.ts    → parseur de durées
+│   ├── metadata.ts    → registre des schedulers
+│   ├── manager.ts     → SchedulerManager
+│   ├── builder.ts     → compileScheduler
+│   └── queue/         → backends mémoire, Redis, RabbitMQ
 ├── artifacts/
 │   ├── artifact.ts    → Artifact
 │   └── runner.ts      → artifactRunner (stub)

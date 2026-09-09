@@ -4,9 +4,10 @@ import {LBadge, Logger} from "@protorians/logger";
 import {compileController} from "./compiler.ts";
 import {compileSocket} from "../socket/builder.ts";
 import {compileMcp} from "../mcp/builder.ts";
+import {compileScheduler} from "../scheduler/builder.ts";
 import {RaitonThread} from "../thread.ts";
 import {Injection} from "../injection/index.ts";
-import {isControllerArtifact, isSocketArtifact, isMcpArtifact} from "../../framework/index.ts";
+import {isControllerArtifact, isSocketArtifact, isMcpArtifact, isSchedulerArtifact} from "../../framework/index.ts";
 import {Artifacts} from "../../framework/artifacts.ts";
 import path from "node:path";
 import {ControllerRouteTracker} from "./tracker.ts";
@@ -51,8 +52,9 @@ export class ControllerBuilder {
         const isController = isControllerArtifact(filename);
         const isSocket = isSocketArtifact(filename);
         const isMcp = isMcpArtifact(filename);
+        const isScheduler = isSchedulerArtifact(filename);
 
-        if (!isController && !isSocket && !isMcp)
+        if (!isController && !isSocket && !isMcp && !isScheduler)
             return undefined;
 
         const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
@@ -70,6 +72,10 @@ export class ControllerBuilder {
 
         if (isMcp) {
             return compileMcp(artifact) as any;
+        }
+
+        if (isScheduler) {
+            return compileScheduler(artifact) as any;
         }
 
         const compilated = compileController(artifact, RaitonThread.current.application);

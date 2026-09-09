@@ -15,6 +15,7 @@
 | [middleware.md](middleware.md) | `@Middleware` |
 | [socket.md](socket.md) | `@Socket`, `@OnSocketConnect`, `@OnSocketMessage`... |
 | [openapi.md](openapi.md) | `@ApiTags`, `@ApiOperation`, `@ApiResponse`... |
+| [scheduler.md](scheduler.md) | `@Scheduler`, `@Cron`, `@Every`, `@Timeout`, `@Task` |
 
 Les décorateurs utilisent `reflect-metadata` et `experimentalDecorators: true` + `emitDecoratorMetadata: true` dans `tsconfig.json`.
 
@@ -45,6 +46,9 @@ Les décorateurs utilisent `reflect-metadata` et `experimentalDecorators: true` 
 | `@ApiNotFoundResponse` | Méthode | Raccourci 404 | [Voir](openapi.md) |
 | `@ApiInternalServerErrorResponse` | Méthode | Raccourci 500 | [Voir](openapi.md) |
 | `@RouteInteraction` | Méthode | Description d'interaction | [Voir](openapi.md) |
+| `@Scheduler` | Classe | Conteneur de jobs planifiés | [Voir](scheduler.md) |
+| `@Cron`/`@Every`/`@Timeout` | Méthode | Planification de job | [Voir](scheduler.md) |
+| `@Task` | Méthode | Tâche nommée (dispatch/enqueue) | [Voir](scheduler.md) |
 
 ## Règles générales
 

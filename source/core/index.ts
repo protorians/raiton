@@ -11,6 +11,7 @@ export * from "./application.ts";
 export * from "./controller/index.ts";
 export * from "./socket/index.ts";
 export * from "./mcp/index.ts";
+export * from "./scheduler/index.ts";
 export * from "./plugins/index.ts";
 export * from "./middleware/index.ts";
 export * from "./router/index.ts";

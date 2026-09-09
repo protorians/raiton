@@ -4,6 +4,7 @@ import type {ConstructorType} from "../types/index.ts";
 import {Raiton} from "../core/raiton.ts";
 import {isArtifact} from "./utilities/index.ts";
 import {compileMcp} from "../core/mcp/builder.ts";
+import {compileScheduler} from "../core/scheduler/builder.ts";
 
 export type HmrChannel =
     | 'hmr:di'
@@ -13,6 +14,7 @@ export type HmrChannel =
     | 'hmr:hook'
     | 'hmr:mcp'
     | 'hmr:health-check'
+    | 'hmr:scheduler'
 
 export interface ArtifactClassification {
     channel: HmrChannel
@@ -48,6 +50,7 @@ export const HMR_CHANNELS: Record<HmrChannel, readonly string[]> = {
     'hmr:hook': ['hook', 'event', 'listener'],
     'hmr:mcp': ['mcp'],
     'hmr:health-check': ['health-check'],
+    'hmr:scheduler': ['scheduler', 'task', 'cron', 'job'],
 }
 
 export class Artifacts {
@@ -84,6 +87,10 @@ export class Artifacts {
         'socket',
         'mcp',
         'health-check',
+        'scheduler',
+        'task',
+        'cron',
+        'job',
     ]
 
     static register(type: string) {
@@ -234,6 +241,26 @@ export class Artifacts {
                 Injection.invalidateCascade(name)
                 if (filename) Injection.registerArtifactPath(name, filename)
                 compileMcp(mod)
+            }
+        }
+    }
+
+    static reloadScheduler(modulo: any, filename?: string) {
+
+        if (Raiton.thread?.builder.options.serve === false)
+            return Logger.warn(
+                'Artifact reload is only available in development mode'
+            )
+
+        for (const mod of Object.values(modulo)) {
+            const name = (mod && typeof mod === 'object' && 'name' in mod) ? mod.name : (
+                typeof mod === 'function' ? mod.name ?? mod.constructor.name : undefined
+            );
+
+            if (typeof name === 'string' && typeof mod === 'function') {
+                Injection.invalidateCascade(name)
+                if (filename) Injection.registerArtifactPath(name, filename)
+                compileScheduler(mod)
             }
         }
     }
