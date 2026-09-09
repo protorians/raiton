@@ -2,7 +2,7 @@ import type {
     JsonRpcError,
     JsonRpcRequest,
     JsonRpcResponse,
-} from "../../types";
+} from "../../types/index.ts";
 
 export const McpVersion = '2024-11-05'
 export const LatestProtocolVersion = '2024-11-05'

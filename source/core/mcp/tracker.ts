@@ -1,4 +1,4 @@
-import {Route} from "../router"
+import {Route} from "../router/index.ts"
 
 const mcpRouteMap = new Map<string, Route[]>()
 

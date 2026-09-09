@@ -1,2 +1,2 @@
-export * from "./decorators.constant"
-export * from "./microservices.constant"
+export * from "./decorators.constant.ts"
+export * from "./microservices.constant.ts"

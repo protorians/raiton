@@ -1,4 +1,4 @@
-import {RaitonCommand} from "../core";
+import {RaitonCommand} from "../core/index.ts";
 
 
 export default class GraftsCommand extends RaitonCommand {

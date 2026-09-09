@@ -1,4 +1,4 @@
-import { PluginInterface, PluginCallable } from '../../types'
+import { PluginInterface, PluginCallable } from '../../types/index.ts'
 
 export function definePlugin(
   setup: PluginCallable,

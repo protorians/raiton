@@ -1,15 +1,15 @@
 import "reflect-metadata";
-import {registerMcpServer, unregisterMcpServer, getMcpServerMetadata} from "../../core/mcp";
-import {Injectable} from ".";
+import {registerMcpServer, unregisterMcpServer, getMcpServerMetadata} from "../../core/mcp/index.ts";
+import {Injectable} from "./index.ts";
 import {LifetimeEnum} from "@protorians/core";
-import {METADATA_KEYS} from "../constants";
+import {METADATA_KEYS} from "../constants/index.ts";
 import type {
     McpArgumentMetaInterface,
     McpArgumentSchema,
     McpElementMetaInterface,
     McpElementType,
     McpServerOptionsInterface,
-} from "../../types";
+} from "../../types/index.ts";
 
 /**
  * Decorate a class as an MCP server. The class methods decorated with

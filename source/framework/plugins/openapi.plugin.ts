@@ -1,8 +1,8 @@
-import type {PluginInterface} from "../../types";
-import type {ContextInterface} from "../../types/core";
-import {PluginScope} from "../../core";
+import type {PluginInterface} from "../../types/index.ts";
+import type {ContextInterface} from "../../types/core.ts";
+import {PluginScope} from "../../core/index.ts";
 import {Logger} from "@protorians/logger";
-import {generateOpenApiSpec} from "../utilities/openapi.utils";
+import {generateOpenApiSpec} from "../utilities/openapi.utils.ts";
 
 /**
  * OpenAPI plugin options

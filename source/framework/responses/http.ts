@@ -1,6 +1,6 @@
-import {HttpResponseInterface} from "../../types";
-import {HttpStatus} from "../enums";
-import {ThrowableResponse} from ".";
+import {HttpResponseInterface} from "../../types/index.ts";
+import {HttpStatus} from "../enums/index.ts";
+import {ThrowableResponse} from "./index.ts";
 
 
 export class HttpResponse {

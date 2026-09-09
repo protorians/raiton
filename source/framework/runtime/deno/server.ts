@@ -1,106 +1,166 @@
-import {RuntimeAdapterInterface, RuntimeRequestInterface, RuntimeReplyInterface} from '../../../types'
+import {RuntimeAdapterInterface, RuntimeServerOptionsInterface} from '../../../types/index.ts'
 import {Logger} from "@protorians/logger";
-import {getRealIp} from "../../utilities";
+import {getRealIp} from "../../utilities/index.ts";
+import {findSocketForPath} from "../../../core/socket/index.ts";
+import {Injection} from "../../../core/injection/index.ts";
+import {RaitonResponses, HttpStatus} from "../../index.ts";
 
-// class DenoRequest implements RuntimeRequestInterface {
-//   constructor(private req: Request) {}
-//   get method(): string { return this.req.method; }
-//   get url(): string { return this.req.url; }
-//   get headers(): Headers { return new Headers(this.req.headers); }
-//   get body(): any { return this.req.body; }
-//   get query(): Record<string, any> | undefined { return undefined; }
-//   get params(): Record<string, any> | undefined { return undefined; }
-//   get file(): any { return undefined; }
-//   get files(): any { return undefined; }
-//   get remoteAddress(): string | undefined { return undefined; }
-//   get ip(): string | undefined { return getRealIp(this.headers, this.remoteAddress); }
-// }
-
-// class DenoReply implements RuntimeReplyInterface {
-//   private statusCode: number = 200;
-//   private headers: Headers = new Headers();
-//   private body: BodyInit | null = null;
-//
-//   status(code: number): void { this.statusCode = code; }
-//   header(name: string, value: string): void { this.headers.set(name, value); }
-//   send(body: any): void {
-//     if (body === undefined) {
-//       this.body = null;
-//     } else if (typeof body === 'string' || body instanceof Uint8Array) {
-//       this.body = body;
-//     } else {
-//       if (!this.headers.has('content-type')) {
-//         this.headers.set('content-type', 'application/json');
-//       }
-//       this.body = JSON.stringify(body);
-//     }
-//   }
-//   text(text: string | Buffer): void {
-//     // Accept string, Uint8Array, or any other value (including Buffer-like)
-//     if (typeof text === 'string' || text instanceof Uint8Array) {
-//       this.body = text;
-//     } else {
-//       // Fallback: treat as JSON string
-//       this.body = JSON.stringify(text);
-//     }
-//   }
-//   json(json: any): void {
-//     this.headers.set('content-type', 'application/json');
-//     this.body = JSON.stringify(json);
-//   }
-//   type(contentType: string): void {
-//     this.headers.set('content-type', contentType);
-//   }
-//   toResponse(): Response {
-//     let bodyToSend: BodyInit = '';
-//     if (this.body instanceof Uint8Array) {
-//       bodyToSend = this.body;
-//     } else if (typeof this.body === 'string') {
-//       bodyToSend = this.body;
-//     } else if (this.body === null) {
-//       bodyToSend = '';
-//     } else {
-//       // fallback: treat as JSON
-//       bodyToSend = JSON.stringify(this.body);
-//     }
-//     return new Response(bodyToSend, { status: this.statusCode, headers: this.headers });
-//   }
-// }
-
-/**
- * @alpha Not ready
- */
 export const denoRuntime: RuntimeAdapterInterface = {
-    createServer(handler) {
-        let controller: AbortController | null = null;
+    createServer(handler, options?: RuntimeServerOptionsInterface) {
+        if (typeof Deno === 'undefined') throw new Error(
+            'Deno is not available, please run this script with the Deno runtime (`deno run --allow-net ...`)'
+        )
+
+        let server: Deno.HttpServer | null = null
+
+        const socketHandlers = {
+            open(socket: WebSocket, entry: any) {
+                try {
+                    const instance: any = Injection.resolve(entry.construct)
+                    if (!instance) return
+
+                    socket.onmessage = async (event: MessageEvent) => {
+                        try {
+                            let payload: any = event.data
+                            if (typeof payload === 'string') {
+                                try { payload = JSON.parse(payload) } catch { /* keep raw string */ }
+                            }
+
+                            const eventName = payload && typeof payload === 'object' ? payload.event : undefined
+                            const evt = eventName
+                                ? entry.metadata.events.find((item: any) => item.name === eventName && (item.type === 'event' || item.type === 'message'))
+                                : entry.metadata.events.find((item: any) => item.type === 'message')
+
+                            if (!evt) {
+                                socket.send(JSON.stringify(RaitonResponses(
+                                    `Socket event "${eventName ?? 'message'}" not found`,
+                                    null,
+                                    HttpStatus.NOT_FOUND
+                                )))
+                                return
+                            }
+
+                            const response = await instance[evt.propertyKey]?.(payload?.data ?? payload)
+                            if (response !== undefined) {
+                                socket.send(JSON.stringify(response))
+                            }
+                        } catch (e: any) {
+                            Logger.error('Socket message failed', e.message ?? e)
+                            socket.send(JSON.stringify(RaitonResponses(
+                                'Internal server error',
+                                null,
+                                HttpStatus.INTERNAL_SERVER_ERROR
+                            )))
+                        }
+                    }
+
+                    const connect = entry.metadata.events.find((event: any) => event.type === 'connect')
+                    if (connect) instance[connect.propertyKey]?.()
+                } catch (e: any) {
+                    Logger.error('Socket connect failed', e.message ?? e)
+                    try { socket.close(1011, 'Internal error') } catch { /* noop */ }
+                }
+            },
+            close(socket: WebSocket, entry: any) {
+                try {
+                    const instance = (socket as any)._instance
+                    if (!instance) return
+
+                    const disconnect = entry.metadata.events.find((event: any) => event.type === 'disconnect')
+                    if (disconnect) instance[disconnect.propertyKey]?.()
+                } catch (e: any) {
+                    Logger.error('Socket disconnect failed', e.message ?? e)
+                }
+            }
+        }
 
         return {
             async listen(port, hostname) {
-                // controller = new AbortController();
-                //
-                // const server = Deno.serve({
-                //     port: Number(port),
-                //     hostname,
-                //     signal: controller.signal,
-                //     handler: async (reqEvent) => {
-                //         const denoReq = new DenoRequest(reqEvent.request);
-                //         const denoRes = new DenoReply();
-                //
-                //         await handler(denoReq, denoRes);
-                //
-                //         const resp = denoRes.toResponse();
-                //         await reqEvent.respondWith(resp);
-                //     }
-                // });
+                server = Deno.serve(
+                    {
+                        port: Number(port),
+                        hostname,
+                        onListen() {
+                            Logger.log('Deno server listening')
+                        }
+                    },
+                    async (request, info) => {
+                        const upgrade = request.headers.get('upgrade')?.toLowerCase()
+                        const pathname = new URL(request.url).pathname
 
-                // Server will run until close() is called
+                        if (upgrade === 'websocket') {
+                            const socketEntry = findSocketForPath(pathname, options?.prefix)
+                            if (socketEntry) {
+                                const {socket, response} = Deno.upgradeWebSocket(request)
+                                const instance: any = Injection.resolve(socketEntry.construct)
+                                ;(socket as any)._instance = instance
+                                socket.onopen = () => socketHandlers.open(socket, socketEntry)
+                                socket.onclose = () => socketHandlers.close(socket, socketEntry)
+                                return response
+                            }
+                        }
+
+                        let responseBody: any
+                        let statusCode = 200
+                        const headers = new Headers()
+
+                        const remoteAddress = info.remoteAddr?.hostname
+
+                        await handler(
+                            {
+                                method: request.method,
+                                url: request.url,
+                                headers: request.headers as any,
+                                body: request.body ? request.body : null,
+                                remoteAddress,
+                                ip: getRealIp(request.headers, remoteAddress)
+                            },
+                            {
+                                status(code) {
+                                    statusCode = code
+                                },
+                                header(name, value) {
+                                    headers.set(name, value)
+                                },
+                                send(body: any) {
+                                    if (body === undefined) {
+                                        responseBody = ''
+                                    } else if (typeof body === 'string' || body instanceof Uint8Array) {
+                                        responseBody = body;
+                                    } else {
+                                        headers.set('content-type', 'application/json');
+                                        responseBody = (JSON.stringify(body));
+                                    }
+                                },
+                                text(text: string | Uint8Array) {
+                                    responseBody = text
+                                },
+                                json(json: any) {
+                                    headers.set('content-type', 'application/json')
+                                    responseBody = JSON.stringify(json)
+                                },
+                                type(contentType: string) {
+                                    headers.set('content-type', contentType)
+                                }
+                            }
+                        )
+
+                        if (responseBody instanceof Response) {
+                            return responseBody;
+                        }
+
+                        return new Response(
+                            typeof responseBody === 'object' && !(responseBody instanceof Uint8Array)
+                                ? JSON.stringify(responseBody)
+                                : responseBody,
+                            {status: statusCode, headers}
+                        )
+                    }
+                )
             },
             async close() {
-                // if (controller) {
-                //     controller.abort();
-                // }
-                // Note: Deno.serve does not expose a direct stop; closing the signal aborts incoming connections.
+                await server?.shutdown()
             }
-        };
+        }
     }
 }

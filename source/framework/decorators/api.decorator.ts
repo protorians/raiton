@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import {METADATA_KEYS} from "../constants/decorators.constant";
+import {METADATA_KEYS} from "../constants/decorators.constant.ts";
 
 /**
  * Tag metadata for OpenAPI grouping

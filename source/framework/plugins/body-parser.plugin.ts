@@ -1,7 +1,7 @@
-import type {MiddlewareParametersInterface, PluginInterface} from "../../types";
-import {RequestContext} from "../../core/context";
+import type {MiddlewareParametersInterface, PluginInterface} from "../../types/index.ts";
+import {RequestContext} from "../../core/context.ts";
 import {Logger} from "@protorians/logger";
-import {tryParseJson} from "../utilities/json.util";
+import {tryParseJson} from "../utilities/json.util.ts";
 
 export function bodyParserPlugin(): PluginInterface {
     return {

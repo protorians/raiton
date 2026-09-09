@@ -1,5 +1,5 @@
 import {Command} from "commander";
-import {RaitonCommand} from "./command";
+import {RaitonCommand} from "./command.ts";
 import fs from 'node:fs';
 import path from "node:path";
 import {Logger} from "@protorians/logger";
@@ -17,28 +17,38 @@ export class RaitonCommands {
 
     public async harvest(): Promise<void> {
         const dir = path.join(this.appdir, 'commands');
-        
-        if (!fs.existsSync(dir)) {
+
+        if (fs.existsSync(dir)) {
+            const files = fs.readdirSync(dir);
+
+            for (const file of files) {
+                if (file.startsWith('~')) continue;
+                if (file.endsWith('.d.ts')) continue;
+                if (!file.includes('.command.')) continue;
+
+                const filepath = path.join(dir, file);
+                const mod = await import(filepath);
+
+                const capability = new mod.default(this.cli, this.workdir, this.appdir)
+
+                if (!(capability instanceof RaitonCommand)) continue;
+
+                capability.register();
+                this.stack.add(capability);
+            }
+
             return;
         }
 
-        const files = fs.readdirSync(dir);
+        const {RaitonCommandsRegistry} = await import("../bin/commands.registry.ts");
 
-        for (const file of files) {
-            if (file.startsWith('~')) continue;
-            if (file.endsWith('.d.ts')) continue;
-            if (!file.includes('.command.')) continue;
-
-            const filepath = path.join(dir, file);
-            const mod = await import(filepath);
-
-            const capability = new mod.default(this.cli, this.workdir, this.appdir)
+        for (const constructor of RaitonCommandsRegistry) {
+            const capability = new constructor(this.cli, this.workdir, this.appdir)
 
             if (!(capability instanceof RaitonCommand)) continue;
 
             capability.register();
             this.stack.add(capability);
         }
-
     }
 }

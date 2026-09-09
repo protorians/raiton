@@ -1,14 +1,14 @@
-import {Security, bodyParserPlugin} from "../framework/plugins";
-import {PluginScope} from './plugins/scope'
-import {RequestContext} from './context'
-import {ApplicationConfigInterface, ApplicationInterface} from "../types/application";
-import {HttpException, HttpMethod, ThrowableResponse, RaitonResponses, HttpStatus} from "../framework";
-import {RouteHandlerCallable} from "../types";
+import {Security, bodyParserPlugin} from "../framework/plugins/index.ts";
+import {PluginScope} from './plugins/scope.ts'
+import {RequestContext} from './context.ts'
+import {ApplicationConfigInterface, ApplicationInterface} from "../types/application.ts";
+import {HttpException, HttpMethod, ThrowableResponse, RaitonResponses, HttpStatus} from "../framework/index.ts";
+import {RouteHandlerCallable} from "../types/index.ts";
 import {Logger} from "@protorians/logger";
-import {RaitonConfig} from "./config";
-import {Artifacts} from "../framework/artifacts";
-import {Injection} from "./injection";
-import {HttpsConfigInterface, resolveHttpsConfig} from "../framework/utilities/https.util";
+import {RaitonConfig} from "./config/index.ts";
+import {Artifacts} from "../framework/artifacts.ts";
+import {Injection} from "./injection/index.ts";
+import {HttpsConfigInterface, resolveHttpsConfig} from "../framework/utilities/https.util.ts";
 
 export class Application implements ApplicationInterface {
     private root: PluginScope

@@ -1,6 +1,6 @@
 import { IncomingMessage } from 'node:http'
-import type { RuntimeRequestInterface } from '../../../types'
-import {getRealIp} from "../../utilities";
+import type { RuntimeRequestInterface } from '../../../types/index.ts'
+import {getRealIp} from "../../utilities/index.ts";
 
 export class NodeRequest implements RuntimeRequestInterface {
     constructor(public req: IncomingMessage) {

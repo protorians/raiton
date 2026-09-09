@@ -1,5 +1,5 @@
-import {registerSocket, unregisterSocket, getSocketMetadata} from "./metadata";
-import {Injection} from "../injection";
+import {registerSocket, unregisterSocket, getSocketMetadata} from "./metadata.ts";
+import {Injection} from "../injection/index.ts";
 
 export function compileSocket(SocketClass: any) {
     const metadata = getSocketMetadata(SocketClass.prototype || SocketClass)

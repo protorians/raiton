@@ -1,5 +1,5 @@
-import {RequestContext} from "../core/context";
-import {HttpMethod} from "../framework";
+import {RequestContext} from "../core/context.ts";
+import {HttpMethod} from "../framework/index.ts";
 
 export type RouteHandlerCallable = (ctx: RequestContext) => Promise<any> | any
 

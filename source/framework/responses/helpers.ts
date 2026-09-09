@@ -1,6 +1,6 @@
-import {HttpResponse, HttpStatus} from "..";
-import {HttpResponseInterface} from "../../types";
-import {Raiton} from "../../core";
+import {HttpResponse, HttpStatus} from "../index.ts";
+import {HttpResponseInterface} from "../../types/index.ts";
+import {Raiton} from "../../core/index.ts";
 
 
 export function RaitonResponses(

@@ -1,10 +1,10 @@
-import type {ParamMetaInterface} from "../../types";
-import {METADATA_KEYS, Parametrable} from "../index";
-import {PluginScope} from "../../core";
-import {RaitonConfig} from "../../core/config";
-import {getSocketRegistry} from "../../core/socket";
-import {getMcpServerRegistry} from "../../core/mcp";
-import {RaitonThread} from "../../core/thread";
+import type {ParamMetaInterface} from "../../types/index.ts";
+import {METADATA_KEYS, Parametrable} from "../index.ts";
+import {PluginScope} from "../../core/index.ts";
+import {RaitonConfig} from "../../core/config/index.ts";
+import {getSocketRegistry} from "../../core/socket/index.ts";
+import {getMcpServerRegistry} from "../../core/mcp/index.ts";
+import {RaitonThread} from "../../core/thread.ts";
 
 /**
  * Generate the OpenAPI specification object

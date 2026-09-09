@@ -1,4 +1,4 @@
-import {RaitonConfig} from "../config/config";
+import {RaitonConfig} from "../config/config.ts";
 
 export class Artifact {
 

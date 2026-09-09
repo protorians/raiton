@@ -1,4 +1,4 @@
-import {CSRFModeEnum} from "../framework/enums";
+import {CSRFModeEnum} from "../framework/enums/index.ts";
 
 export interface CsrfClientDetectionConfig {
     headerName?: string

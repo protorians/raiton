@@ -1,4 +1,4 @@
-import {HookNameType, HookHandlerCallable} from '../types'
+import {HookNameType, HookHandlerCallable} from '../types/index.ts'
 
 export class HookStore {
     private hooks = new Map<HookNameType, HookHandlerCallable[]>()

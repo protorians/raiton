@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import {METADATA_KEYS} from "../constants/decorators.constant";
-import {getControllerMetadata} from "../../core/controller";
-import {RouteInteractionsSubscriber} from "../../types/router";
-import { Raiton } from "../../core/raiton";
+import {METADATA_KEYS} from "../constants/decorators.constant.ts";
+import {getControllerMetadata} from "../../core/controller/index.ts";
+import {RouteInteractionsSubscriber} from "../../types/router.ts";
+import { Raiton } from "../../core/raiton.ts";
 
 /**
  * Represents a route interaction that can be rendered with context data

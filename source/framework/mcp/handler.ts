@@ -4,15 +4,15 @@ import type {
     McpElementMetaInterface,
     McpServerRegistrationInterface,
     McpToolResultContent,
-} from "../../types";
+} from "../../types/index.ts";
 import {
     JsonRpcErrorCode,
     LatestProtocolVersion,
     rpcError,
     rpcFailure,
     rpcSuccess,
-} from "./protocol";
-import {Injection} from "../../core/injection";
+} from "./protocol.ts";
+import {Injection} from "../../core/injection/index.ts";
 
 export interface McpHandleResult {
     kind: 'response' | 'notification';

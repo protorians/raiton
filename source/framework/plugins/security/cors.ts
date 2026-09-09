@@ -1,5 +1,5 @@
-import {definePlugin} from "../../../core/plugins";
-import {MiddlewareParametersInterface} from "../../../types";
+import {definePlugin} from "../../../core/plugins/index.ts";
+import {MiddlewareParametersInterface} from "../../../types/index.ts";
 import {Logger} from "@protorians/logger";
 
 export interface CorsOptions {

@@ -1,4 +1,4 @@
-import {RaitonSignalMapInterface, ThreadInterface} from "../types";
+import {RaitonSignalMapInterface, ThreadInterface} from "../types/index.ts";
 import {ISignalStack, Signal} from "@protorians/core";
 
 

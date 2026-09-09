@@ -1,4 +1,4 @@
-import type {ServerInterface, ServerOptionsInterface} from "../types";
+import type {ServerInterface, ServerOptionsInterface} from "../types/index.ts";
 
 
 export class Server implements ServerInterface {

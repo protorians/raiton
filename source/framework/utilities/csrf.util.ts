@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import {CsrfTokenPayload} from "../../types";
+import {CsrfTokenPayload} from "../../types/index.ts";
 
 const DEFAULT_TTL = 3600_000
 

@@ -1,4 +1,4 @@
-import type {ArtifactsConfigInterface} from "./artifact";
+import type {ArtifactsConfigInterface} from "./artifact.ts";
 
 export interface ConfigurableInterface {
     rootDir: string;

@@ -37,9 +37,14 @@
     "./types/*": "./source/types/*.ts"
   },
   "scripts": {
-    "dev": "bun run --hot source/bin/index.ts",
-    "start": "bun run build/bin/index.mjs",
+    "dev": "bun run --hot source/bin/index.ts dev",
+    "dev:node": "node build/bin/index.mjs dev",
+    "dev:deno": "deno task dev",
     "build": "bun build source/bin/index.ts --target=node --format=esm --outfile=build/bin/index.mjs",
+    "start": "bun run source/bin/index.ts start",
+    "start:node": "node build/bin/index.mjs start",
+    "start:deno": "deno task start",
+    "compile:deno": "deno task compile",
     "version": "bun run scripts/update-version.ts",
     "postinstall": "bun run scripts/postinstall.js",
     "prepublishOnly": "npm run build"

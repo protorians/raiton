@@ -1,5 +1,5 @@
-import {RuntimeType} from "../framework/enums/runtime.enum";
-import {HttpsCertificateConfig, HttpsEnvironment} from "../framework/utilities/https.util";
+import {RuntimeType} from "../framework/enums/runtime.enum.ts";
+import {HttpsCertificateConfig, HttpsEnvironment} from "../framework/utilities/https.util.ts";
 
 export interface RuntimeServerInterface {
     listen(port: number, hostname?: string): Promise<void>
@@ -59,9 +59,7 @@ export interface RuntimeInterface {
 
     get isNode(): boolean;
 
-    // get isDeno(): boolean;
-
-    // get isWeb(): boolean;
+    get isDeno(): boolean;
 
     get isBun(): boolean
 

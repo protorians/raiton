@@ -1,5 +1,5 @@
-import {definePlugin} from "../../../core/plugins";
-import {ContextInterface, MiddlewareParametersInterface, MiddlewareNextCallable} from "../../../types";
+import {definePlugin} from "../../../core/plugins/index.ts";
+import {ContextInterface, MiddlewareParametersInterface, MiddlewareNextCallable} from "../../../types/index.ts";
 
 
 export const secureHeaders = definePlugin((scope) => {

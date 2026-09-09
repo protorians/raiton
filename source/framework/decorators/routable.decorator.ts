@@ -1,6 +1,6 @@
-import {getControllerMetadata} from "../../core";
-import {HttpMethod} from "..";
-import {ControllerMetaInterface, RouteDecoratorCallable, RouteMetaInterface} from "../../types";
+import {getControllerMetadata} from "../../core/index.ts";
+import {HttpMethod} from "../index.ts";
+import {ControllerMetaInterface, RouteDecoratorCallable, RouteMetaInterface} from "../../types/index.ts";
 
 
 function stabilizeRoute(meta: ControllerMetaInterface, {path, method, propertyKey}: Partial<RouteMetaInterface>) {

@@ -1,5 +1,5 @@
-import { MiddlewareType } from '../../types'
-import { middlewareCompose } from '..'
+import { MiddlewareType } from '../../types/index.ts'
+import { middlewareCompose } from '../index.ts'
 
 export class MiddlewarePipeline {
   private stack: MiddlewareType[] = []

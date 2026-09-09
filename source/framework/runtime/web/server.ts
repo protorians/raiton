@@ -1,6 +1,6 @@
-// import {RuntimeAdapterInterface} from '../../../types'
+// import {RuntimeAdapterInterface} from '../../../types/index.ts'
 // import {Logger} from "@protorians/logger";
-// import {getRealIp} from "../../utilities";
+// import {getRealIp} from "../../utilities/index.ts";
 //
 // export const webRuntime: RuntimeAdapterInterface = {
 //     createServer(handler) {

@@ -1,7 +1,7 @@
-import {BuilderInterface} from "./builder";
-import {RuntimeAdapterInterface, RuntimeServerInterface} from "./runtime";
-import {ApplicationInterface} from "./application";
-import {RuntimeType} from "../framework/enums/runtime.enum";
+import {BuilderInterface} from "./builder.ts";
+import {RuntimeAdapterInterface, RuntimeServerInterface} from "./runtime.ts";
+import {ApplicationInterface} from "./application.ts";
+import {RuntimeType} from "../framework/enums/runtime.enum.ts";
 
 export interface ThreadSetupOptionsInterface {
     application: ApplicationInterface;

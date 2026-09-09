@@ -1,5 +1,5 @@
-import {ConstructorType, SocketMetaInterface} from "../../types";
-import {METADATA_KEYS} from "../../framework";
+import {ConstructorType, SocketMetaInterface} from "../../types/index.ts";
+import {METADATA_KEYS} from "../../framework/index.ts";
 import "reflect-metadata";
 
 export interface SocketRegistryEntryInterface {

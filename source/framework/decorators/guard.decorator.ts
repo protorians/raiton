@@ -1,7 +1,7 @@
-import {GuardOptions} from "../../types";
-import {Middleware} from "./middleware.decorator";
-import {RaitonGuards} from "../../core/guards";
-import {HttpStatus, RaitonResponses} from "..";
+import {GuardOptions} from "../../types/index.ts";
+import {Middleware} from "./middleware.decorator.ts";
+import {RaitonGuards} from "../../core/guards.ts";
+import {HttpStatus, RaitonResponses} from "../index.ts";
 
 export function createGuardDecoration({name, handler}: GuardOptions) {
     return Middleware(async ({next, context}) => {

@@ -1,6 +1,6 @@
-import {HttpStatus} from "../enums/http-status.enum";
-import {Raiton} from "../../core";
-import {HttpResponseBaseInterface} from "../../types";
+import {HttpStatus} from "../enums/http-status.enum.ts";
+import {Raiton} from "../../core/index.ts";
+import {HttpResponseBaseInterface} from "../../types/index.ts";
 
 export class HttpException extends Error {
 

@@ -1,8 +1,8 @@
 /// <reference types="deno" />
-import {RaitonBuilder, RaitonCommand} from "../core";
+import {RaitonBuilder, RaitonCommand} from "../core/index.ts";
 import {ChildProcess} from 'node:child_process';
 import {LBadge, Logger} from "@protorians/logger";
-import {StartCommandOptionsInterface} from "../types";
+import {StartCommandOptionsInterface} from "../types/index.ts";
 
 export default class StartCommand extends RaitonCommand {
     public readonly name: string = 'start';

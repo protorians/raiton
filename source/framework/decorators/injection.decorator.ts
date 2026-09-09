@@ -1,9 +1,9 @@
 import "reflect-metadata";
-import type {ConstructorType} from "../../types/contruct";
-import {Injection} from "../../core/injection";
+import type {ConstructorType} from "../../types/contruct.ts";
+import {Injection} from "../../core/injection/index.ts";
 import {LifetimeEnum} from "@protorians/core";
 import {Logger} from "@protorians/logger";
-import {METADATA_KEYS} from "../constants";
+import {METADATA_KEYS} from "../constants/index.ts";
 
 
 export function Injectable(lifetime?: LifetimeEnum, name?: string, scope?: any) {

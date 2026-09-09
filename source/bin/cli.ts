@@ -1,5 +1,5 @@
 import {Command} from "commander";
-import {version} from '../../package.json';
+import pkg from '../../package.json' with {type: "json"};
 
 
 const CLI = new Command();
@@ -7,6 +7,6 @@ const CLI = new Command();
 CLI
     .name('raiton')
     .description('Protorians Raiton framework for backend microservice')
-    .version(version);
+    .version(pkg.version);
 
 export default CLI;

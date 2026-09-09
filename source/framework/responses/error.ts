@@ -1,5 +1,5 @@
-import type {ErrorResponseInterface} from "../../types";
-import {HttpResponse} from "./http";
+import type {ErrorResponseInterface} from "../../types/index.ts";
+import {HttpResponse} from "./http.ts";
 
 
 export class HttpErrorResponse {

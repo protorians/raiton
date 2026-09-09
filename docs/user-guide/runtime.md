@@ -21,13 +21,14 @@ return await thread.setup({
 ## Pourquoi utilisé
 
 - choisir explicitement l’environnement d’exécution
-- garder un point d’entrée unique pour Bun et Node
+- garder un point d’entrée unique pour Bun, Node et Deno
 
 ## Comment l’utiliser
 
 - laissez Raiton détecter le runtime si vous ne souhaitez rien imposer
 - forcez `RuntimeType.Bun` si vous ciblez Bun en priorité
 - utilisez `RuntimeType.Node` si vous visez un exécutable Node
+- utilisez `RuntimeType.Deno` si vous exécutez l’application avec Deno
 
 ## Avantages
 

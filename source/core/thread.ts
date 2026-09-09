@@ -7,18 +7,19 @@ import type {
     ThreadOptionsInterface,
     ThreadSetupOptionsInterface,
     ThreadWaitCallable,
-} from "../types";
-import {EventMessageEnum, RuntimeType} from "../framework/enums";
+} from "../types/index.ts";
+import {EventMessageEnum, RuntimeType} from "../framework/enums/index.ts";
 import {ProcessUtility} from "@protorians/core";
-import {until} from "./process.util";
-import {ApplicationInterface} from "../types/application";
-import {Runtime} from "../framework/runtime";
+import {until} from "./process.util.ts";
+import {ApplicationInterface} from "../types/application.ts";
+import {Runtime} from "../framework/runtime/index.ts";
 import {LBadge, Logger} from "@protorians/logger";
-import {ControllerBuilder} from "./controller";
-import {registerDefaultHealthCheck} from "../framework/health-check";
-import {bodyParserPlugin} from "../framework/plugins/body-parser.plugin";
-import {Injection} from "./injection/injection";
-import {Throwable} from "../framework/exceptions";
+import {ControllerBuilder} from "./controller/index.ts";
+import {registerDefaultHealthCheck} from "../framework/health-check.ts";
+import {bodyParserPlugin} from "../framework/plugins/body-parser.plugin.ts";
+import {Injection} from "./injection/injection.ts";
+import {Throwable} from "../framework/exceptions/index.ts";
+import {isBunUsed, isDenoUsed, isNodeUsed} from "../bin/constants.ts";
 import os from "os";
 
 
@@ -41,16 +42,30 @@ export class RaitonThread implements ThreadInterface {
         public readonly builder: BuilderInterface,
         protected _options: ThreadOptionsInterface = {}
     ) {
-        this.appDir = process.cwd();
+        this.appDir = isDenoUsed ? (globalThis as any).Deno.cwd() : process.cwd();
         RaitonThread.instance = this;
     }
 
     public restart(): void {
-        process.send?.(EventMessageEnum.RESTART)
+        if (isDenoUsed) {
+            (globalThis as any).Deno.emit?.(EventMessageEnum.RESTART)
+            return
+        }
+        try {
+            if (typeof process.send === 'function' && process.connected) {
+                process.send(EventMessageEnum.RESTART)
+            }
+        } catch (e: any) {
+            Logger.debug('Restart IPC unavailable', e?.message ?? e)
+        }
     }
 
     public async stop(): Promise<void> {
         await Injection.shutdown();
+        if (isDenoUsed) {
+            (globalThis as any).Deno.exit(0)
+            return
+        }
         process.exit(0)
     }
 
@@ -75,7 +90,9 @@ export class RaitonThread implements ThreadInterface {
     }
 
     public setup({application, runtime}: ThreadSetupOptionsInterface): this {
-        const defaultRuntime = typeof Bun !== 'undefined' ? RuntimeType.Bun : RuntimeType.Node;
+        const defaultRuntime = isBunUsed
+            ? RuntimeType.Bun
+            : (isDenoUsed ? RuntimeType.Deno : RuntimeType.Node);
         this.runtime = new Runtime(runtime || defaultRuntime);
         this.application = application;
         this.application.use(bodyParserPlugin())
@@ -89,19 +106,31 @@ export class RaitonThread implements ThreadInterface {
         if (!this.runtime)
             throw new Throwable('Runtime not defined');
 
-        if (this.builder.source) {
-            await ControllerBuilder.scan(this.builder.source)
+        const scanRoot = isNodeUsed
+            ? (this.builder.out || this.builder.source)
+            : this.builder.source;
+
+        if (scanRoot) {
+            await ControllerBuilder.scan(scanRoot)
             registerDefaultHealthCheck(this.application)
         }
 
         if (this._options.serve) {
-            process.on('SIGINT', async () => {
-                await this.stop();
-            });
+            if (isDenoUsed) {
+                const addSignalListener = (globalThis as any).Deno.addSignalListener;
+                if (typeof addSignalListener === 'function') {
+                    addSignalListener('SIGINT', async () => { await this.stop(); });
+                    addSignalListener('SIGTERM', async () => { await this.stop(); });
+                }
+            } else {
+                process.on('SIGINT', async () => {
+                    await this.stop();
+                });
 
-            process.on('SIGTERM', async () => {
-                await this.stop();
-            });
+                process.on('SIGTERM', async () => {
+                    await this.stop();
+                });
+            }
 
             const port = this.application.config.port || 5712;
             const hostname = this.application.config.hostname || '0.0.0.0';

@@ -5,9 +5,9 @@ import {
     RuntimeRequestInterface,
     RuntimeReplyInterface,
     RuntimeServerOptionsInterface
-} from '../../../types'
-import { NodeRequest } from './request'
-import { NodeReply } from './reply'
+} from '../../../types/index.ts'
+import { NodeRequest } from './request.ts'
+import { NodeReply } from './reply.ts'
 
 export const nodeRuntime: RuntimeAdapterInterface = {
     createServer(handler, options?: RuntimeServerOptionsInterface) {

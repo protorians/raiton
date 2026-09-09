@@ -1,4 +1,4 @@
-import {ConstructorType} from "./contruct";
+import {ConstructorType} from "./contruct.ts";
 import {LifetimeEnum} from "@protorians/core";
 
 

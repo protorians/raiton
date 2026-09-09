@@ -1,2 +1,2 @@
-export * from "./compose"
-export * from "./pipeline"
+export * from "./compose.ts"
+export * from "./pipeline.ts"

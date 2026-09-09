@@ -1,8 +1,8 @@
-import type {PluginInterface} from "../../types";
-import type {ContextInterface} from "../../types/core";
-import {PluginScope} from "../../core";
-import {findMcpServerForPath} from "../../core/mcp/metadata";
-import {isMcpJsonRpc, mcpHandleGet, mcpHandlePost, SESSION_HEADER} from "../mcp/streamable-http";
+import type {PluginInterface} from "../../types/index.ts";
+import type {ContextInterface} from "../../types/core.ts";
+import {PluginScope} from "../../core/index.ts";
+import {findMcpServerForPath} from "../../core/mcp/metadata.ts";
+import {isMcpJsonRpc, mcpHandleGet, mcpHandlePost, SESSION_HEADER} from "../mcp/streamable-http.ts";
 
 export interface McpPluginOptions {
     /**

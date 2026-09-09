@@ -1,3 +1,3 @@
-export * from "./protocol"
-export * from "./handler"
-export * from "./streamable-http"
+export * from "./protocol.ts"
+export * from "./handler.ts"
+export * from "./streamable-http.ts"

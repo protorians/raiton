@@ -1,9 +1,9 @@
 import "reflect-metadata";
-import type {ConstructorType, ContainerDefinitionInterface} from "../../types";
+import type {ConstructorType, ContainerDefinitionInterface} from "../../types/index.ts";
 import {LifetimeEnum, TextUtility} from "@protorians/core";
 import {Logger} from "@protorians/logger";
-import {METADATA_KEYS} from "../../framework/constants";
-import {Throwable} from "../../framework/exceptions";
+import {METADATA_KEYS} from "../../framework/constants/index.ts";
+import {Throwable} from "../../framework/exceptions/index.ts";
 
 const camelCase = TextUtility.camelCase;
 

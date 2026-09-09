@@ -1,11 +1,11 @@
-import {registerMcpServer, unregisterMcpServer, getMcpServerMetadata} from "./metadata";
-import {Injection} from "../injection";
-import {McpServerRegistrationInterface} from "../../types";
-import {McpRouteTracker} from "./tracker";
-import {RaitonThread} from "../thread";
-import {HttpMethod} from "../../framework/enums";
-import {mcpHandleGet, mcpHandlePost, isMcpJsonRpc, SESSION_HEADER} from "../../framework/mcp/streamable-http";
-import type {ContextInterface} from "../../types/core";
+import {registerMcpServer, unregisterMcpServer, getMcpServerMetadata} from "./metadata.ts";
+import {Injection} from "../injection/index.ts";
+import {McpServerRegistrationInterface} from "../../types/index.ts";
+import {McpRouteTracker} from "./tracker.ts";
+import {RaitonThread} from "../thread.ts";
+import {HttpMethod} from "../../framework/enums/index.ts";
+import {mcpHandleGet, mcpHandlePost, isMcpJsonRpc, SESSION_HEADER} from "../../framework/mcp/streamable-http.ts";
+import type {ContextInterface} from "../../types/core.ts";
 
 export function compileMcp(McpServerClass: any): McpServerRegistrationInterface | undefined {
     const metadata = getMcpServerMetadata(McpServerClass.prototype || McpServerClass)
