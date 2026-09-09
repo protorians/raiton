@@ -1,2 +1,2 @@
-export * from "./scope"
-export * from "./plugin"
+export * from "./scope.ts"
+export * from "./plugin.ts"

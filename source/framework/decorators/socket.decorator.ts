@@ -1,7 +1,7 @@
-import {getSocketMetadata, registerSocket} from "../../core/socket";
-import {Injectable} from "..";
+import {getSocketMetadata, registerSocket} from "../../core/socket/index.ts";
+import {Injectable} from "../index.ts";
 import {LifetimeEnum} from "@protorians/core";
-import {SocketEventType} from "../../types";
+import {SocketEventType} from "../../types/index.ts";
 
 export function Socket(namespace = '/') {
     return (target: any) => {

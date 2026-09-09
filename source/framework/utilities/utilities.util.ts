@@ -1,4 +1,4 @@
-import {GenericValuesType} from "../../types";
+import {GenericValuesType} from "../../types/index.ts";
 
 export function getType(value: any): GenericValuesType {
     if (typeof value === "string") return "string";

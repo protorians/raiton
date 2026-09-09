@@ -1,7 +1,7 @@
-import {HttpStatus, HttpMethod} from "./enums";
-import {RaitonResponses} from "./responses/helpers";
-import {ApplicationInterface} from "../types/application";
-import {RequestContext} from "../core/context";
+import {HttpStatus, HttpMethod} from "./enums/index.ts";
+import {RaitonResponses} from "./responses/helpers.ts";
+import {ApplicationInterface} from "../types/application.ts";
+import {RequestContext} from "../core/context.ts";
 
 export interface HealthCheckConfig {
     enabled: boolean;

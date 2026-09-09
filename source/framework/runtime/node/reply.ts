@@ -1,5 +1,5 @@
 import { ServerResponse } from 'node:http'
-import type { RuntimeReplyInterface } from '../../../types'
+import type { RuntimeReplyInterface } from '../../../types/index.ts'
 
 export class NodeReply implements RuntimeReplyInterface {
     constructor(public res: ServerResponse) {}

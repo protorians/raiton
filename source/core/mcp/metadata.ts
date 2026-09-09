@@ -1,5 +1,5 @@
-import {McpServerMetaInterface, McpServerRegistrationInterface} from "../../types";
-import {METADATA_KEYS} from "../../framework/constants";
+import {McpServerMetaInterface, McpServerRegistrationInterface} from "../../types/index.ts";
+import {METADATA_KEYS} from "../../framework/constants/index.ts";
 import "reflect-metadata";
 
 const registry = new Map<string, McpServerRegistrationInterface>();

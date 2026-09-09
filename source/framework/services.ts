@@ -1,4 +1,4 @@
-import {DelegateRepository} from "./repositories";
+import {DelegateRepository} from "./repositories.ts";
 
 export class DelegateService {
     protected repository!: DelegateRepository;

@@ -1,4 +1,4 @@
-import {Route} from "../router"
+import {Route} from "../router/index.ts"
 
 const controllerRouteMap = new Map<string, Route[]>()
 

@@ -1,9 +1,9 @@
-import {secureHeaders} from './headers'
-import {secureCors} from './cors'
-import {secureRateLimit} from './rate-limit'
-import {secureBodyLimit} from './body-limit'
-import {secureMethodGuard} from './method-guard'
-import {secureCsrf} from './csrf'
+import {secureHeaders} from './headers.ts'
+import {secureCors} from './cors.ts'
+import {secureRateLimit} from './rate-limit.ts'
+import {secureBodyLimit} from './body-limit.ts'
+import {secureMethodGuard} from './method-guard.ts'
+import {secureCsrf} from './csrf.ts'
 
 export class Security {
     static headers = secureHeaders

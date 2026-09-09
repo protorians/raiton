@@ -1,5 +1,5 @@
-import {ParseableEntriesType, ParseablePrimitiveType} from "../types";
-import {stabilizeJson} from "./utilities";
+import {ParseableEntriesType, ParseablePrimitiveType} from "../types/index.ts";
+import {stabilizeJson} from "./utilities/index.ts";
 import {DynamicParameter, IDynamicParameters, IDynamicProps, IParameter,} from "@protorians/parameters";
 
 

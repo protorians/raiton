@@ -1,7 +1,7 @@
 import {Command} from 'commander';
-import {RaitonCommands, RaitonConfig} from "../core";
-import {getPackageRoot} from "../framework";
-import {CliTools} from "./cli-tools";
+import {RaitonCommands, RaitonConfig} from "../core/index.ts";
+import {getPackageRoot} from "../framework/index.ts";
+import {CliTools} from "./cli-tools.ts";
 
 
 export default async function bootstrapper(cli: Command) {
@@ -11,5 +11,5 @@ export default async function bootstrapper(cli: Command) {
 
     await RaitonConfig.sync(workdir);
     await capabilities.harvest();
-    return cli.parse(process.argv)
+    return cli.parse(CliTools.argv)
 }

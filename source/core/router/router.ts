@@ -1,7 +1,7 @@
-import {RouteHandlerCallable} from '../../types'
-import {HttpMethod} from "../../framework/enums";
-import {Route} from './route'
-import {RouteMatcher} from './matcher'
+import {RouteHandlerCallable} from '../../types/index.ts'
+import {HttpMethod} from "../../framework/enums/index.ts";
+import {Route} from './route.ts'
+import {RouteMatcher} from './matcher.ts'
 
 export class Router {
     private matcher = new RouteMatcher()

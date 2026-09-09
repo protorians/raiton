@@ -1,6 +1,6 @@
-import {definePlugin} from "../../../core/plugins";
-import {MiddlewareParametersInterface} from "../../../types";
-import {RaitonResponses, HttpStatus} from "../..";
+import {definePlugin} from "../../../core/plugins/index.ts";
+import {MiddlewareParametersInterface} from "../../../types/index.ts";
+import {RaitonResponses, HttpStatus} from "../../index.ts";
 
 
 export const secureBodyLimit = (maxBytes = 1_000_000) =>

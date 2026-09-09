@@ -1,5 +1,5 @@
-import {HttpMethod} from "../framework";
-import {HttpsConfigInput, HttpsConfigInterface} from "../framework/utilities/https.util";
+import {HttpMethod} from "../framework/index.ts";
+import {HttpsConfigInput, HttpsConfigInterface} from "../framework/utilities/https.util.ts";
 
 export interface ApplicationConfigInterface {
     workdir?: string;

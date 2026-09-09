@@ -1,4 +1,4 @@
-import type {RouteDefinitionInterface} from '../../types/router'
+import type {RouteDefinitionInterface} from '../../types/router.ts'
 
 export class Route {
     method: string

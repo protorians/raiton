@@ -1,11 +1,12 @@
 import path from "node:path";
-import {RaitonConfig} from "./config";
-import {Raiton} from "./raiton";
+import {RaitonConfig} from "./config/index.ts";
+import {Raiton} from "./raiton.ts";
 
 
 export class RaitonDirectories {
     public static readonly index = `.${Raiton.identifier}`;
     public static readonly bootstrapFile = 'main.ts';
+    public static readonly compiledBootstrapFile = 'main.mjs';
     // public static readonly bootstrapFile = 'main.js';
 
     public static caches(workdir: string): string {

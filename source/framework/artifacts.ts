@@ -1,9 +1,9 @@
-import {Injection} from "../core/injection";
+import {Injection} from "../core/injection/index.ts";
 import {Logger} from "@protorians/logger";
-import type {ConstructorType} from "../types";
-import {Raiton} from "../core/raiton";
-import {isArtifact} from "./utilities";
-import {compileMcp} from "../core/mcp/builder";
+import type {ConstructorType} from "../types/index.ts";
+import {Raiton} from "../core/raiton.ts";
+import {isArtifact} from "./utilities/index.ts";
+import {compileMcp} from "../core/mcp/builder.ts";
 
 export type HmrChannel =
     | 'hmr:di'

@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import argon2, {Options} from "argon2";
-import {HashAlgoEnum, PasswordAlgoEnum} from "./enums";
+import {HashAlgoEnum, PasswordAlgoEnum} from "./enums/index.ts";
 import bcrypt from "bcrypt";
-import {DerivationOptionsInterface, EncryptionResultType, ScryptOptionsInterface} from "../types";
+import {DerivationOptionsInterface, EncryptionResultType, ScryptOptionsInterface} from "../types/index.ts";
 
 export class Encryption {
     static get algos() {

@@ -1,7 +1,7 @@
 import type {
     RuntimeRequestInterface,
     RuntimeReplyInterface
-} from './runtime'
+} from './runtime.ts'
 
 export type HookNameType =
     | 'onRequest'

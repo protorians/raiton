@@ -1,5 +1,5 @@
-// import {IAccessGuardDeclaration} from "../../types";
-// import {SYSTEM_DECORATORS_KEYS} from "../constants";
+// import {IAccessGuardDeclaration} from "../../types/index.ts";
+// import {SYSTEM_DECORATORS_KEYS} from "../constants/index.ts";
 //
 // export function AccessGuard(declaration: IAccessGuardDeclaration){
 //     return (target: any, methodKey: any)=> {

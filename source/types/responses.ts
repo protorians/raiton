@@ -1,5 +1,5 @@
-import {HttpStatus} from "../framework/enums/http-status.enum";
-import {ParseableEntriesType, ParseableType} from "./parseable";
+import {HttpStatus} from "../framework/enums/http-status.enum.ts";
+import {ParseableEntriesType, ParseableType} from "./parseable.ts";
 
 export interface HttpResponseBaseInterface {
     message: string;

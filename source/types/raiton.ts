@@ -1,4 +1,4 @@
-import {BuilderHMRDeclarationInterface} from "./builder";
+import {BuilderHMRDeclarationInterface} from "./builder.ts";
 
 export interface RaitonSignalMapInterface {
     ready?: undefined;

@@ -1,7 +1,7 @@
-import {HookStore} from '../hooks'
-import {MiddlewarePipeline} from '../middleware'
-import {Route, Router} from '../router'
-import {HttpMethod} from "../../framework/enums";
+import {HookStore} from '../hooks.ts'
+import {MiddlewarePipeline} from '../middleware/index.ts'
+import {Route, Router} from '../router/index.ts'
+import {HttpMethod} from "../../framework/enums/index.ts";
 
 export class PluginScope {
     public hooks: HookStore

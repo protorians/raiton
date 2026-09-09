@@ -1,5 +1,5 @@
-import {ControllerMetaInterface} from "../../types";
-import {METADATA_KEYS} from "../../framework";
+import {ControllerMetaInterface} from "../../types/index.ts";
+import {METADATA_KEYS} from "../../framework/index.ts";
 import "reflect-metadata";
 
 export function getControllerMetadata(target: any): ControllerMetaInterface {

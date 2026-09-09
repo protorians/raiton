@@ -1,15 +1,15 @@
 import fs from "node:fs";
-import {BuilderHMRDeclarationInterface} from "../../types";
+import {BuilderHMRDeclarationInterface} from "../../types/index.ts";
 import {LBadge, Logger} from "@protorians/logger";
-import {compileController} from "./compiler";
-import {compileSocket} from "../socket/builder";
-import {compileMcp} from "../mcp/builder";
-import {RaitonThread} from "../thread";
-import {Injection} from "../injection";
-import {isControllerArtifact, isSocketArtifact, isMcpArtifact} from "../../framework";
-import {Artifacts} from "../../framework/artifacts";
+import {compileController} from "./compiler.ts";
+import {compileSocket} from "../socket/builder.ts";
+import {compileMcp} from "../mcp/builder.ts";
+import {RaitonThread} from "../thread.ts";
+import {Injection} from "../injection/index.ts";
+import {isControllerArtifact, isSocketArtifact, isMcpArtifact} from "../../framework/index.ts";
+import {Artifacts} from "../../framework/artifacts.ts";
 import path from "node:path";
-import {ControllerRouteTracker} from "./tracker";
+import {ControllerRouteTracker} from "./tracker.ts";
 
 export class ControllerBuilder {
 

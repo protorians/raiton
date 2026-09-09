@@ -1,17 +1,18 @@
-import {RaitonConfig} from "./config";
+import {RaitonConfig} from "./config/index.ts";
 import path from "node:path";
-import {RaitonDirectories} from "./directories";
+import {RaitonDirectories} from "./directories.ts";
 import fs, {WatchEventType} from "node:fs";
-import type {BuilderConfigInterface, BuilderInterface, ThreadInterface,} from "../types";
-import {RaitonThread} from "./thread";
-import {Raiton} from "./raiton";
-import {ControllerBuilder} from "./controller";
+import type {BuilderConfigInterface, BuilderInterface, ThreadInterface,} from "../types/index.ts";
+import {RaitonThread} from "./thread.ts";
+import {Raiton} from "./raiton.ts";
+import {ControllerBuilder} from "./controller/index.ts";
 import {watch} from "fs";
 import {LBadge, Logger} from "@protorians/logger";
-import {Throwable} from "../framework/exceptions";
-import {Artifacts, HMR_CHANNELS, HmrChannel} from "../framework/artifacts";
+import {Throwable} from "../framework/exceptions/index.ts";
+import {Artifacts, HMR_CHANNELS, HmrChannel} from "../framework/artifacts.ts";
 import {build} from "esbuild";
 import {execSync, spawn, spawnSync} from "node:child_process";
+import {isNodeUsed} from "../bin/constants.ts";
 
 export class RaitonBuilder implements BuilderInterface {
     protected _source: string | null = null;
@@ -54,6 +55,14 @@ export class RaitonBuilder implements BuilderInterface {
 
         const classification = Artifacts.classify(filename)
         if (!classification) return
+
+        // Sur Node, le rechargement d'artefacts TypeScript en mémoire n'est pas
+        // possible (import() natif des fichiers .ts). On bascule alors sur le
+        // redémarrage de processus via IPC RESTART géré par la commande `develop`.
+        if (isNodeUsed) {
+            Raiton.thread?.restart()
+            return
+        }
 
         const payload = {
             filename,
@@ -102,7 +111,7 @@ export class RaitonBuilder implements BuilderInterface {
 
 
         this._bootstrapper = path.join(this._source, RaitonDirectories.bootstrapFile)
-        this._bootstrapperFile = path.join(RaitonDirectories.server('./'), RaitonDirectories.bootstrapFile)
+        this._bootstrapperFile = path.join(RaitonDirectories.server(this.workdir), RaitonDirectories.compiledBootstrapFile)
 
         return this;
 
@@ -198,24 +207,69 @@ export class RaitonBuilder implements BuilderInterface {
 
         const source = path.relative(this.workdir, this._source)
         const output = path.relative(this.workdir, this._out)
-        const tsconfig = 'tsconfig.json'
-        // const tsconfig = path.join(path.relative(this._source, this.workdir), 'tsconfig.json')
 
         Logger.log(LBadge.notice('Building'), 'application');
         Logger.log(LBadge.info('Source'), source);
         Logger.log(LBadge.info('Output'), output);
 
-        execSync(`cd ${this.workdir} && npx tsc -p ${tsconfig} --outDir ${output} --noEmit`, {stdio: 'inherit'})
+        await this.typecheck()
+        await this.compile()
+
+        return this;
+    }
+
+    protected async typecheck(): Promise<this> {
+        const tsconfigPath = path.join(this.workdir, 'tsconfig.json')
+        if (!fs.existsSync(tsconfigPath)) return this
+
+        try {
+            execSync(`cd ${this.workdir} && npx tsc -p tsconfig.json --noEmit`, {stdio: 'inherit'})
+        } catch (e: any) {
+            Logger.warn('TypeScript check reported errors', e?.message ?? e)
+        }
+
+        return this;
+    }
+
+    protected async compile(): Promise<this> {
+        if (!this._source) throw new Error('Application source not found');
+        if (!this._out) throw new Error('Application output not found');
+        if (!this.bootstrapper) throw new Error('Bootstrapper not found')
+
+        const outfile = this.bootstrapperFile
+        if (!outfile) throw new Error('Bootstrapper file not found')
+
+        await build({
+            entryPoints: [this.bootstrapper],
+            bundle: true,
+            platform: 'node',
+            format: 'esm',
+            target: 'node20',
+            outfile,
+            sourcemap: true,
+            packages: 'external',
+            external: ['@protorians/*', 'argon2', 'bcrypt'],
+        })
 
         return this;
     }
 
     public async boot(): Promise<any> {
         if (!this.bootstrapper) throw new Error('Bootstrapper not found')
-        if (!fs.existsSync(this.bootstrapper))
-            throw new Error(`Bootstrapper file "${this.bootstrapper}" does not exists`)
 
-        const bootstrapper = await import(this.bootstrapper);
+        let entry = this.bootstrapper
+
+        if (isNodeUsed) {
+            const compiled = this.bootstrapperFile
+            if (!compiled) throw new Error('Bootstrapper file not found')
+            if (!fs.existsSync(compiled)) await this.compile()
+            entry = compiled
+        }
+
+        if (!fs.existsSync(entry))
+            throw new Error(`Bootstrapper file "${entry}" does not exists`)
+
+        const bootstrapper = await import(entry);
         if (!('default' in bootstrapper))
             throw new Error('Bootstrapper not supported! Please export to "default"')
 

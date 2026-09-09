@@ -1,6 +1,6 @@
-import {definePlugin} from "../../../core/plugins";
-import {ContextInterface, MiddlewareParametersInterface, MiddlewareNextCallable} from "../../../types";
-import {RaitonResponses, HttpStatus} from "../..";
+import {definePlugin} from "../../../core/plugins/index.ts";
+import {ContextInterface, MiddlewareParametersInterface, MiddlewareNextCallable} from "../../../types/index.ts";
+import {RaitonResponses, HttpStatus} from "../../index.ts";
 
 
 export interface RateLimitOptions {

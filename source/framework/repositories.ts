@@ -1,4 +1,4 @@
-import {Throwable} from "./exceptions";
+import {Throwable} from "./exceptions/index.ts";
 
 
 export class DelegateRepository {

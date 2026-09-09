@@ -1,10 +1,9 @@
 /// <reference types="deno" />
-import {Raiton, RaitonCommand} from "../core";
+import {Raiton, RaitonCommand} from "../core/index.ts";
 import {ChildProcess, ChildProcessWithoutNullStreams} from 'node:child_process';
 import {Logger} from "@protorians/logger";
-import {EventMessageEnum} from "../framework";
-import {CliTools} from "../bin/cli-tools";
-import path from "node:path";
+import {EventMessageEnum} from "../framework/index.ts";
+import {CliTools} from "../bin/cli-tools.ts";
 
 export default class DevelopCommand extends RaitonCommand {
     public readonly name: string = 'develop';
@@ -32,7 +31,7 @@ export default class DevelopCommand extends RaitonCommand {
     protected async run(): Promise<void> {
         // Logger.info('Workdir', this.workdir);
 
-        const entryPoint = path.join(this.appdir, 'bin/index.ts');
+        const entryPoint = CliTools.cliEntry(this.appdir);
         this.child = CliTools.spawn(entryPoint, ['build', '-d'], {
             stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
             cwd: this.workdir

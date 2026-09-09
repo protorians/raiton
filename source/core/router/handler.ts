@@ -1,10 +1,10 @@
-import {ControllerMetaInterface, RouteMetaInterface} from "../../types";
+import {ControllerMetaInterface, RouteMetaInterface} from "../../types/index.ts";
 import {Logger} from "@protorians/logger";
-import {Raiton} from "..";
-import {HttpException} from "../../framework/exceptions";
-import {ThrowableResponse} from "../../framework/responses/http-throwable";
-import {collectRouteArguments, validateDtoArguments, validateResponse, runMiddlewares} from "./handler.utils";
-import {RaitonResponses, HttpStatus} from "../../framework";
+import {Raiton} from "../index.ts";
+import {HttpException} from "../../framework/exceptions/index.ts";
+import {ThrowableResponse} from "../../framework/responses/http-throwable.ts";
+import {collectRouteArguments, validateDtoArguments, validateResponse, runMiddlewares} from "./handler.utils.ts";
+import {RaitonResponses, HttpStatus} from "../../framework/index.ts";
 
 export function createHandler(
     instance: any,

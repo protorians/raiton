@@ -1,5 +1,5 @@
 import {WatchEventType} from "node:fs";
-import type {HmrChannel} from "../framework/artifacts";
+import type {HmrChannel} from "../framework/artifacts.ts";
 
 export interface StartCommandOptionsInterface {
     develop?: boolean;

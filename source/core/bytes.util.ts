@@ -1,4 +1,4 @@
-import {FileSizeFormatedInterface} from "../types";
+import {FileSizeFormatedInterface} from "../types/index.ts";
 
 export function parseBytes(bytes: number, decimals = 2): FileSizeFormatedInterface {
     if (bytes === 0) return {size: 0, unit: "o"};

@@ -1,4 +1,4 @@
-import {GuardDeclaration} from "../types";
+import {GuardDeclaration} from "../types/index.ts";
 import {Logger} from "@protorians/logger";
 
 export class RaitonGuards {

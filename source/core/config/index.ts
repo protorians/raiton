@@ -1,2 +1,2 @@
-export * from "./config"
-export * from "./define"
+export * from "./config.ts"
+export * from "./define.ts"

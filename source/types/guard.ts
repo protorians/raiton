@@ -1,4 +1,4 @@
-import {MiddlewareParametersInterface} from "./middleware";
+import {MiddlewareParametersInterface} from "./middleware.ts";
 
 export interface GuardOptions {
     name: string;

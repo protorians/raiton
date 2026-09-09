@@ -1,4 +1,4 @@
-import {Route} from '.'
+import {Route} from './index.ts'
 
 export class RouteMatcher {
     protected _routes = new Map<string, Route>()

@@ -14,6 +14,7 @@ class Runtime {
   constructor(public readonly type: RuntimeType)
 
   get isNode(): boolean
+  get isDeno(): boolean
   get isBun(): boolean
 
   adapter(): RuntimeAdapterInterface
@@ -25,11 +26,15 @@ class Runtime {
 
 ```typescript
 // Détection automatique (dans RaitonThread.setup) :
-const defaultRuntime = typeof Bun !== 'undefined' ? RuntimeType.Bun : RuntimeType.Node
+// Bun si présent, sinon Deno si présent, sinon Node
+const defaultRuntime = isBunUsed
+  ? RuntimeType.Bun
+  : (isDenoUsed ? RuntimeType.Deno : RuntimeType.Node)
 
 // Manuel :
 const runtime = new Runtime(RuntimeType.Bun)
 const runtime = new Runtime(RuntimeType.Node)
+const runtime = new Runtime(RuntimeType.Deno)
 ```
 
 ### Création du serveur
@@ -77,11 +82,16 @@ node/
 - `NodeRequest` : wrapper autour de `IncomingMessage` avec interface `RequestInterface`
 - `NodeReply` : wrapper autour de `ServerResponse` avec interface `ReplyInterface`
 
-### `denoRuntime` (stub)
+### `denoRuntime` (Deno.serve)
 
 **Fichier :** `source/framework/runtime/deno/server.ts`
 
-Non implémenté — stub uniquement.
+Utilise `Deno.serve()` et `Deno.upgradeWebSocket()` pour les sockets.
+
+- **Serveur** : `Deno.serve({ port, hostname })`
+- **Requêtes** : Native `Request` / `Response`
+- **Sockets** : `Deno.upgradeWebSocket()`
+- **Recommandé** pour une production stable et rapide sur Deno
 
 ## Interface `RuntimeAdapterInterface`
 

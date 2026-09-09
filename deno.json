@@ -4,6 +4,9 @@
     "@/": "./source/"
   },
   "tasks": {
-    "start": "deno run --allow-all source/bin/bootstrapper.ts"
+    "dev": "deno run --allow-all --watch source/bin/index.ts dev",
+    "build": "deno run --allow-all source/bin/index.ts build",
+    "start": "deno run --allow-all source/bin/index.ts start",
+    "compile": "deno compile --no-check --allow-all --output build/bin/raiton source/bin/index.ts"
   }
 }

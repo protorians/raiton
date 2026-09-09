@@ -1,4 +1,4 @@
-import {getControllerMetadata} from "../../core";
+import {getControllerMetadata} from "../../core/index.ts";
 
 export function CsrfToken() {
     return (target: any, propertyKey?: string) => {

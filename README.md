@@ -72,16 +72,23 @@ export default async (thread: ThreadInterface) => {
 ## Utilisation du CLI
 
 Raiton est livré avec une interface en ligne de commande pour faciliter le développement.
+Il fonctionne sur **Bun**, **Node.js** et **Deno**.
 
 ```bash
-# Lancer en mode développement (avec hot reload)
-bun raiton develop
+# Bun — exécution TypeScript native
+bun raiton dev      # mode développement avec HMR
+bun raiton build    # build du projet
+bun raiton start    # démarrage en production (sans HMR)
 
-# Builder le projet
-bun raiton build
+# Node.js (bundle JS préalable : bun run build)
+node build/bin/index.mjs dev
+node build/bin/index.mjs start
 
-# Démarrer le projet buildé
-bun raiton start
+# Deno
+deno task dev       # mode développement avec HMR (--watch)
+deno task build
+deno task start     # démarrage en production
+deno task compile   # binaire autonome stable et rapide
 ```
 
 ## Runtimes supportés
@@ -90,7 +97,7 @@ Raiton détecte automatiquement l'environnement d'exécution et adapte son serve
 
 - **Bun** : Utilisation de `Bun.serve`.
 - **Node.js** : Adaptateur pour serveurs HTTP Node.
-- **Web** : Compatible avec les environnements basés sur les standards Web (Fetch API).
+- **Deno** : Utilisation de `Deno.serve`.
 
 ## Documentation API
 

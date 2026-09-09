@@ -1,9 +1,9 @@
-import {ApplicationInterface} from "../../types/application";
-import {getControllerMetadata} from "..";
-import {createHandler} from "../router";
-import {Injection} from "../injection";
-import {ControllerMetaInterface} from "../../types";
-import {ControllerRouteTracker} from "./tracker";
+import {ApplicationInterface} from "../../types/application.ts";
+import {getControllerMetadata} from "../index.ts";
+import {createHandler} from "../router/index.ts";
+import {Injection} from "../injection/index.ts";
+import {ControllerMetaInterface} from "../../types/index.ts";
+import {ControllerRouteTracker} from "./tracker.ts";
 
 export function compileController(
     ControllerClass: any,

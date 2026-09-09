@@ -1,5 +1,5 @@
-import {GenericValueType} from "../types/generic";
-import {getType} from "./utilities";
+import {GenericValueType} from "../types/generic.ts";
+import {getType} from "./utilities/index.ts";
 
 export function env<T>(key: string, defaultValue?: T, type?: GenericValueType): T | undefined {
     const value = process.env[key] || defaultValue;

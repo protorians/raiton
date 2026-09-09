@@ -1,8 +1,8 @@
 import type {
     McpServerRegistrationInterface,
-} from "../../types";
-import {McpVersion} from "./protocol";
-import {handleMcpRequest} from "./handler";
+} from "../../types/index.ts";
+import {McpVersion} from "./protocol.ts";
+import {handleMcpRequest} from "./handler.ts";
 
 export const SESSION_HEADER = 'mcp-session-id'
 

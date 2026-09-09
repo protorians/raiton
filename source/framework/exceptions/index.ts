@@ -1,2 +1,2 @@
-export * from "./http-exception"
-export * from "./throwable"
+export * from "./http-exception.ts"
+export * from "./throwable.ts"

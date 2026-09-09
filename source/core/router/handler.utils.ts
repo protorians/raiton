@@ -1,7 +1,7 @@
-import {MiddlewareCallable, ParamMetaInterface, RouteMetaInterface} from "../../types";
-import {middlewareCompose} from "../../core";
+import {MiddlewareCallable, ParamMetaInterface, RouteMetaInterface} from "../../types/index.ts";
+import {middlewareCompose} from "../index.ts";
 import {validate} from "class-validator";
-import {DataTransferObject, METADATA_KEYS, Parametrable, parseCookie, Throwable, ViewModel} from "../../framework";
+import {DataTransferObject, METADATA_KEYS, Parametrable, parseCookie, Throwable, ViewModel} from "../../framework/index.ts";
 
 /**
  * Helper function for collecting arguments from route parameters

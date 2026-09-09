@@ -1,6 +1,6 @@
-import {HttpResponseInterface} from "../../types";
-import {HttpStatus} from "../enums";
-import {Raiton} from "../../core";
+import {HttpResponseInterface} from "../../types/index.ts";
+import {HttpStatus} from "../enums/index.ts";
+import {Raiton} from "../../core/index.ts";
 
 
 export class ThrowableResponse extends Error {
