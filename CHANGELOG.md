@@ -1,3 +1,13 @@
+## [6.7.0-beta.15](https://github.com/protorians/raiton/compare/v6.6.0-beta.14...v6.7.0-beta.15) (2026-09-09)
+
+### Features
+
+* feat: add HTTP cache system with `@Cache()` decorator, `CacheManager`, and ETag support (#19) ([3cbafa5](https://github.com/protorians/raiton/commit/3cbafa5d38ba4db223f17664726b28790ad15c5a))
+
+### Other Changes
+
+* Merge pull request #18 ([0bab971](https://github.com/protorians/raiton/commit/0bab971d90cb6a329859c8d24929c67a3a2d9518))
+
 ## [6.6.0-beta.14](https://github.com/protorians/raiton/compare/v6.5.0-beta.13...v6.6.0-beta.14) (2026-09-04)
 
 ### Features
