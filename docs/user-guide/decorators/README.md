@@ -11,6 +11,7 @@ Cette section regroupe les décorateurs que vous utilisez pour définir vos cont
 - [parameters.md](parameters.md)
 - [injection.md](injection.md)
 - [middleware.md](middleware.md)
+- [cache.md](cache.md)
 - [socket.md](socket.md)
 - [api-tags.md](api-tags.md)
 - [api-operation.md](api-operation.md)
