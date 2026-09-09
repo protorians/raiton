@@ -28,6 +28,7 @@ Les décorateurs utilisent `reflect-metadata` et `experimentalDecorators: true` 
 | `@Injectable` | Classe | Enregistrement DI | [Voir](injection.md) |
 | `@Inject` | Constructeur/propriété | Injection de dépendance | [Voir](injection.md) |
 | `@Middleware` | Classe/méthode | Middleware sur contrôleur/route | [Voir](middleware.md) |
+| `@Cache` | Méthode | Cache de réponse de route | [Voir](../cache/cache.md) |
 | `@Socket` | Classe | Handler socket | [Voir](socket.md) |
 | `@OnSocket*` | Méthode | Événement socket | [Voir](socket.md) |
 | `@ApiTags` | Classe/méthode | Tag OpenAPI | [Voir](openapi.md) |

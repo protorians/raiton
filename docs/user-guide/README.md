@@ -19,6 +19,7 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 | [responses.md](responses.md) | Structurer les réponses et les erreurs |
 | [body-parser.md](body-parser.md) | Lire JSON, formulaires et fichiers |
 | [security.md](security.md) | Sécurité HTTP, CORS, rate-limit, body-limit |
+| [cache.md](cache.md) | ETag (validation) et cache de routes (`@Cache`) |
 | [health-check.md](health-check.md) | Endpoint de contrôle et vérifications de santé |
 | [https.md](https.md) | HTTPS, certificats et environnements |
 | [openapi/README.md](openapi/README.md) | Générer et documenter l'API |

@@ -14,6 +14,7 @@ Le dossier `source/framework/` regroupe les briques publiques du framework: déc
 | [env.md](env.md) | Variables d’environnement |
 | [base-classes.md](base-classes.md) | DTO, ViewModel, services, repositories, bag de paramètres |
 | [decorators/](decorators/README.md) | Décorateurs du framework |
+| [cache/](cache/README.md) | ETag et cache de routes |
 | [plugins/](plugins/README.md) | Body parser, OpenAPI, sécurité |
 
 ## Ce que fournit ce module
@@ -38,6 +39,7 @@ framework/
 ├── parameter-bag.ts
 ├── artifacts.ts
 ├── env.ts
+├── cache/
 ├── decorators/
 ├── plugins/
 ├── runtime/
