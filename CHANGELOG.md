@@ -1,3 +1,13 @@
+## [6.8.1-beta.17](https://github.com/protorians/raiton/compare/v6.7.0-beta.15...v6.8.1-beta.17) (2026-09-26)
+
+### Bug Fixes
+
+* fix(package): remove period from description in package.json ([894ee9b](https://github.com/protorians/raiton/commit/894ee9b6471392d9743c030e7cd176c64dff3071))
+
+### Other Changes
+
+* Add task scheduler and improve dependency injection logging (#20) ([05cd0c9](https://github.com/protorians/raiton/commit/05cd0c9774d242ee24697b14e9ea52b94cbbb663))
+
 ## [6.8.0-beta.16](https://github.com/protorians/raiton/compare/v6.7.0-beta.15...v6.8.0-beta.16) (2026-09-26)
 
 ### Features
