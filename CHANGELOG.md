@@ -1,3 +1,13 @@
+## [6.8.0-beta.16](https://github.com/protorians/raiton/compare/v6.7.0-beta.15...v6.8.0-beta.16) (2026-09-26)
+
+### Features
+
+* feat(scheduler): add task scheduler with decorators, queue backends, and HMR support ([63069d6](https://github.com/protorians/raiton/commit/63069d696f122e8def2a041718467848644e3e62))
+
+### Bug Fixes
+
+* refactor(injection): log a trace when a dependency is not registered ([567d5b4](https://github.com/protorians/raiton/commit/567d5b4e29b9e3d8e45a1a16d378a0881e4df599))
+
 ## [6.7.0-beta.15](https://github.com/protorians/raiton/compare/v6.6.0-beta.14...v6.7.0-beta.15) (2026-09-09)
 
 ### Features
