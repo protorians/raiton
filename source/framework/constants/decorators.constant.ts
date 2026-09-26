@@ -26,4 +26,6 @@ export const METADATA_KEYS = {
     MCP: Symbol('mcp:meta'),
     MCP_ELEMENTS: Symbol('mcp:elements'),
     MCP_ARGUMENTS: Symbol('mcp:arguments'),
+    // Scheduler metadata keys
+    SCHEDULER: Symbol('scheduler:meta'),
 }

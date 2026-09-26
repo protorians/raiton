@@ -14,6 +14,10 @@ export function isMcpArtifact(filename: string) {
     return isArtifact(filename, 'mcp')
 }
 
+export function isSchedulerArtifact(filename: string) {
+    return isArtifact(filename, 'scheduler')
+}
+
 export function isHealthCheckArtifact(filename: string) {
     return isArtifact(filename, 'health-check')
 }

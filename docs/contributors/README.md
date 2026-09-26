@@ -29,6 +29,7 @@ docs/
 │   ├── middleware.md          ← Pipeline middleware
 │   ├── controller.md          ← ControllerBuilder, compilation
 │   ├── injection.md           ← Injection de dépendances
+│   ├── scheduler.md           ← SchedulerManager, cron, files d'attente
 │   ├── plugin-scope.md        ← Système de plugins
 │   ├── config.md              ← Configuration
 │   └── builder-thread.md      ← Build, thread, cycle de vie

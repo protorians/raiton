@@ -16,6 +16,7 @@ import {Runtime} from "../framework/runtime/index.ts";
 import {LBadge, Logger} from "@protorians/logger";
 import {ControllerBuilder} from "./controller/index.ts";
 import {registerDefaultHealthCheck} from "../framework/health-check.ts";
+import {SchedulerManager} from "./scheduler/index.ts";
 import {bodyParserPlugin} from "../framework/plugins/body-parser.plugin.ts";
 import {Injection} from "./injection/injection.ts";
 import {Throwable} from "../framework/exceptions/index.ts";
@@ -61,6 +62,7 @@ export class RaitonThread implements ThreadInterface {
     }
 
     public async stop(): Promise<void> {
+        await SchedulerManager.current.stop();
         await Injection.shutdown();
         if (isDenoUsed) {
             (globalThis as any).Deno.exit(0)
@@ -114,6 +116,8 @@ export class RaitonThread implements ThreadInterface {
             await ControllerBuilder.scan(scanRoot)
             registerDefaultHealthCheck(this.application)
         }
+
+        await SchedulerManager.current.start();
 
         if (this._options.serve) {
             if (isDenoUsed) {

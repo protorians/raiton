@@ -10,4 +10,5 @@ export interface RaitonSignalMapInterface {
     'hmr:middleware': BuilderHMRDeclarationInterface;
     'hmr:hook': BuilderHMRDeclarationInterface;
     'hmr:mcp': BuilderHMRDeclarationInterface;
+    'hmr:scheduler': BuilderHMRDeclarationInterface;
 }

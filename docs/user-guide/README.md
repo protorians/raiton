@@ -25,6 +25,7 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 | [openapi/README.md](openapi/README.md) | Générer et documenter l'API |
 | [sockets.md](sockets.md) | Déclarer et gérer les sockets |
 | [mcp.md](mcp.md) | Exposer outils, prompts et ressources via le protocole MCP |
+| [scheduler.md](scheduler.md) | Planifier des tâches (cron, intervalle) et gérer des files d’attente |
 | [tutorial.md](tutorial.md) | Construire une mini API complète de bout en bout |
 | [plugins.md](plugins.md) | Vue d'ensemble des plugins intégrés |
 | [types.md](types.md) | Comprendre les types utiles au développeur |
@@ -50,11 +51,12 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 15. lire [openapi/README.md](openapi/README.md)
 16. lire [sockets.md](sockets.md)
 17. lire [mcp.md](mcp.md)
-18. lire [health-check.md](health-check.md)
-19. lire [types.md](types.md)
-20. lire [tutorial.md](tutorial.md)
-21. lire [plugins.md](plugins.md)
-22. lire [cli.md](cli.md)
+18. lire [scheduler.md](scheduler.md)
+19. lire [health-check.md](health-check.md)
+20. lire [types.md](types.md)
+21. lire [tutorial.md](tutorial.md)
+22. lire [plugins.md](plugins.md)
+23. lire [cli.md](cli.md)
 
 ## Ce que couvre ce guide
 
@@ -66,6 +68,7 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 - les plugins de sécurité et de documentation
 - le protocole HTTPS et la gestion des certificats
 - les endpoints et vérifications de santé (health-check)
+- la planification de tâches et les files d’attente (scheduler)
 - le cycle local `dev` / `build` / `start`
 
 > **Navigation :** [← docs/](../README.md) | [← contributeurs](../contributors/README.md)

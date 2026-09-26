@@ -1,6 +1,6 @@
 # MCP (Model Context Protocol)
 
-> **Navigation :** [← sockets](sockets.md) | [types →](types.md)
+> **Navigation :** [← sockets](sockets.md) | [scheduler →](scheduler.md)
 
 Raiton permet de créer un serveur **MCP (Model Context Protocol)** facilement, avec des décorateurs, et de le faire coexister avec le serveur HTTP et les sockets sur le même processus et le même port.
 
@@ -117,4 +117,4 @@ Les serveurs MCP sont documentés dans le contrat OpenAPI généré, avec une ex
 
 ---
 
-[← sockets](sockets.md) | [types →](types.md)
+[← sockets](sockets.md) | [scheduler →](scheduler.md)
