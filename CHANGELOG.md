@@ -1,3 +1,9 @@
+## [6.8.2-beta.18](https://github.com/protorians/raiton/compare/v6.8.1-beta.17...v6.8.2-beta.18) (2026-10-08)
+
+### Bug Fixes
+
+* chore(package): update @types/bun to 1.4.2 and typescript to 7.0.2 ([b32054d](https://github.com/protorians/raiton/commit/b32054da6ece5866315abb896404d2cee5b80947))
+
 ## [6.8.1-beta.17](https://github.com/protorians/raiton/compare/v6.7.0-beta.15...v6.8.1-beta.17) (2026-09-26)
 
 ### Bug Fixes
