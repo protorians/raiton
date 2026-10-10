@@ -86,6 +86,17 @@ async function handler(context: any) {
 }
 ```
 
+#### DTO de corps
+
+Pour un argument `@Body()` typé par une classe, `collectRouteArguments` fait
+`new metatype(ctx.req.body)`. Le DTO doit hériter de `DataTransferObject`, dont
+le constructeur recopie le corps sur l’instance et tolère un corps absent
+(`{}` par défaut) — inutile d’écrire `constructor(data) { super(data ?? {}) }`.
+
+`validateDtoArguments` valide ensuite les arguments `instanceof
+DataTransferObject` (via `validation(false)`). Les autres arguments injectés
+(`req`, `params`, `query`, en-têtes…) ne sont pas validés.
+
 ## Exemple de routage manuel
 
 ```typescript

@@ -31,6 +31,38 @@ export class UsersController {
 }
 ```
 
+## DTOs et validation
+
+Un DTO doit **toujours** hériter de `DataTransferObject` (`raiton/framework`).
+Le routeur instancie le type de l’argument `@Body()` et lui passe le corps
+parsé ; `DataTransferObject` recopie alors ses champs. La validation
+`class-validator` s’exécute automatiquement avant l’appel du handler.
+
+```typescript
+import { IsNotEmpty, IsString } from "class-validator"
+import { ApiBody, Body, Controllable, Post, DataTransferObject } from "raiton/framework"
+
+class CreateUserDto extends DataTransferObject {
+  @IsString()
+  @IsNotEmpty()
+  name!: string
+}
+
+@Controllable("/users")
+export class UsersController {
+  @Post("/")
+  @ApiBody({ type: CreateUserDto })
+  create(@Body() payload: CreateUserDto) {
+    return payload
+  }
+}
+```
+
+- **Ne définissez pas de constructeur** dans le DTO : `DataTransferObject` gère
+  déjà la copie du corps et tolère un corps absent (DTO vide). Écrire
+  `constructor(data) { super(data ?? {}) }` est inutile.
+- Le DTO expose `payload.validation()` pour une validation manuelle.
+
 ## Avantages
 
 - contrats d’entrée plus clairs
