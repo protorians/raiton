@@ -1,3 +1,9 @@
+## [6.8.3-beta.19](https://github.com/protorians/raiton/compare/v6.8.2-beta.18...v6.8.3-beta.19) (2026-10-10)
+
+### Bug Fixes
+
+* fix(framework): DataTransferObject tolère un corps absent ([13926ab](https://github.com/protorians/raiton/commit/13926ab9f45aaa56a27b46ffc1e923a2876f6ad1))
+
 ## [6.8.2-beta.18](https://github.com/protorians/raiton/compare/v6.8.1-beta.17...v6.8.2-beta.18) (2026-10-08)
 
 ### Bug Fixes
