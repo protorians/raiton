@@ -1,3 +1,11 @@
+## [6.8.6-beta.21](https://github.com/protorians/raiton/compare/v6.8.3-beta.19...v6.8.6-beta.21) (2026-10-22)
+
+### Bug Fixes
+
+* fix:version ([3d9f1bf](https://github.com/protorians/raiton/commit/3d9f1bf1f64e58e729aa92696bc7a3868c621fdd))
+* chore(release): v6.8.4-beta.20 [skip ci] ([3c6074e](https://github.com/protorians/raiton/commit/3c6074e47a6d399f67eebc624fc13275f88b5403))
+* fix(framework): détecte la véritable adresse LAN du serveur ([c5583a6](https://github.com/protorians/raiton/commit/c5583a6b5083280a9c5fe9fa015286c7085a9453))
+
 ## [6.8.4-beta.20](https://github.com/protorians/raiton/compare/v6.8.3-beta.19...v6.8.4-beta.20) (2026-10-22)
 
 ### Bug Fixes
