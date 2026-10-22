@@ -1,7 +1,7 @@
 import fs from 'node:fs'
-import os from 'node:os'
 import {execSync, execFileSync} from 'node:child_process'
 import path from 'node:path'
+import {getLanIp} from './ip.util.ts'
 
 export enum HttpsEnvironment {
     Localhost = 'localhost',
@@ -77,15 +77,7 @@ function resolveCertFromPaths(
 }
 
 function getLanHostname(): string {
-    const interfaces = os.networkInterfaces()
-    for (const name of Object.keys(interfaces)) {
-        for (const iface of interfaces[name] || []) {
-            if (iface.family === 'IPv4' && !iface.internal) {
-                return iface.address
-            }
-        }
-    }
-    return 'localhost'
+    return getLanIp() ?? 'localhost'
 }
 
 function isCommandAvailable(command: string): boolean {

@@ -21,7 +21,7 @@ import {bodyParserPlugin} from "../framework/plugins/body-parser.plugin.ts";
 import {Injection} from "./injection/injection.ts";
 import {Throwable} from "../framework/exceptions/index.ts";
 import {isBunUsed, isDenoUsed, isNodeUsed} from "../bin/constants.ts";
-import os from "os";
+import {getLanIp} from "../framework/utilities/ip.util.ts";
 
 
 export class RaitonThread implements ThreadInterface {
@@ -80,15 +80,7 @@ export class RaitonThread implements ThreadInterface {
     }
 
     protected getNetworkIp(): string | null {
-        const interfaces = os.networkInterfaces();
-        for (const name of Object.keys(interfaces)) {
-            for (const iface of interfaces[name] || []) {
-                if (iface.family === 'IPv4' && !iface.internal) {
-                    return iface.address;
-                }
-            }
-        }
-        return null;
+        return getLanIp() ?? null;
     }
 
     public setup({application, runtime}: ThreadSetupOptionsInterface): this {
