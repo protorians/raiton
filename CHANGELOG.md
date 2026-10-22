@@ -1,3 +1,9 @@
+## [6.8.4-beta.20](https://github.com/protorians/raiton/compare/v6.8.3-beta.19...v6.8.4-beta.20) (2026-10-22)
+
+### Bug Fixes
+
+* fix(framework): détecte la véritable adresse LAN du serveur ([c5583a6](https://github.com/protorians/raiton/commit/c5583a6b5083280a9c5fe9fa015286c7085a9453))
+
 ## [6.8.3-beta.19](https://github.com/protorians/raiton/compare/v6.8.2-beta.18...v6.8.3-beta.19) (2026-10-10)
 
 ### Bug Fixes
