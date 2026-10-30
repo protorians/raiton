@@ -9,6 +9,7 @@ import {RaitonThread} from "../thread.ts";
 import {Injection} from "../injection/index.ts";
 import {isControllerArtifact, isSocketArtifact, isMcpArtifact, isSchedulerArtifact} from "../../framework/index.ts";
 import {Artifacts} from "../../framework/artifacts.ts";
+import {METADATA_KEYS} from "../../framework/constants/index.ts";
 import path from "node:path";
 import {ControllerRouteTracker} from "./tracker.ts";
 
@@ -58,7 +59,7 @@ export class ControllerBuilder {
             return undefined;
 
         const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
-        const artifact = imported.default || imported || undefined;
+        const artifact = resolveArtifact(imported, {isController, isSocket, isMcp, isScheduler});
 
         if (!artifact) return undefined;
         if (!RaitonThread.current?.application) return undefined;
@@ -103,4 +104,44 @@ export class ControllerBuilder {
             }
         }
     }
+}
+
+interface ArtifactKinds {
+    isController: boolean;
+    isSocket: boolean;
+    isMcp: boolean;
+    isScheduler: boolean;
+}
+/**
+ * Sélectionne la classe réellement décorée parmi les exports d'un fichier
+ * d'artefact.
+ *
+ * Les fichiers peuvent exporter leur artefact en `default` **ou** en export
+ * nommé (les exemples de la documentation Raiton utilisent `export class
+ * MathServer`). L'ancien `imported.default || imported` retombait sur l'objet
+ * namespace du module pour un export nommé : `compileMcp` enregistrait alors un
+ * serveur fantôme (nom et métadonnées vides) sur le même chemin HTTP.
+ */
+export function resolveArtifact(imported: any, kinds: ArtifactKinds): any {
+    if (!imported || typeof imported !== 'object') return imported;
+
+    const keys: symbol[] = [];
+    if (kinds.isController) keys.push(METADATA_KEYS.CONTROLLERS);
+    if (kinds.isSocket) keys.push(METADATA_KEYS.SOCKETS);
+    if (kinds.isMcp) keys.push(METADATA_KEYS.MCP);
+    if (kinds.isScheduler) keys.push(METADATA_KEYS.SCHEDULER);
+
+    const decorated = Object.values(imported)
+        .find((candidate) => isDecoratedArtifact(candidate, keys));
+
+    return decorated ?? imported.default ?? imported;
+}
+
+function isDecoratedArtifact(candidate: any, keys: symbol[]): boolean {
+    if (typeof candidate !== 'function') return false;
+    const prototype = candidate.prototype;
+    return keys.some((key) =>
+        (prototype ? Boolean(Reflect.getMetadata(key, prototype)) : false)
+        || Boolean(Reflect.getMetadata(key, candidate)),
+    );
 }
