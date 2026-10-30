@@ -41,6 +41,7 @@
     "dev:node": "node build/bin/index.mjs dev",
     "dev:deno": "deno task dev",
     "build": "bun build source/bin/index.ts --target=node --format=esm --outfile=build/bin/index.mjs",
+    "test": "bun test tests",
     "start": "bun run source/bin/index.ts start",
     "start:node": "node build/bin/index.mjs start",
     "start:deno": "deno task start",
