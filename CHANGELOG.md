@@ -1,3 +1,10 @@
+## [6.8.7-beta.22](https://github.com/protorians/raiton/compare/v6.8.6-beta.21...v6.8.7-beta.22) (2026-10-30)
+
+### Bug Fixes
+
+* chore(test): ajoute le script test (bun test) ([4b25595](https://github.com/protorians/raiton/commit/4b2559542894fed96ba6deef38427f197d3e5da9))
+* fix(core): retrouve l'artefact décoré parmi les exports nommés ([3f60b91](https://github.com/protorians/raiton/commit/3f60b914851cd920b96376d04be3efde9f968a95))
+
 ## [6.8.6-beta.21](https://github.com/protorians/raiton/compare/v6.8.3-beta.19...v6.8.6-beta.21) (2026-10-22)
 
 ### Bug Fixes
