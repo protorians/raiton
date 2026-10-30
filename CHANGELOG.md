@@ -1,3 +1,9 @@
+## [6.8.8-beta.24](https://github.com/protorians/raiton/compare/v6.8.7-beta.22...v6.8.8-beta.24) (2026-10-30)
+
+### Bug Fixes
+
+* fix:version ([66e4a81](https://github.com/protorians/raiton/commit/66e4a81d212a72fbcc947775d97ef20f09ac5989))
+
 ## [6.8.7-beta.22](https://github.com/protorians/raiton/compare/v6.8.6-beta.21...v6.8.7-beta.22) (2026-10-30)
 
 ### Bug Fixes
