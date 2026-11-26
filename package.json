@@ -1,6 +1,6 @@
 {
   "name": "raiton",
-  "version": "6.8.8-beta.24",
+  "version": "6.8.9-beta.25",
   "private": false,
   "type": "module",
   "description": "Modular TypeScript Backend Framework with Dependency Injection, Plugins, Controllers, Middleware and Hot Reloading",

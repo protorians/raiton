@@ -1,3 +1,9 @@
+## [6.8.9-beta.25](https://github.com/protorians/raiton/compare/v6.8.8-beta.24...v6.8.9-beta.25) (2026-11-26)
+
+### Bug Fixes
+
+* fix(framework): sécurise le rechargement HMR des middlewares et hooks ([08bb7ef](https://github.com/protorians/raiton/commit/08bb7efb2665dce0af607694fffdbd691751d1aa))
+
 ## [6.8.8-beta.24](https://github.com/protorians/raiton/compare/v6.8.7-beta.22...v6.8.8-beta.24) (2026-10-30)
 
 ### Bug Fixes
