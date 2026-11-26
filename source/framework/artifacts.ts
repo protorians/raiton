@@ -6,6 +6,47 @@ import {isArtifact} from "./utilities/index.ts";
 import {compileMcp} from "../core/mcp/builder.ts";
 import {compileScheduler} from "../core/scheduler/builder.ts";
 
+/**
+ * Un artefact middleware/hook peut être exporté sous deux formes : une classe
+ * (instanciée par le conteneur) ou une fonction `(context) => …`. Instancier
+ * systématiquement lève « function is not a constructor » dès que la fonction
+ * est fléchée ou `async` — et un `function` classique, lui constructible, ne
+ * doit pas être instancié non plus. On ne reconnaît donc que la syntaxe classe.
+ */
+function isClass(value: unknown): value is ConstructorType {
+    if (typeof value !== 'function') return false
+    if (!/^\s*class[\s{]/.test(Function.prototype.toString.call(value))) return false
+    try {
+        Reflect.construct(Object, [], value)
+        return true
+    } catch {
+        return false
+    }
+}
+
+/**
+ * Un artefact de middleware *décorateur* n'est pas enregistré dans le pipeline
+ * racine : le remplacer l'y ajouterait et le ferait exécuter sur **toutes** les
+ * requêtes. On ne remplace donc que les entrées déjà présentes.
+ */
+function isRegistered(registry: any, name: string): boolean {
+    const normalized = name.toLowerCase()
+    const stack = registry?.stack
+    if (Array.isArray(stack)) {
+        return stack.some((entry: any) => {
+            const entryName = typeof entry === 'function' ? entry.name : entry?.name
+            return typeof entryName === 'string' && entryName.toLowerCase() === normalized
+        })
+    }
+    const hooks = registry?.hooks
+    if (hooks instanceof Map) {
+        return [...hooks.keys()].some(
+            (key) => typeof key === 'string' && key.toLowerCase() === normalized
+        )
+    }
+    return false
+}
+
 export type HmrChannel =
     | 'hmr:di'
     | 'hmr:controller'
@@ -179,9 +220,9 @@ export class Artifacts {
                 typeof mod === 'function' ? mod.name ?? mod.constructor.name : undefined
             );
 
-            if (typeof name === 'string') {
+            if (typeof name === 'string' && isRegistered(rootScope.middleware, name)) {
                 if (typeof mod === 'function') {
-                    const instance = new (mod as ConstructorType)()
+                    const instance = isClass(mod) ? new (mod as ConstructorType)() : mod
                     rootScope.middleware.replace(name, instance)
                 } else if (typeof mod === 'object' && mod !== null) {
                     rootScope.middleware.replace(name, mod)
@@ -208,9 +249,9 @@ export class Artifacts {
                 typeof mod === 'function' ? mod.name ?? mod.constructor.name : undefined
             );
 
-            if (typeof name === 'string') {
+            if (typeof name === 'string' && isRegistered(rootScope.hooks, name)) {
                 if (typeof mod === 'function') {
-                    const instance = new (mod as ConstructorType)()
+                    const instance = isClass(mod) ? new (mod as ConstructorType)() : mod
                     rootScope.hooks.replace(name, instance)
                 } else if (typeof mod === 'object' && mod !== null) {
                     rootScope.hooks.replace(name, mod)
