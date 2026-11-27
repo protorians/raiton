@@ -15,6 +15,7 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 | [env.md](env.md) | Lire les variables d'environnement |
 | [encryption.md](encryption.md) | Hasher et vérifier des secrets |
 | [injection.md](injection.md) | Injecter des services et séparer la logique métier |
+| [artifact-bridge.md](artifact-bridge.md) | Monter des artefacts de packages, fichiers hors convention, middleware et hooks |
 | [middleware.md](middleware.md) | Exécuter des règles transverses sur les requêtes |
 | [responses.md](responses.md) | Structurer les réponses et les erreurs |
 | [contracts.md](contracts.md) | Contrats schema-first : validation, types, OpenAPI et client |

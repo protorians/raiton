@@ -92,6 +92,21 @@
           "line": {
             "type": "number"
           },
+          "origin": {
+            "anyOf": [
+              {
+                "const": "scan",
+                "type": "string"
+              },
+              {
+                "const": "bridge",
+                "type": "string"
+              }
+            ]
+          },
+          "package": {
+            "type": "string"
+          },
           "input": {
             "type": "string"
           },
@@ -304,6 +319,101 @@
           "resources": {
             "type": "array",
             "items": {}
+          }
+        }
+      }
+    },
+    "bridge": {
+      "type": "object",
+      "required": [
+        "file",
+        "loaded",
+        "packages",
+        "artifacts",
+        "unresolved"
+      ],
+      "properties": {
+        "file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "loaded": {
+          "type": "boolean"
+        },
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "kind",
+              "origin"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "origin": {
+                "anyOf": [
+                  {
+                    "const": "scan",
+                    "type": "string"
+                  },
+                  {
+                    "const": "bridge",
+                    "type": "string"
+                  }
+                ]
+              },
+              "package": {
+                "type": "string"
+              },
+              "file": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "entry",
+              "reason"
+            ],
+            "properties": {
+              "entry": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "package": {
+                "type": "string"
+              },
+              "file": {
+                "type": "string"
+              }
+            }
           }
         }
       }

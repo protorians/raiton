@@ -1,6 +1,6 @@
 # AGENTS.md — Raiton conventions
 
-This repository uses **Raiton** (raiton 6.10.0-beta.28).
+This repository uses **Raiton** (raiton 6.11.1-beta.30).
 
 ## Deterministic commands
 
