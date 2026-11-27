@@ -74,6 +74,7 @@
     "build": "bun build source/bin/index.ts --target=node --format=esm --outfile=build/bin/index.mjs && bun run build:types",
     "build:types": "tsc -p tsconfig.build.json",
     "bench": "bun run scripts/bench.ts",
+    "bench:ai": "bun run scripts/bench-ai-debug.ts",
     "test": "bun test tests",
     "start": "bun run source/bin/index.ts start",
     "start:node": "node build/bin/index.mjs start",
@@ -102,6 +103,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/bun": "^1.4.2",
     "@types/deno": "^2.5.0",
+    "gpt-tokenizer": "^4.1.2",
     "typescript": "^7.0.2"
   },
   "compilerOptions": {

@@ -1,0 +1,145 @@
+{
+  "generatedAt": "2026-11-27T18:55:32.006Z",
+  "environment": {
+    "runtime": "Bun 1.4.2",
+    "node": "v26.3.0",
+    "platform": "darwin-x64",
+    "cpus": 12
+  },
+  "journal": {
+    "capacity": 1000,
+    "recordBytes": 331,
+    "write": {
+      "p50": 0.05499999997482519,
+      "p90": 0.06700000000137152
+    },
+    "linearLookup": {
+      "p50": 5.326000000081876,
+      "p90": 5.639000000030592
+    },
+    "mapLookup": {
+      "p50": 0.07100000004811591,
+      "p90": 0.07299999992937956
+    },
+    "serialize": {
+      "p50": 0.5260000000362197,
+      "p90": 0.6309999999984939
+    }
+  },
+  "realJournal": {
+    "capacity": 1000,
+    "size": 1000,
+    "totalBytes": 462000,
+    "recordBytes": 1062,
+    "write": {
+      "p50": 1.198999999814987,
+      "p90": 1.5120000000479195
+    },
+    "mapLookup": {
+      "p50": 0.05199999986871262,
+      "p90": 0.07099999993442907
+    },
+    "serialize": {
+      "p50": 1.3349999999263673,
+      "p90": 3.1290000001718
+    }
+  },
+  "realMetadataJournal": {
+    "capacity": 1000,
+    "size": 1000,
+    "totalBytes": 512000,
+    "recordBytes": 863,
+    "write": {
+      "p50": 0.21099999958096305,
+      "p90": 0.2779999999802385
+    },
+    "mapLookup": {
+      "p50": 0.04999999964638846,
+      "p90": 0.05000000010113581
+    },
+    "serialize": {
+      "p50": 0.9839999997893756,
+      "p90": 1.2340000002950546
+    }
+  },
+  "referenceHttpP50": 2.067000000010921,
+  "overhead": {
+    "write": 0.026608611501951904,
+    "full": 0.2810836961818941
+  },
+  "artifacts": {
+    "files": [
+      {
+        "file": "docs/llms.txt",
+        "bytes": 2498,
+        "tokens": 627
+      },
+      {
+        "file": "docs/AGENTS.md",
+        "bytes": 1979,
+        "tokens": 479
+      },
+      {
+        "file": "README.md",
+        "bytes": 6673,
+        "tokens": 1695
+      },
+      {
+        "file": "tests/fixtures/project/source/controllers/items.controller.ts",
+        "bytes": 746,
+        "tokens": 201
+      }
+    ],
+    "project": {
+      "manifest": 1287,
+      "routes": 781,
+      "openapi": 1264
+    },
+    "samples": {
+      "explain": 408,
+      "call": 227,
+      "verify": 138,
+      "baselineLog": 299,
+      "curlResponse": 73
+    }
+  },
+  "projections": {
+    "fixedContext": 479,
+    "scenarios": [
+      {
+        "name": "Diagnostiquer un 400 de validation",
+        "baseline": 1281,
+        "feature": 408,
+        "assumptions": "Contrôleur (174) + extrait de logs (299) + routes (486) contre une explication structurée (408).",
+        "incremental": 0.6814988290398126,
+        "fresh": 0.4960227272727273
+      },
+      {
+        "name": "Invoquer une route inconnue",
+        "baseline": 1055,
+        "feature": 227,
+        "assumptions": "Contrôleur (174) + routes (486) + réponse curl (73) contre une invocation structurée (227).",
+        "incremental": 0.7848341232227488,
+        "fresh": 0.5397653194263363
+      },
+      {
+        "name": "Invoquer une route connue (contexte chaud)",
+        "baseline": 274,
+        "feature": 227,
+        "assumptions": "Contrôleur (174) + réponse curl (73) contre une invocation structurée (227) : borne basse réaliste.",
+        "incremental": 0.17153284671532848,
+        "fresh": 0.06241699867197875
+      },
+      {
+        "name": "Vérifier les contrats après modification",
+        "baseline": 1465,
+        "feature": 138,
+        "assumptions": "OpenAPI (938) + contrôleur (174) contre un rapport de vérification compact (138).",
+        "incremental": 0.9058020477815699,
+        "fresh": 0.6826131687242798
+      }
+    ],
+    "medianIncremental": 0.7848341232227488,
+    "medianFresh": 0.5397653194263363
+  }
+}
