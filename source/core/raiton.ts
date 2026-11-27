@@ -17,4 +17,12 @@ export class Raiton {
     static set thread(thread: ThreadInterface | undefined) {
         this._thread = this._thread || thread;
     }
+
+    /**
+     * Reset the thread singleton. Used by tests and by CLI commands that run
+     * several introspections in the same process.
+     */
+    static resetThread(): void {
+        this._thread = undefined;
+    }
 }
