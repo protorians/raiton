@@ -1,5 +1,5 @@
 import {RouteHandlerCallable} from '../../types/index.ts'
-import {HttpMethod} from "../../framework/enums/index.ts";
+import {HttpMethod} from "../../framework/enums/http-method.enum.ts";
 import {Route} from './route.ts'
 import {RouteMatcher} from './matcher.ts'
 
@@ -21,8 +21,22 @@ export class Router {
         this.matcher.remove(route)
     }
 
+    replace(route: Route) {
+        this.matcher.replace(route)
+        return route
+    }
+
+    /**
+     * Compatibilité : renvoie la `Route` correspondante. Les paramètres ne sont
+     * plus stockés sur l'instance ; utilisez `resolve()` pour les obtenir.
+     */
     match(method: string, url: string) {
         return this.matcher.match(method, url)
+    }
+
+    /** Résout la route et les paramètres propres à cette requête. */
+    resolve(method: string, url: string) {
+        return this.matcher.resolve(method, url)
     }
 
     /**
@@ -31,7 +45,7 @@ export class Router {
      */
     matchPath(url: string) {
         for (const route of this.matcher.routes.values()) {
-            if (route.match(route.method, url)) return route;
+            if (route.matchesPath(url)) return route;
         }
         return null;
     }

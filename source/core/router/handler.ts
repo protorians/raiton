@@ -1,11 +1,17 @@
 import {ControllerMetaInterface, RouteMetaInterface} from "../../types/index.ts";
 import {Logger} from "@protorians/logger";
-import {Raiton} from "../index.ts";
-import {HttpException} from "../../framework/exceptions/index.ts";
+import {Raiton} from "../raiton.ts";
+import {HttpException} from "../../framework/exceptions/http-exception.ts";
 import {ThrowableResponse} from "../../framework/responses/http-throwable.ts";
-import {collectRouteArguments, validateDtoArguments, validateResponse, runMiddlewares} from "./handler.utils.ts";
+import {
+    collectArguments,
+    createResponseValidator,
+    getRouteParameters,
+    validateDtoArguments,
+    runMiddlewares,
+} from "./handler.utils.ts";
 import {RouteCache, getCacheMetadata} from "../../framework/cache/index.ts";
-import {RaitonResponses, HttpStatus} from "../../framework/index.ts";
+import {HttpStatus} from "../../framework/enums/http-status.enum.ts";
 import {RaitonConfig} from "../config/index.ts";
 import {
     ContractValidationError,
@@ -29,18 +35,30 @@ export function createHandler(
     routeMeta: RouteMetaInterface,
     controllerMeta: ControllerMetaInterface,
 ) {
-    const cacheOptions = getCacheMetadata(instance, routeMeta.propertyKey);
-    const routeCache = cacheOptions ? new RouteCache(routeMeta.path, cacheOptions) : undefined;
-    const contract = getRouteContract(instance.constructor, routeMeta.propertyKey);
+    // Everything that does not depend on the request is resolved exactly once,
+    // at handler compilation (including on every HMR recompile).
+    const development = isDevelopment();
+    const handlerName = `${instance.constructor.name}.${routeMeta.propertyKey}`
     const routeLabel = `${routeMeta.method} ${controllerMeta.prefix ?? ""}${routeMeta.path}`;
+    const cacheOptions = getCacheMetadata(instance, routeMeta.propertyKey);
+    const routeCache = cacheOptions
+        ? new RouteCache(`${controllerMeta.prefix ?? ''}${routeMeta.path}`, cacheOptions)
+        : undefined;
+    const cacheEnabled = Boolean(routeCache?.enabled)
+    const contract = getRouteContract(instance.constructor, routeMeta.propertyKey);
+    const parameters = getRouteParameters(instance, routeMeta);
+    const middlewares = [
+        ...(controllerMeta.middlewares['@'] || []),
+        ...(controllerMeta.middlewares[routeMeta.propertyKey] || []),
+    ];
+    const responseValidator = RaitonConfig.shouldValidateResponses(development)
+        ? createResponseValidator(instance, routeMeta)
+        : undefined;
 
     const handler = async (ctx: any) => {
-        const development = isDevelopment();
-        const handlerName = `${instance.constructor.name}.${routeMeta.propertyKey}`
-
         try {
-            const cacheKey = (routeCache && routeCache.enabled && routeCache.matchesMethod(ctx.req?.method))
-                ? await routeCache.key(ctx)
+            const cacheKey = (cacheEnabled && routeCache!.matchesMethod(ctx.req?.method))
+                ? await routeCache!.key(ctx)
                 : undefined;
 
             if (cacheKey) {
@@ -54,7 +72,6 @@ export function createHandler(
                 }
             }
 
-            const middlewares = [...controllerMeta.middlewares['@'] || [], ...controllerMeta.middlewares[routeMeta.propertyKey] || []];
             await runMiddlewares(middlewares, ctx);
 
             // Schema-first input validation runs before the handler and before
@@ -65,12 +82,12 @@ export function createHandler(
                 if (input.body !== undefined) ctx.req.body = input.body;
             }
 
-            const args = collectRouteArguments(instance, routeMeta, ctx);
+            const args = collectArguments(parameters, ctx);
             await validateDtoArguments(args);
             let responses = instance[routeMeta.propertyKey](...args);
             if (responses instanceof Promise) responses = await responses;
 
-            if (contract?.output && RaitonConfig.shouldValidateResponses(development)) {
+            if (contract?.output && responseValidator) {
                 const output = await validateRouteOutput(contract, responses);
                 if (!output.success) {
                     Logger.error(
@@ -82,7 +99,7 @@ export function createHandler(
                 }
             }
 
-            await validateResponse(responses, instance, routeMeta);
+            if (responseValidator) await responseValidator(responses);
 
             if (cacheKey && !(responses instanceof ThrowableResponse)) {
                 await routeCache!.set(ctx, responses, 200, {}, cacheKey);

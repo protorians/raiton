@@ -1,7 +1,6 @@
 import type {PluginInterface} from "../../types/index.ts";
 import type {ContextInterface} from "../../types/core.ts";
-import {PluginScope} from "../../core/index.ts";
-import {generateOpenApiSpec} from "../utilities/openapi.utils.ts";
+import type {PluginScope} from "../../core/plugins/scope.ts";
 
 /**
  * OpenAPI plugin options
@@ -129,6 +128,7 @@ export function openApiPlugin(options: OpenApiOptions = {}): PluginInterface {
 
             if (opts.endpoint) {
                 const handler = async ({reply}: ContextInterface) => {
+                    const {generateOpenApiSpec} = await import("../utilities/openapi.utils.ts")
                     const spec = await generateOpenApiSpec(scope, opts);
                     reply.type('application/json');
                     return spec

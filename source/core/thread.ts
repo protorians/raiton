@@ -130,6 +130,9 @@ export class RaitonThread implements ThreadInterface {
         const applicationValidation = validateConfig(this.application.config as any)
         if (!applicationValidation.valid) throw new ConfigValidationError(applicationValidation.errors)
 
+        // Load only the adapter of the selected runtime.
+        await (this.runtime as any).prepare?.()
+
         Readiness.markReady()
 
         const scanRoot = isNodeUsed

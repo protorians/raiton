@@ -1,12 +1,9 @@
 import type {PluginInterface} from "../../types/plugin.ts";
 import type {ContextInterface} from "../../types/core.ts";
 import type {PluginScope} from "../../core/plugins/scope.ts";
-import {generateManifest} from "../../manifest/manifest.ts";
-import {generateOpenApiSpec} from "../utilities/openapi.utils.ts";
 import {HealthCheckManager} from "../health-check.ts";
 import {Readiness} from "../observability/readiness.ts";
 import {Raiton} from "../../core/raiton.ts";
-import {SchedulerManager} from "../../core/scheduler/manager.ts";
 
 export interface DevPageOptions {
     path?: string;
@@ -59,7 +56,11 @@ function publicPath(path: string): string {
     return `${prefix}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-function renderPage(path: string): string {
+async function renderPage(path: string): Promise<string> {
+    const [{generateManifest}, {SchedulerManager}] = await Promise.all([
+        import("../../manifest/manifest.ts"),
+        import("../../core/scheduler/manager.ts"),
+    ])
     const manifest = generateManifest({refresh: true});
     const health = HealthCheckManager.getConfig();
     const readiness = Readiness.snapshot();
@@ -147,7 +148,8 @@ function renderPage(path: string): string {
 </html>`;
 }
 
-function routeOrigin(method: string, path: string) {
+async function routeOrigin(method: string, path: string) {
+    const {generateManifest} = await import("../../manifest/manifest.ts")
     const manifest = generateManifest({refresh: true});
     const normalized = path.replace(/\/+$/, "") || "/";
     const route = manifest.routes.find(item =>
@@ -180,23 +182,25 @@ export function devPagePlugin(options: DevPageOptions = {}): PluginInterface {
 
             scope.get(route, async ({reply}: ContextInterface) => {
                 reply.type("text/html; charset=utf-8");
-                return renderPage(route);
+                return await renderPage(route);
             });
 
             scope.get(`${route}/manifest`, async ({reply}: ContextInterface) => {
                 reply.type("application/json");
+                const {generateManifest} = await import("../../manifest/manifest.ts")
                 return generateManifest({refresh: true});
             });
 
             scope.get(`${route}/routes`, async ({reply}: ContextInterface) => {
                 reply.type("application/json");
+                const {generateManifest} = await import("../../manifest/manifest.ts")
                 return generateManifest({refresh: true}).routes;
             });
 
             scope.get(`${route}/why`, async ({req, reply}: ContextInterface) => {
                 const method = String((req as any).query?.method ?? "GET");
                 const path = String((req as any).query?.path ?? req.url.split("?")[0]);
-                const origin = routeOrigin(method, path);
+                const origin = await routeOrigin(method, path);
                 reply.type("application/json");
                 reply.status(origin ? 200 : 404);
                 return origin ?? {error: true, code: "NOT_FOUND", message: `Route ${method} ${path} not found`};
@@ -204,6 +208,7 @@ export function devPagePlugin(options: DevPageOptions = {}): PluginInterface {
 
             scope.get(`${route}/openapi`, async ({reply}: ContextInterface) => {
                 reply.type("application/json");
+                const {generateOpenApiSpec} = await import("../utilities/openapi.utils.ts")
                 return generateOpenApiSpec(scope, {title: "API", version: "1.0.0", description: ""});
             });
         },

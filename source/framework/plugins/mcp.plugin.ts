@@ -1,6 +1,6 @@
 import type {PluginInterface} from "../../types/index.ts";
 import type {ContextInterface} from "../../types/core.ts";
-import {PluginScope} from "../../core/index.ts";
+import type {PluginScope} from "../../core/plugins/scope.ts";
 import {findMcpServerForPath} from "../../core/mcp/metadata.ts";
 import {
     isMcpJsonRpc,

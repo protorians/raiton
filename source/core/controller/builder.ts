@@ -7,9 +7,8 @@ import {compileMcp} from "../mcp/builder.ts";
 import {compileScheduler} from "../scheduler/builder.ts";
 import {RaitonThread} from "../thread.ts";
 import {Injection} from "../injection/index.ts";
-import {isControllerArtifact, isSocketArtifact, isMcpArtifact, isSchedulerArtifact} from "../../framework/index.ts";
-import {Artifacts} from "../../framework/artifacts.ts";
-import {METADATA_KEYS} from "../../framework/constants/index.ts";
+import {Artifacts, type ArtifactClassification} from "../../framework/artifacts.ts";
+import {METADATA_KEYS} from "../../framework/constants/decorators.constant.ts";
 import path from "node:path";
 import {ControllerRouteTracker} from "./tracker.ts";
 
@@ -21,15 +20,21 @@ export class ControllerBuilder {
         const output: any[] = []
         const timestamp = Date.now()
 
-        for (const file of files) {
+        // One classification per file, reused by both passes. The source
+        // directory is read exactly once.
+        const entries = files.map(file => {
             const filename = path.join(workdir, file);
-            const classification = Artifacts.classify(filename);
+            return {filename, classification: Artifacts.classify(filename)}
+        })
+
+        for (const {filename, classification} of entries) {
             if (classification?.channel !== 'hmr:di') continue;
             await this.loadDiArtifact(filename, 1, timestamp);
         }
 
-        for (const file of files) {
-            output.push(await this.build<any>({filename: path.join(workdir, file), version: 1, timestamp: Date.now()}))
+        for (const {filename, classification} of entries) {
+            if (!classification) continue;
+            output.push(await this.build<any>({filename, version: 1, timestamp}, classification))
         }
 
         return output.filter(f => typeof f !== 'undefined');
@@ -49,11 +54,21 @@ export class ControllerBuilder {
         }
     }
 
-    static async build<T>({filename, version, timestamp}: BuilderHMRDeclarationInterface): Promise<T | undefined> {
-        const isController = isControllerArtifact(filename);
-        const isSocket = isSocketArtifact(filename);
-        const isMcp = isMcpArtifact(filename);
-        const isScheduler = isSchedulerArtifact(filename);
+    static async build<T>(
+        {filename, version, timestamp}: BuilderHMRDeclarationInterface,
+        classification?: ArtifactClassification | null,
+    ): Promise<T | undefined> {
+        const resolvedClassification = classification === undefined
+            ? Artifacts.classify(filename)
+            : classification
+
+        if (!resolvedClassification)
+            return undefined;
+
+        const isController = resolvedClassification.channel === 'hmr:controller';
+        const isSocket = resolvedClassification.channel === 'hmr:socket';
+        const isMcp = resolvedClassification.channel === 'hmr:mcp';
+        const isScheduler = resolvedClassification.channel === 'hmr:scheduler';
 
         if (!isController && !isSocket && !isMcp && !isScheduler)
             return undefined;
@@ -87,6 +102,17 @@ export class ControllerBuilder {
         const app = RaitonThread.current?.application
         if (!app) return
 
+        const rootScope = (app as any).root
+
+        // A controller edit may rename the class. Remove routes tracked under
+        // the previous name(s) for this file before compiling the new class.
+        if (rootScope?.router && filename) {
+            for (const previousName of Injection.getArtifactNames(filename)) {
+                ControllerRouteTracker.removeRoutes(previousName, rootScope.router)
+                Injection.invalidateCascade(previousName)
+            }
+        }
+
         for (const mod of Object.values(modulo)) {
             const name = (mod && typeof mod === 'object' && 'name' in mod) ? mod.name : (
                 typeof mod === 'function' ? mod.name ?? mod.constructor.name : undefined
@@ -94,7 +120,6 @@ export class ControllerBuilder {
 
             if (typeof name === 'string' && typeof mod === 'function') {
                 Injection.invalidateCascade(name)
-                const rootScope = (app as any).root
                 if (rootScope?.router) {
                     ControllerRouteTracker.removeRoutes(name, rootScope.router)
                 }

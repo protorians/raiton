@@ -11,9 +11,14 @@ export class Injection {
 
     protected static _classes: Map<string, ContainerDefinitionInterface> = new Map();
     protected static _instances: Map<string, Map<any, any>> = new Map();
-    protected static _resolutionStack: string[] = [];
+    protected static _resolutionStack: Set<string> = new Set();
     protected static _dependents: Map<string, Set<string>> = new Map();
     protected static _artifactPaths: Map<string, string> = new Map();
+    protected static _normalizedNames: Map<string, string> = new Map();
+    protected static _parameterMetadata: WeakMap<Function, {
+        parameters: any[];
+        designParameters: any[];
+    }> = new WeakMap();
 
     static get classes(): Map<string, ContainerDefinitionInterface> {
         return this._classes;
@@ -35,11 +40,19 @@ export class Injection {
         this._instances.clear();
         this._dependents.clear();
         this._artifactPaths.clear();
+        this._normalizedNames.clear();
+        this._resolutionStack.clear();
+        this._parameterMetadata = new WeakMap();
     }
 
     protected static normalizeName(name: string): string {
+        const cached = this._normalizedNames.get(name);
+        if (cached) return cached;
+
         const stableName = camelCase(name);
-        return stableName[0].toLowerCase() + stableName.slice(1);
+        const normalized = stableName[0].toLowerCase() + stableName.slice(1);
+        this._normalizedNames.set(name, normalized);
+        return normalized;
     }
 
     static registry(
@@ -57,7 +70,14 @@ export class Injection {
 
     static updateConstruct(name: string, construct: ConstructorType): typeof this {
         const name_ = this.normalizeName(name);
-        this._classes.set(name_, {...this._classes.get(this.normalizeName(name))!, construct});
+        const definition = this._classes.get(name_);
+        if (!definition) {
+            throw new Throwable(`Dependency ${name_} not registered`);
+        }
+        // Invalidate before swapping the constructor so a subsequent HMR
+        // resolution can never return an instance of the previous class.
+        this.invalidate(name_);
+        this._classes.set(name_, {...definition, construct});
         return this;
     }
 
@@ -97,10 +117,28 @@ export class Injection {
         return this._artifactPaths.get(this.normalizeName(name));
     }
 
+    /** Names registered for a given artifact file (used by HMR renames). */
+    static getArtifactNames(filename: string): string[] {
+        const names: string[] = [];
+        for (const [name, path] of this._artifactPaths) {
+            if (path === filename) {
+                names.push(this._classes.get(name)?.name ?? name);
+            }
+        }
+        return names;
+    }
+
     static resolveArguments(definition: ContainerDefinitionInterface, scope?: any): any[] {
         try {
-            const parameters = Reflect.getMetadata(METADATA_KEYS.INJECT_PARAMETERS, definition.construct) || [];
-            const designParameters = Reflect.getMetadata('design:paramtypes', definition.construct) || [];
+            let metadata = this._parameterMetadata.get(definition.construct)
+            if (!metadata) {
+                metadata = {
+                    parameters: Reflect.getMetadata(METADATA_KEYS.INJECT_PARAMETERS, definition.construct) || [],
+                    designParameters: Reflect.getMetadata('design:paramtypes', definition.construct) || [],
+                }
+                this._parameterMetadata.set(definition.construct, metadata)
+            }
+            const {parameters, designParameters} = metadata;
             const effectiveScope = scope || definition.scope || this.defaultScope;
 
             const maxLen = Math.max(parameters.length, designParameters.length);
@@ -160,11 +198,11 @@ export class Injection {
         }
 
         const effectiveScope = scope || cls.scope || this.defaultScope;
-        if (this._resolutionStack.includes(name_)) {
-            throw new Throwable(`Circular dependency detected: ${this._resolutionStack.join(' -> ')} -> ${name}`);
+        if (this._resolutionStack.has(name_)) {
+            throw new Throwable(`Circular dependency detected: ${[...this._resolutionStack].join(' -> ')} -> ${name}`);
         }
 
-        this._resolutionStack.push(name_);
+        this._resolutionStack.add(name_);
 
         try {
             let instance: any;
@@ -190,7 +228,7 @@ export class Injection {
                 return instance as any;
             }
         } finally {
-            this._resolutionStack.pop();
+            this._resolutionStack.delete(name_);
         }
 
         return undefined;

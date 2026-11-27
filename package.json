@@ -45,6 +45,12 @@
       "import": "./source/framework/index.ts",
       "default": "./source/framework/index.ts"
     },
+    "./framework/decorators": {
+      "types": "./build/types/framework/decorators/index.d.ts",
+      "import": "./source/framework/decorators/index.ts",
+      "default": "./source/framework/decorators/index.ts"
+    },
+    "./framework/decorators/*": "./source/framework/decorators/*.ts",
     "./framework/*": "./source/framework/*.ts",
     "./contracts": {
       "types": "./build/types/contracts/index.d.ts",

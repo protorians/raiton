@@ -1,5 +1,5 @@
-import {validate, validateOrReject, ValidationError} from "class-validator";
-import {Logger} from "@protorians/logger";
+import type {ValidationError} from "class-validator";
+import {loadClassValidator} from "./utilities/validation.util.ts";
 
 
 export class DataTransferObject {
@@ -12,6 +12,7 @@ export class DataTransferObject {
     }
 
     async validation(strict: boolean = true): Promise<void | ValidationError[]> {
+        const {validate, validateOrReject} = await loadClassValidator()
         return await ((strict ? validateOrReject : validate)(this))
     }
 }

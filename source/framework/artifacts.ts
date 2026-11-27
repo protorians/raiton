@@ -2,9 +2,8 @@ import {Injection} from "../core/injection/index.ts";
 import {Logger} from "@protorians/logger";
 import type {ConstructorType} from "../types/index.ts";
 import {Raiton} from "../core/raiton.ts";
-import {isArtifact} from "./utilities/index.ts";
-import {compileMcp} from "../core/mcp/builder.ts";
 import {compileScheduler} from "../core/scheduler/builder.ts";
+import {compileMcp} from "../core/mcp/builder.ts";
 
 /**
  * Un artefact middleware/hook peut être exporté sous deux formes : une classe
@@ -94,6 +93,43 @@ export const HMR_CHANNELS: Record<HmrChannel, readonly string[]> = {
     'hmr:scheduler': ['scheduler', 'task', 'cron', 'job'],
 }
 
+const ARTIFACT_EXTENSIONS = ['.ts', '.js', '.mjs', '.cjs'] as const
+
+/**
+ * Lookup `type.extension` -> classification construit une seule fois.
+ * `Artifacts.classify()` ne fait donc qu'un lookup par fichier au lieu de
+ * parcourir tous les canaux et tous les types.
+ */
+const CLASSIFICATION_LOOKUP: Map<string, ArtifactClassification> = (() => {
+    const lookup = new Map<string, ArtifactClassification>()
+    for (const [channel, types] of Object.entries(HMR_CHANNELS)) {
+        for (const artifactType of types) {
+            for (const extension of ARTIFACT_EXTENSIONS) {
+                lookup.set(`${artifactType}${extension}`, {
+                    channel: channel as HmrChannel,
+                    artifactType,
+                })
+            }
+        }
+    }
+    return lookup
+})()
+
+function artifactTypeOf(filename: string): string | null {
+    const lower = filename.toLowerCase()
+    const dot = lower.lastIndexOf('.')
+    if (dot <= 0) return null
+
+    const extension = lower.slice(dot)
+    if (!ARTIFACT_EXTENSIONS.includes(extension as any)) return null
+
+    const stem = lower.slice(0, dot)
+    const typeDot = stem.lastIndexOf('.')
+    if (typeDot === -1) return null
+
+    return stem.slice(typeDot + 1)
+}
+
 export class Artifacts {
 
     static readonly types: Set<string> = new Set();
@@ -145,20 +181,16 @@ export class Artifacts {
     }
 
     static is(filename: string) {
-        return [...this.types]
-            .map(type => isArtifact(filename, type))
-            .some(Boolean)
+        const artifactType = artifactTypeOf(filename)
+        return artifactType !== null && this.types.has(artifactType)
     }
 
     static classify(filename: string): ArtifactClassification | null {
-        for (const [channel, types] of Object.entries(HMR_CHANNELS)) {
-            for (const type of types) {
-                if (isArtifact(filename, type)) {
-                    return {channel: channel as HmrChannel, artifactType: type}
-                }
-            }
-        }
-        return null
+        const artifactType = artifactTypeOf(filename)
+        if (!artifactType) return null
+
+        const extension = filename.slice(filename.lastIndexOf('.')).toLowerCase()
+        return CLASSIFICATION_LOOKUP.get(`${artifactType}${extension}`) ?? null
     }
 
     static reload(modulo: any, filename?: string) {
@@ -252,9 +284,9 @@ export class Artifacts {
             if (typeof name === 'string' && isRegistered(rootScope.hooks, name)) {
                 if (typeof mod === 'function') {
                     const instance = isClass(mod) ? new (mod as ConstructorType)() : mod
-                    rootScope.hooks.replace(name, instance)
+                    rootScope.hooks.replaceAll(name, instance)
                 } else if (typeof mod === 'object' && mod !== null) {
-                    rootScope.hooks.replace(name, mod)
+                    rootScope.hooks.replaceAll(name, mod)
                 }
             }
         }

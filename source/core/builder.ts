@@ -10,7 +10,6 @@ import {watch} from "fs";
 import {LBadge, Logger} from "@protorians/logger";
 import {Throwable} from "../framework/exceptions/index.ts";
 import {Artifacts, HMR_CHANNELS, HmrChannel} from "../framework/artifacts.ts";
-import {build} from "esbuild";
 import {execSync, spawn, spawnSync} from "node:child_process";
 import {isNodeUsed} from "../bin/constants.ts";
 import {invalidateManifest} from "../manifest/manifest.ts";
@@ -255,6 +254,7 @@ export class RaitonBuilder implements BuilderInterface {
         const outfile = this.bootstrapperFile
         if (!outfile) throw new Error('Bootstrapper file not found')
 
+        const {build} = await import("esbuild")
         await build({
             entryPoints: [this.bootstrapper],
             bundle: true,

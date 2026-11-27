@@ -1,8 +1,12 @@
-import {Security, bodyParserPlugin} from "../framework/plugins/index.ts";
+import {Security} from "../framework/plugins/security/index.ts";
+import {bodyParserPlugin} from "../framework/plugins/body-parser.plugin.ts";
 import {PluginScope} from './plugins/scope.ts'
 import {RequestContext} from './context.ts'
 import {ApplicationConfigInterface, ApplicationInterface} from "../types/application.ts";
-import {HttpException, HttpMethod, ThrowableResponse, HttpStatus} from "../framework/index.ts";
+import {HttpException} from "../framework/exceptions/http-exception.ts";
+import {HttpMethod} from "../framework/enums/http-method.enum.ts";
+import {ThrowableResponse} from "../framework/responses/http-throwable.ts";
+import {HttpStatus} from "../framework/enums/http-status.enum.ts";
 import {RouteHandlerCallable} from "../types/index.ts";
 import {Logger} from "@protorians/logger";
 import {RaitonConfig} from "./config/index.ts";
@@ -163,6 +167,14 @@ export class Application implements ApplicationInterface {
         return this.route(HttpMethod.TRACE, path, handler, version)
     }
 
+    private parseRequestUrl(url: string | undefined): URL {
+        try {
+            return new URL(url || '/', this.hostname)
+        } catch {
+            return new URL('/', this.hostname)
+        }
+    }
+
     async handle(req: any, reply: any): Promise<any> {
         const release = shutdown.track()
         const observability = this._observability
@@ -171,6 +183,10 @@ export class Application implements ApplicationInterface {
         try {
             const ctx = new RequestContext(req, reply)
             ctx.state.requestId = requestId
+            // Parse the URL once per request: the body parser, middleware and
+            // router all reuse this instance instead of parsing it again.
+            const requestUrl = this.parseRequestUrl(req.url)
+            ctx.state.url = requestUrl
 
             // During graceful shutdown, new requests are rejected immediately
             // while already-tracked requests are allowed to finish.
@@ -198,8 +214,9 @@ export class Application implements ApplicationInterface {
                 )
             }
 
-            await this.root.hooks.run('onRequest', ctx)
-
+            if (this.root.hooks.has('onRequest')) {
+                await this.root.hooks.run('onRequest', ctx)
+            }
             const notFound = (pathname: string) => {
                 if (this.config.verbose) {
                     Logger.warn(`Route not found: ${req.method} ${pathname} request_id=${requestId}`)
@@ -226,7 +243,7 @@ export class Application implements ApplicationInterface {
                 const req = context.req;
                 const reply = context.reply;
 
-                const url = new URL(req.url, this.hostname)
+                const url = (context.state?.url as URL | undefined) ?? new URL(req.url, this.hostname)
                 let pathname = url.pathname
 
                 if (this.config.prefix) {
@@ -254,12 +271,12 @@ export class Application implements ApplicationInterface {
                     }
                 }
 
-                const route = this.root.router.match(
+                const resolved = this.root.router.resolve(
                     req.method,
                     pathname
                 )
 
-                if (!route) {
+                if (!resolved) {
                     const pathRoute = this.root.router.matchPath(pathname)
                     if (pathRoute) {
                         reply.status(HttpStatus.METHOD_NOT_ALLOWED)
@@ -271,12 +288,15 @@ export class Application implements ApplicationInterface {
                     return notFound(pathname)
                 }
 
+                const route = resolved.route
                 context.state.matchedRoutePath = route.version
                     ? `/${route.version}${route.path}`
                     : route.path
 
                 try {
-                    (context as any).params = route.parameters;
+                    // Parameters are request-scoped: never read them from the
+                    // shared Route instance.
+                    (context as any).params = resolved.params;
                     let responses = await route.handler(context)
 
                     if (responses instanceof ThrowableResponse) {
@@ -315,7 +335,9 @@ export class Application implements ApplicationInterface {
 
             try {
                 await this.root.middleware.run(ctx, handler)
-                await this.root.hooks.run('onResponse', ctx)
+                if (this.root.hooks.has('onResponse')) {
+                    await this.root.hooks.run('onResponse', ctx)
+                }
             } catch (err: any) {
                 Logger.info(`${req.method} ${req.url} request_id=${requestId}`)
                 if (err instanceof HttpException || err instanceof ThrowableResponse) {

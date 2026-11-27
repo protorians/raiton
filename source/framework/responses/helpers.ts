@@ -1,6 +1,6 @@
-import {HttpResponse, HttpStatus} from "../index.ts";
-import {HttpResponseInterface} from "../../types/index.ts";
-import {Raiton} from "../../core/index.ts";
+import type {HttpResponseInterface} from "../../types/responses.ts";
+import type {HttpStatus} from "../enums/http-status.enum.ts";
+import {Raiton} from "../../core/raiton.ts";
 
 
 export function RaitonResponses(

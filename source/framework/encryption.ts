@@ -1,8 +1,41 @@
 import crypto from "node:crypto";
-import argon2, {Options} from "argon2";
+import type {Options} from "argon2";
 import {HashAlgoEnum, PasswordAlgoEnum} from "./enums/index.ts";
-import bcrypt from "bcrypt";
-import {DerivationOptionsInterface, EncryptionResultType, ScryptOptionsInterface} from "../types/index.ts";
+import type {DerivationOptionsInterface, EncryptionResultType, ScryptOptionsInterface} from "../types/index.ts";
+
+/**
+ * Optional password hashing dependencies are loaded lazily: importing the
+ * framework entry must not pay for argon2/bcrypt when the application never
+ * hashes passwords.
+ */
+let argon2Module: Promise<any> | undefined
+let bcryptModule: Promise<any> | undefined
+
+function loadArgon2(): Promise<any> {
+    return (argon2Module ??= import("argon2")
+        .then(module => (module as any).default ?? module)
+        .catch((error: any) => {
+            argon2Module = undefined
+            throw new Error(
+                'Argon2 requires the optional "argon2" package. ' +
+                'Install it with `bun add argon2` or `npm install argon2`. ' +
+                `Original error: ${error?.message ?? error}`
+            )
+        }))
+}
+
+function loadBcrypt(): Promise<any> {
+    return (bcryptModule ??= import("bcrypt")
+        .then(module => (module as any).default ?? module)
+        .catch((error: any) => {
+            bcryptModule = undefined
+            throw new Error(
+                'Bcrypt requires the optional "bcrypt" package. ' +
+                'Install it with `bun add bcrypt` or `npm install bcrypt`. ' +
+                `Original error: ${error?.message ?? error}`
+            )
+        }))
+}
 
 export class Encryption {
     static get algos() {
@@ -124,6 +157,7 @@ export class Encryption {
     }) | (string | number) | undefined): Promise<EncryptionResultType> {
         switch (this.algo) {
             case HashAlgoEnum.ARGON2ID: {
+                const argon2 = await loadArgon2()
                 return await argon2.hash(value, {
                     ...(typeof options === 'object' ? options : {}),
                     type: argon2.argon2id
@@ -131,13 +165,14 @@ export class Encryption {
             }
             case HashAlgoEnum.BCRYPT: {
                 try {
+                    const bcrypt = await loadBcrypt()
                     const saltRounds = 12;
                     return await bcrypt.hash(
                         value,
                         (typeof options === 'string' || typeof options === 'number') ? options : saltRounds
                     );
-                } catch (e) {
-                    throw new Error(`BCRYPT not supported without optional dependency "bcrypt"`);
+                } catch (e: any) {
+                    throw new Error(`BCRYPT not supported without optional dependency "bcrypt": ${e?.message ?? e}`);
                 }
             }
             default:
@@ -147,10 +182,14 @@ export class Encryption {
 
     async checkPassword(hash: string, password: string): Promise<boolean> {
         switch (this.algo) {
-            case HashAlgoEnum.ARGON2ID:
+            case HashAlgoEnum.ARGON2ID: {
+                const argon2 = await loadArgon2()
                 return await argon2.verify(hash, password);
-            case HashAlgoEnum.BCRYPT:
+            }
+            case HashAlgoEnum.BCRYPT: {
+                const bcrypt = await loadBcrypt()
                 return await bcrypt.compare(password, hash);
+            }
         }
         return false;
     }

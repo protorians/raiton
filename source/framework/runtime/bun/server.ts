@@ -6,7 +6,8 @@ import {Logger} from "@protorians/logger";
 import {getRealIp} from "../../utilities/index.ts";
 import {findSocketForPath} from "../../../core/socket/index.ts";
 import {Injection} from "../../../core/injection/index.ts";
-import {RaitonResponses, HttpStatus} from "../../index.ts";
+import {RaitonResponses} from "../../responses/helpers.ts";
+import {HttpStatus} from "../../enums/http-status.enum.ts";
 
 export const bunRuntime: RuntimeAdapterInterface = {
     createServer(handler, options?: RuntimeServerOptionsInterface) {

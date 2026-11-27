@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import {registerMcpServer, unregisterMcpServer, getMcpServerMetadata} from "../../core/mcp/index.ts";
-import {Injectable} from "./index.ts";
+import {registerMcpServer, unregisterMcpServer, getMcpServerMetadata} from "../../core/mcp/metadata.ts";
+import {Injectable} from "./injection.decorator.ts";
 import {LifetimeEnum} from "@protorians/core";
-import {METADATA_KEYS} from "../constants/index.ts";
+import {METADATA_KEYS} from "../constants/decorators.constant.ts";
 import type {
     McpArgumentMetaInterface,
     McpArgumentSchema,

@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import {METADATA_KEYS} from "../constants/decorators.constant.ts";
-import {getControllerMetadata} from "../../core/controller/index.ts";
-import {RouteInteractionsSubscriber} from "../../types/router.ts";
+import {getControllerMetadata} from "../../core/controller/metadata.ts";
+import type {RouteInteractionsSubscriber} from "../../types/router.ts";
 import { Raiton } from "../../core/raiton.ts";
 
 /**
