@@ -1,3 +1,9 @@
+## [6.11.1-beta.30](https://github.com/protorians/raiton/compare/v6.11.0-beta.29...v6.11.1-beta.30) (2026-11-27)
+
+### Bug Fixes
+
+* docs(specs): retirer les renvois vers la spec 003 non publiée ([4812776](https://github.com/protorians/raiton/commit/481277629ec39729bc072ba01186a67fab7bb142))
+
 ## [6.11.0-beta.29](https://github.com/protorians/raiton/compare/v6.10.0-beta.28...v6.11.0-beta.29) (2026-11-27)
 
 ### Features
