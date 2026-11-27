@@ -216,6 +216,7 @@ function toolFailure(
     code: string,
     message: string,
     details?: any,
+    schema?: any,
 ): JsonRpcResponse {
     return rpcSuccess(id, {
         content: [{type: 'text', text: message}],
@@ -224,6 +225,7 @@ function toolFailure(
             code,
             message,
             ...(details !== undefined ? {details} : {}),
+            ...(schema !== undefined ? {schema} : {}),
         },
         isError: true,
     })
@@ -266,7 +268,13 @@ async function callTool(
     const schema = toolInputSchema(tool) as any
     const validation = await validateContract(schema, rawInput)
     if (!validation.success) {
-        return toolFailure(id, 'MCP_INVALID_ARGUMENTS', `Invalid arguments for tool: ${name}`, validation.issues)
+        return toolFailure(
+            id,
+            'MCP_INVALID_ARGUMENTS',
+            `Invalid arguments for tool: ${name}`,
+            validation.issues,
+            schema,
+        )
     }
 
     const input = (validation.value ?? rawInput) as Record<string, any>

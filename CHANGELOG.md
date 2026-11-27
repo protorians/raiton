@@ -1,3 +1,9 @@
+## Unreleased
+
+### Features
+
+* **debug**: AI-assisted runtime debug (spec 003) — `raiton call`, `requests`, `explain`, `replay` and `verify`; bounded in-memory request journal with redaction, timeline, source locations and HMR staleness; HTTP and stdio debug MCP server (`raiton-debug`) with scopes, audit and conformance; enriched, actionable errors; route examples and error documentation in the manifest and OpenAPI; opt-in configuration, local-only defaults and constant-time token protection.
+
 ## [6.10.0-beta.28](https://github.com/protorians/raiton/compare/v6.8.9-beta.25...v6.10.0-beta.28) (2026-11-27)
 
 ### Features

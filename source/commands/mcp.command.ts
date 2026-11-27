@@ -7,6 +7,9 @@ import {handleMcpRequest} from "../framework/mcp/handler.ts";
 import {runAllConformance} from "../framework/mcp/conformance.ts";
 import {serveMcpStdio} from "../framework/mcp/stdio.ts";
 import type {McpInvocationContext} from "../types/index.ts";
+import {createDebugMcpEntry} from "../debug/mcp.ts";
+import {enableCliDebug} from "../debug/cli.ts";
+import {serveDebugMcpHttp} from "../debug/mcp-http.ts";
 
 interface ListOptions {
     json?: boolean;
@@ -28,6 +31,15 @@ interface ServeOptions {
 }
 
 interface ConformanceOptions {
+    json?: boolean;
+}
+
+interface DebugOptions {
+    stdio?: boolean;
+    http?: boolean;
+    port?: string;
+    hostname?: string;
+    token?: string;
     json?: boolean;
 }
 
@@ -89,6 +101,17 @@ export default class McpCommand extends RaitonCommand {
             .description("Run the shared HTTP and stdio MCP conformance suite")
             .option("--json", "Emit JSON on stdout")
             .action((server: string | undefined, options: ConformanceOptions) => this.conformance(server, options).catch(error => fail(error, options.json)));
+
+        command
+            .command("debug")
+            .description("Serve the AI-assisted debug MCP server (stdio or HTTP)")
+            .option("--stdio", "Serve newline-delimited JSON-RPC over stdin/stdout")
+            .option("--http", "Serve streamable HTTP on a local port")
+            .option("--port <port>", "HTTP port", "5711")
+            .option("--hostname <host>", "HTTP host", "127.0.0.1")
+            .option("--token <token>", "Token required by the HTTP transport")
+            .option("--json", "Emit JSON (not compatible with a long-running server)")
+            .action((options: DebugOptions) => this.debug(options).catch(error => fail(error, options.json)));
     }
 
     private async list(options: ListOptions): Promise<void> {
@@ -254,5 +277,46 @@ export default class McpCommand extends RaitonCommand {
         }
 
         if (!passed) process.exitCode = ExitCode.DIAGNOSTIC_FAILED;
+    }
+
+    private async debug(options: DebugOptions): Promise<void> {
+        if (options.json) {
+            throw new CliError("`mcp debug` is a long-running server and cannot emit a single JSON document", {
+                code: "INVALID_OPTION",
+                hint: "Omit --json when serving the debug MCP server.",
+                exitCode: ExitCode.USAGE,
+            });
+        }
+
+        const {application} = await loadProject(this.workdir, true);
+        const runtime = enableCliDebug(application, this.workdir);
+        const entry = createDebugMcpEntry(runtime.config.mcp.path);
+        const scopes = ["debug:read", "debug:call", "debug:replay", "debug:admin"];
+        const context: McpInvocationContext = {
+            actor: "raiton-debug-cli",
+            transport: "stdio",
+            scopes,
+        };
+
+        if (options.http) {
+            const port = Number(options.port ?? 5711);
+            const server = await serveDebugMcpHttp(entry, {
+                hostname: options.hostname,
+                port,
+                token: options.token,
+                scopes,
+            });
+            process.stderr.write(`[raiton:debug] MCP HTTP listening on ${server.url}\n`);
+            await new Promise<void>(resolve => {
+                const stop = () => resolve();
+                process.once("SIGINT", stop);
+                process.once("SIGTERM", stop);
+            });
+            await server.close();
+            return;
+        }
+
+        process.stderr.write("[raiton:debug] serving debug MCP over stdio\n");
+        await serveMcpStdio(entry, {context});
     }
 }

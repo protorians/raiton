@@ -50,6 +50,12 @@ export interface ContractIssue {
     path: string;
     code: string;
     message: string;
+    /** Expected value, format or constraint (development diagnostics). */
+    expected?: string;
+    /** Received value summary (development diagnostics, redacted upstream). */
+    received?: string;
+    /** Contract or decorator source location, when available. */
+    location?: string;
 }
 
 export interface ContractValidationResult<T = unknown> {
@@ -104,6 +110,57 @@ function issueCodeFromTypeBox(error: any): string {
     if (schema.type === "object") return "invalid_object";
     if (error?.type !== undefined) return "invalid_value";
     return "invalid_value";
+}
+
+/**
+ * Human-readable description of the expected value for an issue. Kept short so
+ * error bodies stay token-efficient.
+ */
+export function describeExpected(schema: any): string | undefined {
+    if (!schema || typeof schema !== "object") return undefined;
+    if (schema.const !== undefined) return JSON.stringify(schema.const);
+    if (Array.isArray(schema.enum)) return schema.enum.map((value: any) => JSON.stringify(value)).join(" | ");
+    if (schema.format) return `format:${schema.format}`;
+    if (Array.isArray(schema.anyOf)) {
+        const values = schema.anyOf.map((item: any) => describeExpected(item)).filter(Boolean);
+        if (values.length) return values.join(" | ");
+    }
+    if (schema.type === "string") {
+        const constraints: string[] = [];
+        if (Number.isFinite(schema.minLength)) constraints.push(`minLength ${schema.minLength}`);
+        if (Number.isFinite(schema.maxLength)) constraints.push(`maxLength ${schema.maxLength}`);
+        if (typeof schema.pattern === "string") constraints.push(`pattern ${schema.pattern}`);
+        return constraints.length ? `string (${constraints.join(", ")})` : "string";
+    }
+    if (schema.type === "number" || schema.type === "integer") {
+        const constraints: string[] = [];
+        if (Number.isFinite(schema.minimum)) constraints.push(`>= ${schema.minimum}`);
+        if (Number.isFinite(schema.maximum)) constraints.push(`<= ${schema.maximum}`);
+        if (Number.isFinite(schema.exclusiveMinimum)) constraints.push(`> ${schema.exclusiveMinimum}`);
+        if (Number.isFinite(schema.exclusiveMaximum)) constraints.push(`< ${schema.exclusiveMaximum}`);
+        return constraints.length ? `${schema.type} (${constraints.join(", ")})` : String(schema.type);
+    }
+    if (schema.type === "array") {
+        const constraints: string[] = [];
+        if (Number.isFinite(schema.minItems)) constraints.push(`minItems ${schema.minItems}`);
+        if (Number.isFinite(schema.maxItems)) constraints.push(`maxItems ${schema.maxItems}`);
+        return constraints.length ? `array (${constraints.join(", ")})` : "array";
+    }
+    return schema.type ? String(schema.type) : undefined;
+}
+
+/** Bounded, one-line summary of a received value. */
+export function describeReceived(value: any, maxLength = 80): string {
+    if (value === undefined) return "undefined";
+    if (value === null) return "null";
+    if (typeof value === "string") return value.length > maxLength ? `${value.slice(0, maxLength)}…` : value;
+    if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") return String(value);
+    if (Array.isArray(value)) return `array(${value.length})`;
+    if (typeof value === "object") {
+        const name = (value as any)?.constructor?.name;
+        return name && name !== "Object" ? name : "object";
+    }
+    return String(value);
 }
 
 function schemaOptions(schema: any): Record<string, any> {
@@ -227,10 +284,14 @@ export async function validateContract<T = unknown>(
 
     const issues: ContractIssue[] = [];
     for (const error of Value.Errors(typeboxSchema, value)) {
+        const expected = describeExpected(error.schema);
+        const received = describeReceived(error.value);
         issues.push({
             path: normalizePath(error.path),
             code: issueCodeFromTypeBox(error),
             message: error.message || "Invalid value",
+            ...(expected !== undefined ? {expected} : {}),
+            ...(received !== undefined ? {received} : {}),
         });
     }
 

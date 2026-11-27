@@ -10,6 +10,7 @@ import {METADATA_KEYS} from "../framework/constants/index.ts";
 import {contractToJsonSchema, isCompositeInput, type RouteContract} from "../contracts/index.ts";
 import {MANIFEST_SCHEMA_VERSION, type ProjectManifest, type ProjectRouteManifest} from "./schema.ts";
 import {getRouteContract} from "../contracts/decorators.ts";
+import {defaultExample, errorsForRoute, fillPathParams} from "../debug/examples.ts";
 
 import pkg from "../../package.json" with {type: "json"};
 
@@ -105,10 +106,27 @@ function buildRoutes(workdir: string): ProjectRouteManifest[] {
                 ? contractToJsonSchema(contract.input.body)
                 : undefined;
         const outputSchema = contract?.output ? contractToJsonSchema(contract.output) : undefined;
+        const composite = contract?.input && isCompositeInput(contract.input) ? contract.input : undefined;
+        const querySchema = composite?.query ? contractToJsonSchema(composite.query) : undefined;
+        const paramsSchema = composite?.params ? contractToJsonSchema(composite.params) : undefined;
+        const headersSchema = composite?.headers ? contractToJsonSchema(composite.headers) : undefined;
+
+        const routePath = `${controllerMeta.prefix ?? ""}${routeMeta.path}`.replace(/\/+/g, "/") || "/";
+        const examples = [...(contract?.examples ?? [])];
+        if (!examples.some(example => example.name === "default")) {
+            examples.unshift(defaultExample({
+                bodySchema: inputSchema,
+                paramsSchema,
+                querySchema,
+                headersSchema,
+                expectedStatus: 200,
+            }));
+        }
+        const completedExamples = examples.map(example => fillPathParams(example, routePath, paramsSchema));
 
         output.push({
             method: String(routeMeta.method).toUpperCase(),
-            path: `${controllerMeta.prefix ?? ""}${routeMeta.path}`.replace(/\/+/g, "/") || "/",
+            path: routePath,
             version: route.version,
             controller: controllerName,
             handler: String(routeMeta.propertyKey),
@@ -118,6 +136,11 @@ function buildRoutes(workdir: string): ProjectRouteManifest[] {
             output: schemaName(outputSchema),
             inputSchema,
             outputSchema,
+            ...(querySchema ? {querySchema} : {}),
+            ...(paramsSchema ? {paramsSchema} : {}),
+            ...(headersSchema ? {headersSchema} : {}),
+            examples: completedExamples,
+            errors: errorsForRoute(contract),
         });
     }
 

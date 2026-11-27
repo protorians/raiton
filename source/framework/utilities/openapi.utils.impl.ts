@@ -2,6 +2,7 @@ import type {ParamMetaInterface} from "../../types/index.ts";
 import {METADATA_KEYS} from "../constants/decorators.constant.ts";
 import {Parametrable} from "../enums/http-parameters.enum.ts";
 import type {PluginScope} from "../../core/plugins/scope.ts";
+import {errorsForRoute, exampleForSchema} from "../../debug/examples.ts";
 
 /**
  * Generate the OpenAPI specification object
@@ -381,6 +382,33 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
                     },
                 };
             }
+        }
+
+        // Published examples and documented error codes: the manifest and the
+        // OpenAPI document expose the same additive information.
+        const requestMedia = operation.requestBody?.content?.['application/json'];
+        if (requestMedia?.schema && requestMedia.example === undefined) {
+            requestMedia.example = exampleForSchema(requestMedia.schema);
+        }
+        for (const parameter of operation.parameters ?? []) {
+            if (parameter?.schema && parameter.example === undefined) {
+                parameter.example = exampleForSchema(parameter.schema);
+            }
+        }
+        const documentedErrors = errorsForRoute(contract);
+        for (const error of documentedErrors) {
+            const key = String(error.status);
+            if (!operation.responses[key]) {
+                operation.responses[key] = {
+                    description: `${error.code}: ${error.description ?? 'Error response'}`,
+                };
+            }
+        }
+        if (documentedErrors.length) {
+            operation['x-raiton-errors'] = documentedErrors;
+        }
+        if (contract?.examples?.length) {
+            operation['x-raiton-examples'] = contract.examples;
         }
 
         // Assign operation to path item under the method key

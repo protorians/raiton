@@ -1,13 +1,18 @@
 import {HttpStatus} from "../enums/index.ts";
+import {redactValue} from "../../debug/redaction.ts";
 
 export interface ErrorCatalogEntry {
     code: string;
     status: HttpStatus;
     message: string;
     docsPath: string;
+    hint?: string;
 }
 
 const DOCS_BASE = "https://github.com/protorians/raiton/blob/main/docs";
+
+/** Version of the stable error envelope. */
+export const ERROR_SCHEMA_VERSION = "1.0.0";
 
 export function errorDocsUrl(path: string): string {
     return `${DOCS_BASE}/${path.replace(/^\//, "")}`;
@@ -99,6 +104,32 @@ export interface ErrorPayloadOptions {
     statusCode?: number;
     docsUrl?: string;
     data?: any;
+    /** Actionable next step. Defaults to the catalogue hint. */
+    hint?: string;
+    /** Development-only source location. */
+    location?: string;
+    /** Development-only stack lines. */
+    stack?: string[];
+    redact?: string[];
+}
+
+const DEFAULT_HINTS: Record<string, string> = {
+    BAD_REQUEST: "Check the request method, path and payload.",
+    VALIDATION_ERROR: "Fix the listed fields and retry; the handler was not executed.",
+    OUTPUT_VALIDATION_ERROR: "The handler ran but its response does not match its @Output contract.",
+    UNAUTHORIZED: "Provide a valid authorization header.",
+    FORBIDDEN: "Check the scopes or permissions attached to the request.",
+    NOT_FOUND: "Run `raiton routes` to list mounted routes and retry with an existing path.",
+    METHOD_NOT_ALLOWED: "Use one of the methods listed in `allowed`.",
+    CONFLICT: "Fetch the current resource and retry with a consistent value.",
+    RATE_LIMITED: "Wait for the rate limit window to reset.",
+    INTERNAL_SERVER_ERROR: "Run `raiton explain <requestId>` to inspect the failing step.",
+    SERVICE_UNAVAILABLE: "The server is draining; retry after it is ready.",
+    CONFIGURATION_ERROR: "Fix the reported configuration field and restart.",
+};
+
+export function hintFor(code: string): string {
+    return DEFAULT_HINTS[code] ?? "Run `raiton doctor` and inspect the correlation id in the logs.";
 }
 
 /**
@@ -107,16 +138,21 @@ export interface ErrorPayloadOptions {
  */
 export function errorPayload(code: string, options: ErrorPayloadOptions = {}) {
     const entry = ERROR_CATALOG[code] ?? ERROR_CATALOG.INTERNAL_SERVER_ERROR;
-    return {
+    const payload = {
         error: true,
+        schemaVersion: ERROR_SCHEMA_VERSION,
         code: entry.code,
         statusCode: options.statusCode ?? entry.status,
         message: options.message ?? entry.message,
         docsUrl: options.docsUrl ?? errorDocsUrl(entry.docsPath),
+        hint: options.hint ?? entry.hint ?? hintFor(entry.code),
         ...(options.requestId ? {requestId: options.requestId} : {}),
-        ...(options.details !== undefined ? {details: options.details} : {}),
-        ...(options.data !== undefined ? {data: options.data} : {}),
+        ...(options.details !== undefined ? {details: redactValue(options.details, {keys: options.redact ?? []})} : {}),
+        ...(options.data !== undefined ? {data: redactValue(options.data, {keys: options.redact ?? []})} : {}),
+        ...(options.location ? {location: options.location} : {}),
+        ...(options.stack ? {stack: options.stack} : {}),
     };
+    return payload;
 }
 
 export function catalogEntry(code: string): ErrorCatalogEntry {
@@ -143,17 +179,27 @@ export function codeForStatus(status: number): string {
  * Enrich a legacy exception payload with the stable catalogue fields without
  * removing existing fields (backward-compatible additive change).
  */
-export function enrichErrorPayload(payload: any, statusCode?: number, requestId?: string) {
-    const code = payload?.code
-        ?? (typeof payload?.errorCode === "string" ? payload.errorCode : undefined)
-        ?? codeForStatus(statusCode ?? payload?.statusCode ?? 500);
+export function enrichErrorPayload(
+    payload: any,
+    statusCode?: number,
+    requestId?: string,
+    options: ErrorPayloadOptions = {},
+) {
+    const safe = redactValue(payload, {keys: options.redact ?? []});
+    const code = safe?.code
+        ?? (typeof safe?.errorCode === "string" ? safe.errorCode : undefined)
+        ?? codeForStatus(statusCode ?? safe?.statusCode ?? 500);
     const known = ERROR_CATALOG[code];
-    const fallback = catalogEntry(codeForStatus(statusCode ?? payload?.statusCode ?? 500));
+    const fallback = catalogEntry(codeForStatus(statusCode ?? safe?.statusCode ?? 500));
     return {
-        ...payload,
+        ...safe,
+        schemaVersion: safe?.schemaVersion ?? ERROR_SCHEMA_VERSION,
         code: known?.code ?? code,
-        statusCode: payload?.statusCode ?? statusCode ?? known?.status ?? fallback.status,
-        docsUrl: payload?.docsUrl ?? errorDocsUrl(known?.docsPath ?? fallback.docsPath),
+        statusCode: safe?.statusCode ?? statusCode ?? known?.status ?? fallback.status,
+        docsUrl: safe?.docsUrl ?? errorDocsUrl(known?.docsPath ?? fallback.docsPath),
+        hint: safe?.hint ?? options.hint ?? known?.hint ?? hintFor(known?.code ?? code),
         ...(requestId ? {requestId} : {}),
+        ...(options.location ? {location: options.location} : {}),
+        ...(options.stack ? {stack: options.stack} : {}),
     };
 }

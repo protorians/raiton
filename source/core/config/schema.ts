@@ -180,6 +180,109 @@ export function validateConfig(input: Partial<ConfigurableInterface> | any): Con
         }
     }
 
+    if (config.debug !== undefined) {
+        if (typeof config.debug !== "object" || config.debug === null) {
+            errors.push({field: "debug", message: "debug must be an object"});
+        } else {
+            checkBoolean(errors, config.debug, "enabled");
+            const journal = config.debug.journal;
+            if (journal !== undefined) {
+                if (typeof journal !== "object" || journal === null) {
+                    errors.push({field: "debug.journal", message: "debug.journal must be an object"});
+                } else {
+                    checkBoolean(errors, journal, "enabled");
+                    const capacity = journal.capacity;
+                    if (capacity !== undefined && (!Number.isInteger(capacity) || capacity < 1)) {
+                        errors.push({
+                            field: "debug.journal.capacity",
+                            message: "debug.journal.capacity must be a positive integer",
+                            expected: "integer >= 1",
+                            received: String(capacity),
+                        });
+                    }
+                    const maxBody = journal.maxBodyBytes;
+                    if (maxBody !== undefined && (!Number.isInteger(maxBody) || maxBody < 0)) {
+                        errors.push({
+                            field: "debug.journal.maxBodyBytes",
+                            message: "debug.journal.maxBodyBytes must be a non-negative integer",
+                            expected: "integer >= 0",
+                            received: String(maxBody),
+                        });
+                    }
+                    if (journal.capture !== undefined && !["off", "metadata", "full"].includes(journal.capture)) {
+                        errors.push({
+                            field: "debug.journal.capture",
+                            message: "debug.journal.capture must be off, metadata or full",
+                            expected: "off|metadata|full",
+                            received: String(journal.capture),
+                        });
+                    }
+                    if (journal.ttlMs !== undefined && (!Number.isInteger(journal.ttlMs) || journal.ttlMs < 0)) {
+                        errors.push({
+                            field: "debug.journal.ttlMs",
+                            message: "debug.journal.ttlMs must be a non-negative integer",
+                            expected: "integer >= 0",
+                            received: String(journal.ttlMs),
+                        });
+                    }
+                    if (journal.sampleRate !== undefined
+                        && (typeof journal.sampleRate !== "number" || journal.sampleRate < 0 || journal.sampleRate > 1)) {
+                        errors.push({
+                            field: "debug.journal.sampleRate",
+                            message: "debug.journal.sampleRate must be between 0 and 1",
+                            expected: "number(0..1)",
+                            received: String(journal.sampleRate),
+                        });
+                    }
+                    if (journal.redact !== undefined
+                        && (!Array.isArray(journal.redact) || journal.redact.some((key: any) => typeof key !== "string"))) {
+                        errors.push({
+                            field: "debug.journal.redact",
+                            message: "debug.journal.redact must be an array of strings",
+                            expected: "string[]",
+                            received: describe(journal.redact),
+                        });
+                    }
+                }
+            }
+            const http = config.debug.http;
+            if (http !== undefined) {
+                if (typeof http !== "object" || http === null) {
+                    errors.push({field: "debug.http", message: "debug.http must be an object"});
+                } else {
+                    checkBoolean(errors, http, "enabled");
+                    checkBoolean(errors, http, "loopbackOnly");
+                    if (http.basePath !== undefined && (typeof http.basePath !== "string" || !http.basePath.startsWith("/"))) {
+                        errors.push({
+                            field: "debug.http.basePath",
+                            message: "debug.http.basePath must be an absolute path",
+                            expected: "string starting with /",
+                        });
+                    }
+                    checkString(errors, http, "tokenEnv");
+                }
+            }
+            const mcp = config.debug.mcp;
+            if (mcp !== undefined) {
+                if (typeof mcp !== "object" || mcp === null) {
+                    errors.push({field: "debug.mcp", message: "debug.mcp must be an object"});
+                } else {
+                    checkBoolean(errors, mcp, "enabled");
+                    if (mcp.path !== undefined && (typeof mcp.path !== "string" || !mcp.path.startsWith("/"))) {
+                        errors.push({
+                            field: "debug.mcp.path",
+                            message: "debug.mcp.path must be an absolute path",
+                            expected: "string starting with /",
+                        });
+                    }
+                }
+            }
+            if (config.debug.replay !== undefined) {
+                checkBoolean(errors, config.debug.replay, "allowUnsafeMethods");
+            }
+        }
+    }
+
     return {valid: errors.length === 0, errors};
 }
 
@@ -248,6 +351,46 @@ export function getConfigJsonSchema(): Record<string, any> {
                 properties: {
                     exposeDestructive: {type: "boolean", default: false},
                     rateLimitPerMinute: {type: "integer", minimum: 0},
+                },
+            },
+            debug: {
+                type: "object",
+                properties: {
+                    enabled: {type: "boolean"},
+                    journal: {
+                        type: "object",
+                        properties: {
+                            enabled: {type: "boolean"},
+                            capacity: {type: "integer", minimum: 1, default: 1000},
+                            maxBodyBytes: {type: "integer", minimum: 0, default: 65536},
+                            capture: {enum: ["off", "metadata", "full"]},
+                            ttlMs: {type: "integer", minimum: 0, default: 900000},
+                            sampleRate: {type: "number", minimum: 0, maximum: 1},
+                            redact: {type: "array", items: {type: "string"}, uniqueItems: true},
+                        },
+                    },
+                    http: {
+                        type: "object",
+                        properties: {
+                            enabled: {type: "boolean"},
+                            basePath: {type: "string", pattern: "^/", default: "/__raiton"},
+                            loopbackOnly: {type: "boolean", default: true},
+                            tokenEnv: {type: "string", default: "RAITON_DEBUG_TOKEN"},
+                        },
+                    },
+                    mcp: {
+                        type: "object",
+                        properties: {
+                            enabled: {type: "boolean"},
+                            path: {type: "string", pattern: "^/", default: "/__raiton/mcp"},
+                        },
+                    },
+                    replay: {
+                        type: "object",
+                        properties: {
+                            allowUnsafeMethods: {type: "boolean", default: false},
+                        },
+                    },
                 },
             },
             docs: {

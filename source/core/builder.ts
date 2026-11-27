@@ -13,6 +13,8 @@ import {Artifacts, HMR_CHANNELS, HmrChannel} from "../framework/artifacts.ts";
 import {execSync, spawn, spawnSync} from "node:child_process";
 import {isNodeUsed} from "../bin/constants.ts";
 import {invalidateManifest} from "../manifest/manifest.ts";
+import {rotateDebugBuild} from "../debug/runtime.ts";
+import {invalidateSourceCache} from "../debug/source.ts";
 
 export class RaitonBuilder implements BuilderInterface {
     protected _source: string | null = null;
@@ -58,6 +60,8 @@ export class RaitonBuilder implements BuilderInterface {
 
         // Any source change makes the cached inventory stale.
         invalidateManifest()
+        invalidateSourceCache()
+        rotateDebugBuild()
 
         // Sur Node, le rechargement d'artefacts TypeScript en mémoire n'est pas
         // possible (import() natif des fichiers .ts). On bascule alors sur le

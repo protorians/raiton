@@ -42,6 +42,7 @@ export class RaitonConfig {
         validation: {responses: 'auto'},
         shutdown: {timeoutMs: 10_000},
         mcp: {exposeDestructive: false},
+        debug: {},
     }
 
     static reset(): void {
@@ -144,6 +145,16 @@ export class RaitonConfig {
             if (loaded.validation) merged.validation = {...this.defaultConfig.validation, ...loaded.validation};
             if (loaded.shutdown) merged.shutdown = {...this.defaultConfig.shutdown, ...loaded.shutdown};
             if (loaded.mcp) merged.mcp = {...this.defaultConfig.mcp, ...loaded.mcp};
+            if (loaded.debug) {
+                merged.debug = {
+                    ...this.defaultConfig.debug,
+                    ...loaded.debug,
+                    journal: {...(this.defaultConfig.debug?.journal ?? {}), ...(loaded.debug.journal ?? {})},
+                    http: {...(this.defaultConfig.debug?.http ?? {}), ...(loaded.debug.http ?? {})},
+                    mcp: {...(this.defaultConfig.debug?.mcp ?? {}), ...(loaded.debug.mcp ?? {})},
+                    replay: {...(this.defaultConfig.debug?.replay ?? {}), ...(loaded.debug.replay ?? {})},
+                };
+            }
             loaded = merged;
         } else {
             loaded = {...this.defaultConfig};

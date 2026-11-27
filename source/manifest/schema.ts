@@ -2,8 +2,24 @@ import {t} from "../contracts/typebox.ts";
 import {Value} from "@sinclair/typebox/value";
 
 export const MANIFEST_SCHEMA_VERSION = "1.0.0";
+export const SUPPORTED_MANIFEST_SCHEMA_VERSIONS = new Set([MANIFEST_SCHEMA_VERSION]);
 
 const SchemaRecord = t.record(t.string(), t.any());
+
+export const RouteExampleSchema = t.object({
+    name: t.string(),
+    body: t.optional(t.any()),
+    params: t.optional(SchemaRecord),
+    query: t.optional(SchemaRecord),
+    headers: t.optional(SchemaRecord),
+    expectedStatus: t.optional(t.number()),
+});
+
+export const RouteErrorSchema = t.object({
+    code: t.string(),
+    status: t.number(),
+    description: t.optional(t.string()),
+});
 
 export const RouteManifestSchema = t.object({
     method: t.string(),
@@ -17,7 +33,12 @@ export const RouteManifestSchema = t.object({
     output: t.optional(t.string()),
     inputSchema: t.optional(SchemaRecord),
     outputSchema: t.optional(SchemaRecord),
-});
+    querySchema: t.optional(SchemaRecord),
+    paramsSchema: t.optional(SchemaRecord),
+    headersSchema: t.optional(SchemaRecord),
+    examples: t.optional(t.array(RouteExampleSchema)),
+    errors: t.optional(t.array(RouteErrorSchema)),
+}, {additionalProperties: true});
 
 export const McpToolManifestSchema = t.object({
     name: t.string(),
@@ -95,6 +116,21 @@ export interface McpServerManifest {
     resources?: Array<Record<string, any>>;
 }
 
+export interface ManifestRouteExample {
+    name: string;
+    body?: any;
+    params?: Record<string, any>;
+    query?: Record<string, any>;
+    headers?: Record<string, any>;
+    expectedStatus?: number;
+}
+
+export interface ManifestRouteError {
+    code: string;
+    status: number;
+    description?: string;
+}
+
 export interface ProjectRouteManifest {
     method: string;
     path: string;
@@ -107,6 +143,11 @@ export interface ProjectRouteManifest {
     output?: string;
     inputSchema?: Record<string, any>;
     outputSchema?: Record<string, any>;
+    querySchema?: Record<string, any>;
+    paramsSchema?: Record<string, any>;
+    headersSchema?: Record<string, any>;
+    examples?: ManifestRouteExample[];
+    errors?: ManifestRouteError[];
 }
 
 export interface ProjectManifest {
@@ -139,6 +180,16 @@ export function validateManifest(manifest: unknown): ManifestValidationResult {
                 path: error.path,
                 message: error.message,
             })),
+        };
+    }
+    const version = (manifest as any)?.schemaVersion;
+    if (!SUPPORTED_MANIFEST_SCHEMA_VERSIONS.has(version)) {
+        return {
+            valid: false,
+            errors: [{
+                path: "/schemaVersion",
+                message: `Unsupported manifest schema version: ${version}. Supported: ${[...SUPPORTED_MANIFEST_SCHEMA_VERSIONS].join(", ")}.`,
+            }],
         };
     }
     return {valid: true, errors: []};

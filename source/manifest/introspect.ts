@@ -5,6 +5,7 @@ import {RaitonConfig} from "../core/config/config.ts";
 import type {ApplicationInterface} from "../types/application.ts";
 import {generateManifest, type GenerateManifestOptions} from "./manifest.ts";
 import {type ProjectManifest, validateManifest} from "./schema.ts";
+import {setDebugContext} from "../debug/runtime.ts";
 
 export interface Introspection {
     builder: RaitonBuilder;
@@ -40,6 +41,10 @@ export async function introspectProject(
             `Ensure its default export calls thread.setup({ application }).run().`
         );
     }
+
+    // CLI introspection knows the project root even when the bootstrapper did
+    // not pass it to the Application: align debug session paths.
+    setDebugContext({workdir, application});
 
     const manifest = generateManifest({workdir, refresh: true, ...options});
     return {

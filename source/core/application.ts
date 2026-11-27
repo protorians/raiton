@@ -18,14 +18,19 @@ import {observabilityPlugin} from "../framework/observability/plugin.ts";
 import {devPagePlugin, watchDevPageHmr} from "../framework/plugins/dev.plugin.ts";
 import {shutdown} from "../framework/observability/shutdown.ts";
 import {resolveRequestId} from "../framework/observability/request.ts";
-import {enrichErrorPayload, errorPayload} from "../framework/errors/catalog.ts";
+import {enrichErrorPayload, errorPayload, hintFor} from "../framework/errors/catalog.ts";
 import {suggestRoute} from "../framework/utilities/route-suggestion.util.ts";
+import {resolveDebugConfig} from "../debug/config.ts";
+import {configureDebug, recordDebugLog, type DebugRuntimeState} from "../debug/runtime.ts";
+import {debugPlugin} from "../debug/surface.ts";
+import {firstUserFrame, stackLines} from "../debug/source.ts";
 
 export class Application implements ApplicationInterface {
     private root: PluginScope
     private _resolvedHttps: HttpsConfigInterface | undefined
     private readonly _observability = RaitonConfig.getObservability()
     private readonly _plugins = new Set<string>()
+    private _debug?: DebugRuntimeState
 
     readonly version: string = RaitonConfig.get('version') || '0.0.1'
 
@@ -63,6 +68,23 @@ export class Application implements ApplicationInterface {
         if (this.development && devPage?.enabled !== false) {
             this.register(devPagePlugin({path: devPage?.path ?? '/__dev'}))
             watchDevPageHmr()
+        }
+
+        // AI-assisted debug surfaces are opt-in: disabled by default outside
+        // development and never mounted unless explicitly enabled.
+        const debugWorkdir = this.config.workdir ?? process.cwd()
+        const debugConfig = resolveDebugConfig({
+            development: this.development,
+            workdir: debugWorkdir,
+        })
+        this._debug = configureDebug({
+            config: debugConfig,
+            development: this.development,
+            workdir: debugWorkdir,
+            application: this,
+        })
+        if (debugConfig.enabled) {
+            this.register(debugPlugin(this._debug))
         }
 
         return this;
@@ -106,6 +128,16 @@ export class Application implements ApplicationInterface {
 
     public setOptions(options: ApplicationConfigInterface): this {
         Object.assign(this.config, options);
+        return this;
+    }
+
+    /**
+     * Attach a debug runtime after construction. Used by CLI tooling that
+     * boots the application without a socket and then enables the journal for
+     * in-process invocation and verification.
+     */
+    public adoptDebugRuntime(runtime: DebugRuntimeState): this {
+        this._debug = runtime;
         return this;
     }
 
@@ -179,14 +211,32 @@ export class Application implements ApplicationInterface {
         const release = shutdown.track()
         const observability = this._observability
         const requestId = resolveRequestId(req, observability.requestIdHeader)
+        let ctx: any
 
         try {
-            const ctx = new RequestContext(req, reply)
+            ctx = new RequestContext(req, reply)
             ctx.state.requestId = requestId
             // Parse the URL once per request: the body parser, middleware and
             // router all reuse this instance instead of parsing it again.
             const requestUrl = this.parseRequestUrl(req.url)
             ctx.state.url = requestUrl
+
+            const debug = this._debug?.collector
+            if (debug) {
+                debug.start(ctx)
+                const originalStatus = reply.status.bind(reply)
+                reply.status = (code: number) => {
+                    ctx.state.responseStatus = code
+                    return originalStatus(code)
+                }
+                if (ctx.state.traceId) {
+                    try {
+                        reply.header('x-trace-id', ctx.state.traceId)
+                    } catch {
+                        // A mock reply may not implement `header`; ignore.
+                    }
+                }
+            }
 
             // During graceful shutdown, new requests are rejected immediately
             // while already-tracked requests are allowed to finish.
@@ -224,6 +274,7 @@ export class Application implements ApplicationInterface {
                 const body: any = errorPayload('NOT_FOUND', {
                     message: 'Not Found',
                     requestId,
+                    hint: hintFor('NOT_FOUND'),
                 })
                 if (this.development) {
                     const candidates = this.root.router.getRoutes().filter(route =>
@@ -235,6 +286,7 @@ export class Application implements ApplicationInterface {
                     if (suggestion) body.suggestion = suggestion
                 }
                 reply.status(HttpStatus.NOT_FOUND)
+                debug?.setResponseBody(ctx, body)
                 return reply.send(body)
             }
 
@@ -279,12 +331,19 @@ export class Application implements ApplicationInterface {
                 if (!resolved) {
                     const pathRoute = this.root.router.matchPath(pathname)
                     if (pathRoute) {
-                        reply.status(HttpStatus.METHOD_NOT_ALLOWED)
-                        return reply.send({
-                            ...errorPayload('METHOD_NOT_ALLOWED', {requestId}),
+                        const body: any = {
+                            ...errorPayload('METHOD_NOT_ALLOWED', {
+                                requestId,
+                                hint: `Use one of: ${[pathRoute.method].join(", ")}.`,
+                            }),
                             allowed: [pathRoute.method],
-                        })
+                        }
+                        reply.status(HttpStatus.METHOD_NOT_ALLOWED)
+                        debug?.step(ctx, "route", "method-not-allowed", undefined, `${req.method} ${pathname}`)
+                        debug?.setResponseBody(ctx, body)
+                        return reply.send(body)
                     }
+                    debug?.step(ctx, "route", "not-found", undefined, `${req.method} ${pathname}`)
                     return notFound(pathname)
                 }
 
@@ -292,6 +351,7 @@ export class Application implements ApplicationInterface {
                 context.state.matchedRoutePath = route.version
                     ? `/${route.version}${route.path}`
                     : route.path
+                debug?.step(ctx, "route", "resolved", undefined, `${req.method} ${pathname}`)
 
                 try {
                     // Parameters are request-scoped: never read them from the
@@ -319,17 +379,34 @@ export class Application implements ApplicationInterface {
                     }
 
                     context.reply.send(responses)
+                    debug?.setResponseBody(context, responses)
                 } catch (e: any) {
                     Logger.info(`${req.method} ${req.url} request_id=${requestId}`)
                     Logger.error(`Failed to execute handle request_id=${requestId}`, e.message ?? e)
                     if (this.development) {
                         console.error(e)
                     }
-                    context.reply.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    context.reply.send(errorPayload('INTERNAL_SERVER_ERROR', {
+                    const location = this.development ? firstUserFrame(e?.stack) : undefined
+                    debug?.setError(ctx, {
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: String(e?.message ?? e),
+                        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                        ...(this.development ? {stack: stackLines(e)} : {}),
+                        ...(location ? {location} : {}),
+                    })
+                    recordDebugLog("error", `handle: ${e?.message ?? e}`)
+                    const body = errorPayload('INTERNAL_SERVER_ERROR', {
                         requestId,
-                        ...(this.development ? {details: {message: String(e?.message ?? e)}} : {}),
-                    }))
+                        hint: hintFor('INTERNAL_SERVER_ERROR'),
+                        ...(this.development ? {
+                            details: {message: String(e?.message ?? e)},
+                            location,
+                            stack: stackLines(e),
+                        } : {}),
+                    })
+                    context.reply.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    context.reply.send(body)
+                    debug?.setResponseBody(context, body)
                 }
             }
 
@@ -343,17 +420,48 @@ export class Application implements ApplicationInterface {
                 if (err instanceof HttpException || err instanceof ThrowableResponse) {
                     Logger.error(`Server error request_id=${requestId}`, err.message ?? err);
                     const status = err.statusCode ?? 500;
+                    const location = this.development ? firstUserFrame(err.stack) : undefined
+                    debug?.setError(ctx, {
+                        code: typeof (err as any).code === "string" ? (err as any).code : "INTERNAL_SERVER_ERROR",
+                        message: String(err.message ?? err),
+                        statusCode: status,
+                        ...(this.development ? {stack: stackLines(err)} : {}),
+                        ...(location ? {location} : {}),
+                    })
+                    recordDebugLog("error", `server: ${err.message ?? err}`)
                     ctx.reply.status(status)
-                    return ctx.reply.send(enrichErrorPayload(err.render(), status, requestId))
+                    const body = enrichErrorPayload(err.render(), status, requestId, {
+                        hint: hintFor("INTERNAL_SERVER_ERROR"),
+                        location,
+                        stack: this.development ? stackLines(err) : undefined,
+                    })
+                    debug?.setResponseBody(ctx, body)
+                    return ctx.reply.send(body)
                 }
+                const location = this.development ? firstUserFrame(err?.stack) : undefined
                 const body = errorPayload('INTERNAL_SERVER_ERROR', {
                     requestId,
-                    ...(this.development ? {details: {message: String(err?.message ?? err)}} : {}),
+                    hint: hintFor('INTERNAL_SERVER_ERROR'),
+                    ...(this.development ? {
+                        details: {message: String(err?.message ?? err)},
+                        location,
+                        stack: stackLines(err),
+                    } : {}),
                 })
+                debug?.setError(ctx, {
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: String(err?.message ?? err),
+                    statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                    ...(this.development ? {stack: stackLines(err)} : {}),
+                    ...(location ? {location} : {}),
+                })
+                recordDebugLog("error", `server: ${err?.message ?? err}`)
                 ctx.reply.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                debug?.setResponseBody(ctx, body)
                 return ctx.reply.send(body)
             }
         } finally {
+            this._debug?.collector?.finish(ctx)
             release()
         }
     }
