@@ -3,6 +3,7 @@ import {RaitonBuilder, RaitonCommand} from "../core/index.ts";
 import {ChildProcess} from 'node:child_process';
 import {LBadge, Logger} from "@protorians/logger";
 import {StartCommandOptionsInterface} from "../types/index.ts";
+import {fail} from "../bin/cli-output.ts";
 
 export default class StartCommand extends RaitonCommand {
     public readonly name: string = 'start';
@@ -16,7 +17,8 @@ export default class StartCommand extends RaitonCommand {
             .alias("run")
             .description("Start the application in production mode")
             .option("--develop, -d", "Build in development mode")
-            .action(this.run.bind(this));
+            .action((options: StartCommandOptionsInterface) =>
+                this.run(options).catch(error => fail(error)));
     }
 
     protected async run(options: StartCommandOptionsInterface): Promise<void> {

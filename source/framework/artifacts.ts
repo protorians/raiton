@@ -185,7 +185,17 @@ export class Artifacts {
         return artifactType !== null && this.types.has(artifactType)
     }
 
+    /**
+     * The bridge file must never be classified as an artifact, even if a custom
+     * type named `bridge` is registered.
+     */
+    static isBridge(filename: string): boolean {
+        return /(^|[\\/])artifacts\.bridge\.(ts|mts|cts|js|mjs|cjs)$/.test(filename)
+    }
+
     static classify(filename: string): ArtifactClassification | null {
+        if (this.isBridge(filename)) return null
+
         const artifactType = artifactTypeOf(filename)
         if (!artifactType) return null
 

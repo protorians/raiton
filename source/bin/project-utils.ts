@@ -26,6 +26,15 @@ export async function loadProject(workdir: string, json = false): Promise<Intros
             : await introspectProject(workdir);
     } catch (error: any) {
         if (error instanceof CliError) throw error;
+        if (error?.code && String(error.code).startsWith("BRIDGE_")) {
+            throw new CliError(error.message ?? String(error), {
+                code: error.code,
+                hint: error.diagnostic?.action ?? "Fix the bridge declaration, then retry.",
+                docsUrl: error.diagnostic?.docsUrl,
+                location: error.diagnostic?.location,
+                exitCode: ExitCode.PREREQUISITE_MISSING,
+            });
+        }
         throw new CliError(error?.message ?? String(error), {
             code: "INTROSPECTION_FAILED",
             hint: "Fix the bootstrapper or configuration, then run `raiton doctor`.",

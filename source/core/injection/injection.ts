@@ -34,6 +34,73 @@ export class Injection {
         return this._classes.has(this.normalizeName(name));
     }
 
+    static definition(name: string): ContainerDefinitionInterface | undefined {
+        return this._classes.get(this.normalizeName(name));
+    }
+
+    static hasConstruct(construct: ConstructorType): boolean {
+        for (const definition of this._classes.values()) {
+            if (definition.construct === construct) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Adopt a class that was decorated in another copy of the framework (or in
+     * a package whose container is not the host container).
+     *
+     * Returns:
+     * - `adopted` when the class was unknown and registered in this container;
+     * - `existing` when the same class is already registered;
+     * - `collision` when a different class owns the normalized name;
+     * - `unregistered` when the class has no injectable metadata.
+     */
+    static adopt(construct: ConstructorType): {
+        status: "adopted" | "existing" | "collision" | "unregistered";
+        name: string;
+        existing?: ContainerDefinitionInterface;
+    } {
+        const metadata: ContainerDefinitionInterface | undefined = Reflect.getMetadata(METADATA_KEYS.CONTAINER, construct);
+        if (!metadata?.name) return {status: "unregistered", name: construct.name};
+
+        const normalized = this.normalizeName(metadata.name);
+        const existing = this._classes.get(normalized);
+        if (!existing) {
+            this.registry(metadata.name, construct, metadata.lifetime, metadata.scope);
+            return {status: "adopted", name: metadata.name};
+        }
+        if (existing.construct === construct) {
+            return {status: "existing", name: metadata.name, existing};
+        }
+        return {status: "collision", name: metadata.name, existing};
+    }
+
+    /**
+     * Replace a definition owned by the bridge during hot reload. Unlike
+     * `adopt()` this is not a collision: the caller has already established
+     * ownership of the previous class.
+     */
+    static replace(name: string, construct: ConstructorType): typeof this {
+        const name_ = this.normalizeName(name);
+        const definition = this._classes.get(name_);
+        this.invalidate(name_);
+        if (definition) {
+            this._classes.set(name_, {...definition, construct});
+        } else {
+            this.registry(name, construct);
+        }
+        return this;
+    }
+
+    static unregister(name: string): typeof this {
+        const name_ = this.normalizeName(name);
+        if (this._artifactPaths.has(name_)) this._artifactPaths.delete(name_);
+        this._instances.delete(name_);
+        this._dependents.delete(name_);
+        this._classes.delete(name_);
+        return this;
+    }
+
     static clear(): void {
         Logger.info('Clearing injection container');
         this._classes.clear();

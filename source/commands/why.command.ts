@@ -41,6 +41,8 @@ export default class WhyCommand extends RaitonCommand {
             handler: route.handler,
             decorator: `@${route.method.charAt(0)}${route.method.slice(1).toLowerCase()}("${route.path}")`,
             artifact: route.controller === "Application" ? "application" : "controller",
+            origin: route.origin ?? "scan",
+            ...(route.package ? {package: route.package} : {}),
             input: route.input,
             output: route.output,
         };
@@ -55,6 +57,8 @@ export default class WhyCommand extends RaitonCommand {
         print(`  controller: ${origin.controller}.${origin.handler}`);
         print(`  decorator:  ${origin.decorator}`);
         print(`  artifact:   ${origin.artifact}`);
+        print(`  origin:     ${origin.origin}`);
+        if (origin.package) print(`  package:    ${origin.package}`);
         if (origin.input) print(`  input:      ${origin.input}`);
         if (origin.output) print(`  output:     ${origin.output}`);
     }

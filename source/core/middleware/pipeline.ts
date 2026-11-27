@@ -17,6 +17,27 @@ export class MiddlewarePipeline {
         return this;
     }
 
+    /** True when this exact middleware instance/function is already mounted. */
+    has(mw: MiddlewareType): boolean {
+        return this.stack.includes(mw)
+    }
+
+    /** True when a middleware with this name is already mounted. */
+    hasName(name: string): boolean {
+        const normalized = name.toLowerCase()
+        return this.stack.some(entry => {
+            if (typeof entry === 'function') return entry.name?.toLowerCase() === normalized
+            if (typeof entry === 'object' && entry !== null && 'name' in entry)
+                return String((entry as any).name).toLowerCase() === normalized
+            return false
+        })
+    }
+
+    /** Snapshot used by diagnostics and tests. */
+    entries(): readonly MiddlewareType[] {
+        return this.stack
+    }
+
     replace(name: string, mw: MiddlewareType): this {
         const normalized = name.toLowerCase()
         for (let i = 0; i < this.stack.length; i++) {
@@ -38,8 +59,18 @@ export class MiddlewarePipeline {
         return this;
     }
 
-    remove(name: string): this {
-        const normalized = name.toLowerCase()
+    /**
+     * Remove a middleware by stable name or by identity. Identity removal is
+     * used by the artifact bridge when a descriptor name differs from the
+     * middleware function name.
+     */
+    remove(nameOrMiddleware: string | MiddlewareType): this {
+        if (typeof nameOrMiddleware !== 'string') {
+            this.stack = this.stack.filter(entry => entry !== nameOrMiddleware)
+            this.invalidate()
+            return this
+        }
+        const normalized = nameOrMiddleware.toLowerCase()
         this.stack = this.stack.filter(entry => {
             if (typeof entry === 'function') return entry.name?.toLowerCase() !== normalized
             if (typeof entry === 'object' && entry !== null && 'name' in entry)

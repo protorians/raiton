@@ -50,6 +50,7 @@ const GUIDE_FILES = [
     "user-guide/api/routes.md",
     "user-guide/responses.md",
     "user-guide/injection.md",
+    "user-guide/artifact-bridge.md",
     "user-guide/contracts.md",
     "user-guide/mcp.md",
     "user-guide/observability.md",

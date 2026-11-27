@@ -1,6 +1,7 @@
 import {RaitonCommand, RaitonBuilder} from "../core/index.ts";
 import {LBadge, Logger} from "@protorians/logger";
 import type {BuildCommandOptionsInterface} from "../types/index.ts";
+import {fail} from "../bin/cli-output.ts";
 
 
 export default class BuildCommand extends RaitonCommand {
@@ -14,7 +15,8 @@ export default class BuildCommand extends RaitonCommand {
             .description("Build the application")
             .option("--develop, -d", "Build in development mode")
             .option("--bootstrap, -b", "Bootstrap the application")
-            .action(this.run.bind(this));
+            .action((options: BuildCommandOptionsInterface) =>
+                this.run(options).catch(error => fail(error)));
     }
 
     protected async run(options: BuildCommandOptionsInterface): Promise<void> {

@@ -26,6 +26,8 @@ import {RaitonConfig} from "./config/config.ts";
 import {ConfigValidationError, validateConfig} from "./config/schema.ts";
 import {Readiness} from "../framework/observability/readiness.ts";
 import {shutdown} from "../framework/observability/shutdown.ts";
+import {ArtifactRegistry} from "./bridge/registry.ts";
+import {BridgeLoader} from "./bridge/loader.ts";
 
 
 export class RaitonThread implements ThreadInterface {
@@ -139,8 +141,27 @@ export class RaitonThread implements ThreadInterface {
             ? (this.builder.out || this.builder.source)
             : this.builder.source;
 
+        // Artifact identity is per application instance: reset it before the
+        // bridge and the scan register what they mount.
+        ArtifactRegistry.clear();
+
+        // Import the bridge before the suffix scan so external services are
+        // available to local controllers, then mount bridge artifacts after the
+        // local scan so external controllers can inject local services.
+        await BridgeLoader.load({
+            workdir: this.builder.workdir,
+            development: (this.application as any).development,
+        });
+
         if (scanRoot) {
             await ControllerBuilder.scan(scanRoot)
+        }
+
+        if (BridgeLoader.state.loaded) {
+            await BridgeLoader.mount(this.application)
+        }
+
+        if (scanRoot) {
             registerDefaultHealthCheck(this.application)
         }
 

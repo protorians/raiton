@@ -3,20 +3,29 @@ import {getControllerMetadata} from "./metadata.ts";
 import {createHandler} from "../router/handler.ts";
 import {Injection} from "../injection/index.ts";
 import {ControllerMetaInterface} from "../../types/index.ts";
-import {ControllerRouteTracker} from "./tracker.ts";
+import {ControllerRouteTracker, type RouteOrigin} from "./tracker.ts";
 import {CacheManager} from "../../framework/cache/cache.ts";
+
+export interface CompileControllerOptions {
+    /** Route ownership. Bridge routes are tracked separately from scan routes. */
+    origin?: RouteOrigin
+    /** Optional tracker key, used by the bridge to isolate same-name controllers. */
+    trackerKey?: string
+}
 
 export function compileController(
     ControllerClass: any,
-    app: ApplicationInterface
+    app: ApplicationInterface,
+    options: CompileControllerOptions = {},
 ) {
     const instance: any = Injection.resolve<typeof ControllerClass>(ControllerClass)
     const metadata: ControllerMetaInterface = getControllerMetadata(ControllerClass.prototype)
     const name = ControllerClass.name
+    const origin = options.origin ?? "scan"
 
     const rootScope = (app as any).root
     if (rootScope?.router) {
-        ControllerRouteTracker.removeRoutes(name, rootScope.router)
+        ControllerRouteTracker.removeRoutes(name, rootScope.router, origin, options.trackerKey)
     }
 
     const routes: any[] = []
@@ -35,6 +44,6 @@ export function compileController(
         routes.push(registered)
     }
 
-    ControllerRouteTracker.setRoutes(name, routes)
+    ControllerRouteTracker.setRoutes(name, routes, origin, options.trackerKey)
     return instance;
 }

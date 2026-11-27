@@ -11,6 +11,9 @@ import {contractToJsonSchema, isCompositeInput, type RouteContract} from "../con
 import {MANIFEST_SCHEMA_VERSION, type ProjectManifest, type ProjectRouteManifest} from "./schema.ts";
 import {getRouteContract} from "../contracts/decorators.ts";
 import {defaultExample, errorsForRoute, fillPathParams} from "../debug/examples.ts";
+import {ArtifactRegistry} from "../core/bridge/registry.ts";
+import {BridgeLoader} from "../core/bridge/loader.ts";
+import type {BridgeManifestSection} from "../types/bridge.ts";
 
 import pkg from "../../package.json" with {type: "json"};
 
@@ -99,6 +102,7 @@ function buildRoutes(workdir: string): ProjectRouteManifest[] {
         const controllerName = controllerClass?.name ?? "Controller";
         const file = Injection.getArtifactPath(controllerName) ?? "";
         const contract = routeContracts(route.handler, controllerClass, routeMeta.propertyKey);
+        const ownership = ArtifactRegistry.routeInfo(route);
 
         const inputSchema = contract?.input && !isCompositeInput(contract.input)
             ? contractToJsonSchema(contract.input)
@@ -141,6 +145,10 @@ function buildRoutes(workdir: string): ProjectRouteManifest[] {
             ...(headersSchema ? {headersSchema} : {}),
             examples: completedExamples,
             errors: errorsForRoute(contract),
+            ...(ownership ? {
+                origin: ownership.origin === "scan" ? "scan" : "bridge",
+                ...(ownership.package ? {package: ownership.package} : {}),
+            } : {origin: "scan"}),
         });
     }
 
@@ -316,6 +324,42 @@ function buildConfig(): Record<string, string> {
     return output;
 }
 
+function describeUnresolvedEntry(entry: unknown): string {
+    if (typeof entry === "string") return entry;
+    if (typeof entry === "function") return entry.name || "anonymous function";
+    if (entry && typeof entry === "object") {
+        const key = ["middleware", "hook", "plugin"].find(name => name in (entry as any));
+        if (key) return `${key}(${(entry as any)[key]?.name ?? "anonymous"})`;
+        return Object.keys(entry as object).slice(0, 6).join(",") || "object";
+    }
+    return String(entry);
+}
+
+function buildBridge(workdir: string): BridgeManifestSection | undefined {
+    const state = BridgeLoader.state;
+    if (!state.loaded && !state.sourceFile && !state.missing) return undefined;
+
+    return {
+        file: state.sourceFile ? relative(workdir, state.sourceFile) : null,
+        loaded: state.loaded,
+        packages: state.packages,
+        artifacts: state.artifacts.map(artifact => ({
+            name: artifact.name,
+            kind: artifact.kind,
+            origin: "bridge",
+            ...(artifact.package ? {package: artifact.package} : {}),
+            ...(artifact.file ? {file: relative(workdir, artifact.file)} : {}),
+        })),
+        unresolved: state.unresolved.map(item => ({
+            entry: describeUnresolvedEntry(item.entry),
+            reason: item.reason,
+            ...(item.code ? {code: item.code} : {}),
+            ...(item.package ? {package: item.package} : {}),
+            ...(item.file ? {file: relative(workdir, item.file)} : {}),
+        })),
+    };
+}
+
 /**
  * Generate the machine-readable project inventory. This function is never
  * called on a request hot path: it is used by CLI commands and, in
@@ -331,6 +375,7 @@ export function generateManifest(options: GenerateManifestOptions = {}): Project
     const runtime = (RaitonThread.current as any)?.runtime?.type ?? "unknown";
     const sourceRoot = RaitonConfig.get("rootDir") || "./";
     const entry = path.join(sourceRoot, "main.ts").split(path.sep).join("/");
+    const bridge = buildBridge(workdir);
 
     const manifest: ProjectManifest = {
         schemaVersion: MANIFEST_SCHEMA_VERSION,
@@ -351,6 +396,7 @@ export function generateManifest(options: GenerateManifestOptions = {}): Project
         config: buildConfig(),
         env: buildEnv(workdir),
         mcp: buildMcp(workdir),
+        ...(bridge ? {bridge} : {}),
     };
 
     cachedManifest = manifest;

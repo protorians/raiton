@@ -89,15 +89,45 @@ export function validateConfig(input: Partial<ConfigurableInterface> | any): Con
     if (config.artifacts !== undefined) {
         if (typeof config.artifacts !== "object" || config.artifacts === null) {
             errors.push({field: "artifacts", message: "artifacts must be an object"});
-        } else if (config.artifacts.types !== undefined
-            && (!Array.isArray(config.artifacts.types)
-                || config.artifacts.types.some((type: any) => typeof type !== "string"))) {
-            errors.push({
-                field: "artifacts.types",
-                message: "artifacts.types must be an array of strings",
-                expected: "string[]",
-                received: describe(config.artifacts.types),
-            });
+        } else {
+            if (config.artifacts.types !== undefined
+                && (!Array.isArray(config.artifacts.types)
+                    || config.artifacts.types.some((type: any) => typeof type !== "string"))) {
+                errors.push({
+                    field: "artifacts.types",
+                    message: "artifacts.types must be an array of strings",
+                    expected: "string[]",
+                    received: describe(config.artifacts.types),
+                });
+            }
+            if (config.artifacts.bridge !== undefined
+                && config.artifacts.bridge !== false
+                && (typeof config.artifacts.bridge !== "string" || !config.artifacts.bridge.trim())) {
+                errors.push({
+                    field: "artifacts.bridge",
+                    message: "artifacts.bridge must be a non-empty string or false",
+                    expected: "string|false",
+                    received: describe(config.artifacts.bridge),
+                });
+            }
+            if (config.artifacts.packages !== undefined && typeof config.artifacts.packages !== "boolean") {
+                errors.push({
+                    field: "artifacts.packages",
+                    message: "artifacts.packages must be a boolean",
+                    expected: "boolean",
+                    received: describe(config.artifacts.packages),
+                });
+            }
+            if (config.artifacts.packageAllowlist !== undefined
+                && (!Array.isArray(config.artifacts.packageAllowlist)
+                    || config.artifacts.packageAllowlist.some((name: any) => typeof name !== "string" || !name.trim()))) {
+                errors.push({
+                    field: "artifacts.packageAllowlist",
+                    message: "artifacts.packageAllowlist must be an array of non-empty strings",
+                    expected: "string[]",
+                    received: describe(config.artifacts.packageAllowlist),
+                });
+            }
         }
     }
 
@@ -317,6 +347,21 @@ export function getConfigJsonSchema(): Record<string, any> {
                 type: "object",
                 properties: {
                     types: {type: "array", items: {type: "string"}, uniqueItems: true},
+                    bridge: {
+                        oneOf: [{type: "string", minLength: 1}, {const: false}],
+                        description: "Bridge file path relative to the workdir or rootDir; false disables discovery.",
+                    },
+                    packages: {
+                        type: "boolean",
+                        default: true,
+                        description: "Discover direct dependencies declaring package.json#raiton.artifacts.",
+                    },
+                    packageAllowlist: {
+                        type: "array",
+                        items: {type: "string", minLength: 1},
+                        uniqueItems: true,
+                        description: "Restrict package discovery to these direct dependencies.",
+                    },
                 },
             },
             observability: {

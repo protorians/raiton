@@ -1,16 +1,15 @@
 import fs from "node:fs";
 import {BuilderHMRDeclarationInterface} from "../../types/index.ts";
 import {LBadge, Logger} from "@protorians/logger";
-import {compileController} from "./compiler.ts";
-import {compileSocket} from "../socket/builder.ts";
-import {compileMcp} from "../mcp/builder.ts";
-import {compileScheduler} from "../scheduler/builder.ts";
 import {RaitonThread} from "../thread.ts";
 import {Injection} from "../injection/index.ts";
 import {Artifacts, type ArtifactClassification} from "../../framework/artifacts.ts";
 import {METADATA_KEYS} from "../../framework/constants/decorators.constant.ts";
 import path from "node:path";
 import {ControllerRouteTracker} from "./tracker.ts";
+import {ArtifactRegistry} from "../bridge/registry.ts";
+import {isMountableClassification, kindForClassification, mountArtifact} from "../artifact-mount.ts";
+import {compileController} from "./compiler.ts";
 
 export class ControllerBuilder {
 
@@ -21,11 +20,16 @@ export class ControllerBuilder {
         const timestamp = Date.now()
 
         // One classification per file, reused by both passes. The source
-        // directory is read exactly once.
-        const entries = files.map(file => {
-            const filename = path.join(workdir, file);
-            return {filename, classification: Artifacts.classify(filename)}
-        })
+        // directory is read exactly once. The bridge file and the local files
+        // it declares are excluded so they are mounted only once.
+        const entries = files
+            .map(file => {
+                const filename = path.join(workdir, file);
+                return {filename, classification: Artifacts.classify(filename)}
+            })
+            .filter(({filename}) =>
+                !Artifacts.isBridge(filename) && !ArtifactRegistry.isExcludedFile(filename)
+            )
 
         for (const {filename, classification} of entries) {
             if (classification?.channel !== 'hmr:di') continue;
@@ -65,37 +69,51 @@ export class ControllerBuilder {
         if (!resolvedClassification)
             return undefined;
 
-        const isController = resolvedClassification.channel === 'hmr:controller';
-        const isSocket = resolvedClassification.channel === 'hmr:socket';
-        const isMcp = resolvedClassification.channel === 'hmr:mcp';
-        const isScheduler = resolvedClassification.channel === 'hmr:scheduler';
-
-        if (!isController && !isSocket && !isMcp && !isScheduler)
+        if (!isMountableClassification(resolvedClassification))
             return undefined;
 
         const imported = await import(`${filename}?v=${version || 1}&t=${timestamp || Date.now()}`)
-        const artifact = resolveArtifact(imported, {isController, isSocket, isMcp, isScheduler});
+        const artifact = resolveArtifact(imported, {
+            isController: resolvedClassification.channel === 'hmr:controller',
+            isSocket: resolvedClassification.channel === 'hmr:socket',
+            isMcp: resolvedClassification.channel === 'hmr:mcp',
+            isScheduler: resolvedClassification.channel === 'hmr:scheduler',
+        });
 
         if (!artifact) return undefined;
+        return await this.buildArtifact<T>(artifact, resolvedClassification, "scan", {file: filename});
+    }
+
+    /**
+     * Compile an artifact that is already imported. The bridge uses this method
+     * so it does not re-import classes by path and does not duplicate any
+     * compiler logic.
+     */
+    static async buildArtifact<T>(
+        artifact: any,
+        classification: ArtifactClassification,
+        origin: "scan" | "bridge" = "scan",
+        options: {file?: string; package?: string} = {},
+    ): Promise<T | undefined> {
+        if (!artifact || !isMountableClassification(classification)) return undefined;
         if (!RaitonThread.current?.application) return undefined;
 
-        const name = artifact.name || (typeof artifact === 'function' ? artifact.name : undefined);
-        if (name) Injection.registerArtifactPath(name, filename);
-
-        if (isSocket) {
-            return compileSocket(artifact) as any;
+        const existing = ArtifactRegistry.getByConstruct(artifact);
+        if (existing) {
+            if (origin === "bridge" && existing.origin !== "bridge" && existing.origin !== "package") {
+                Logger.debug(
+                    `[bridge] ${artifact.name ?? "artifact"} already mounted by the scan; skipping duplicate`
+                );
+            }
+            return existing as unknown as T;
         }
 
-        if (isMcp) {
-            return compileMcp(artifact) as any;
-        }
-
-        if (isScheduler) {
-            return compileScheduler(artifact) as any;
-        }
-
-        const compilated = compileController(artifact, RaitonThread.current.application);
-        return compilated;
+        const record = await mountArtifact(artifact, kindForClassification(classification), RaitonThread.current.application, {
+            origin,
+            file: options.file,
+            package: options.package,
+        });
+        return record as unknown as T;
     }
 
     static async recompile(modulo: any, filename: string): Promise<void> {

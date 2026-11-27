@@ -49,6 +49,11 @@ export class HookStore {
         return (this.hooks.get(name)?.length ?? 0) > 0
     }
 
+    /** True when a hook already contains this exact handler. */
+    hasHandler(name: HookNameType, handler: HookHandlerCallable): boolean {
+        return Boolean(this.hooks.get(name)?.includes(handler))
+    }
+
     async run(name: HookNameType, ctx: any) {
         const list = this.hooks.get(name)
         if (!list || list.length === 0) return

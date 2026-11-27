@@ -6,6 +6,22 @@ export interface ArtifactEntry {
 
 export interface ArtifactsConfigInterface {
     types: string[]
+    /**
+     * Bridge file location, relative to the workdir or the rootDir.
+     * `false` disables bridge discovery entirely.
+     * @default "artifacts.bridge.ts" in the rootDir
+     */
+    bridge?: string | false
+    /**
+     * Discover direct dependencies that declare `package.json#raiton.artifacts`.
+     * @default true
+     */
+    packages?: boolean
+    /**
+     * Optional allowlist of self-describing packages. When provided, only these
+     * direct dependencies are considered.
+     */
+    packageAllowlist?: string[]
 }
 
 // export type ArtifactDecoratorHandler = () => void;

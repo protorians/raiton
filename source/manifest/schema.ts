@@ -29,6 +29,8 @@ export const RouteManifestSchema = t.object({
     handler: t.string(),
     file: t.string(),
     line: t.number(),
+    origin: t.optional(t.union([t.literal("scan"), t.literal("bridge")])),
+    package: t.optional(t.string()),
     input: t.optional(t.string()),
     output: t.optional(t.string()),
     inputSchema: t.optional(SchemaRecord),
@@ -66,6 +68,30 @@ export const McpServerManifestSchema = t.object({
     resources: t.optional(t.array(t.any())),
 });
 
+export const BridgeArtifactManifestSchema = t.object({
+    name: t.string(),
+    kind: t.string(),
+    origin: t.union([t.literal("scan"), t.literal("bridge")]),
+    package: t.optional(t.string()),
+    file: t.optional(t.string()),
+});
+
+export const BridgeUnresolvedManifestSchema = t.object({
+    entry: t.string(),
+    reason: t.string(),
+    code: t.optional(t.string()),
+    package: t.optional(t.string()),
+    file: t.optional(t.string()),
+});
+
+export const BridgeManifestSchema = t.object({
+    file: t.union([t.string(), t.null()]),
+    loaded: t.boolean(),
+    packages: t.array(t.string()),
+    artifacts: t.array(BridgeArtifactManifestSchema),
+    unresolved: t.array(BridgeUnresolvedManifestSchema),
+});
+
 export const ProjectManifestSchema = t.object({
     schemaVersion: t.string(),
     generatedAt: t.string(),
@@ -85,6 +111,7 @@ export const ProjectManifestSchema = t.object({
     config: t.record(t.string(), t.string()),
     env: t.array(t.string()),
     mcp: t.array(McpServerManifestSchema),
+    bridge: t.optional(BridgeManifestSchema),
 }, {additionalProperties: true});
 
 export interface McpToolAnnotationsManifest {
@@ -139,6 +166,8 @@ export interface ProjectRouteManifest {
     handler: string;
     file: string;
     line: number;
+    origin?: "scan" | "bridge";
+    package?: string;
     input?: string;
     output?: string;
     inputSchema?: Record<string, any>;
@@ -162,6 +191,25 @@ export interface ProjectManifest {
     config: Record<string, string>;
     env: string[];
     mcp: McpServerManifest[];
+    bridge?: {
+        file: string | null;
+        loaded: boolean;
+        packages: string[];
+        artifacts: Array<{
+            name: string;
+            kind: string;
+            origin: "scan" | "bridge";
+            package?: string;
+            file?: string;
+        }>;
+        unresolved: Array<{
+            entry: string;
+            reason: string;
+            code?: string;
+            package?: string;
+            file?: string;
+        }>;
+    };
 }
 
 export interface ManifestValidationResult {

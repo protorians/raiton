@@ -11,10 +11,14 @@ import {LBadge, Logger} from "@protorians/logger";
 import {Throwable} from "../framework/exceptions/index.ts";
 import {Artifacts, HMR_CHANNELS, HmrChannel} from "../framework/artifacts.ts";
 import {execSync, spawn, spawnSync} from "node:child_process";
+import {pathToFileURL} from "node:url";
 import {isNodeUsed} from "../bin/constants.ts";
 import {invalidateManifest} from "../manifest/manifest.ts";
 import {rotateDebugBuild} from "../debug/runtime.ts";
 import {invalidateSourceCache} from "../debug/source.ts";
+import {BridgeLoader} from "./bridge/loader.ts";
+import {isSameFile, isWithin, resolveBridgeSource} from "./bridge/paths.ts";
+import {BridgeError} from "./bridge/diagnostics.ts";
 
 export class RaitonBuilder implements BuilderInterface {
     protected _source: string | null = null;
@@ -23,6 +27,7 @@ export class RaitonBuilder implements BuilderInterface {
     protected _bootstrapperFile: string | null = null;
     protected _compiledVersionNumber: number = 1;
     protected _watcher?: fs.FSWatcher;
+    protected _bridgeWatcher?: fs.FSWatcher;
 
 
     constructor(
@@ -53,7 +58,39 @@ export class RaitonBuilder implements BuilderInterface {
     }
 
     protected async parse(filename: string, type?: WatchEventType) {
+        const configuredBridge = resolveBridgeSource(this.workdir)
+        const bridgePath = configuredBridge.file ?? configuredBridge.expected
+        if (bridgePath && isSameFile(filename, bridgePath) && !fs.existsSync(filename)) {
+            invalidateManifest()
+            invalidateSourceCache()
+            rotateDebugBuild()
+            if (isNodeUsed) {
+                Raiton.thread?.restart()
+                return
+            }
+            return await BridgeLoader.reload({workdir: this.workdir, development: true})
+        }
+
         if (!fs.existsSync(filename)) return;
+
+        const bridge = resolveBridgeSource(this.workdir)
+        if (bridge.file && isSameFile(filename, bridge.file)) {
+            invalidateManifest()
+            invalidateSourceCache()
+            rotateDebugBuild()
+
+            if (isNodeUsed) {
+                Raiton.thread?.restart()
+                return
+            }
+
+            const state = await BridgeLoader.reload({workdir: this.workdir, development: true})
+            Logger.log(
+                LBadge.debug('HMR'),
+                `[bridge] ${path.relative(this.workdir, filename)} (${state.artifacts.length} artifact(s))`
+            )
+            return state
+        }
 
         const classification = Artifacts.classify(filename)
         if (!classification) return
@@ -101,6 +138,21 @@ export class RaitonBuilder implements BuilderInterface {
                 this.parse(path.join(this._source, relativePath));
             }
         });
+
+        // A configured bridge may live outside the source directory. Watch the
+        // single file explicitly instead of widening the recursive scan.
+        const bridge = resolveBridgeSource(this.workdir)
+        if (bridge.file && !isWithin(this._source, bridge.file)) {
+            try {
+                this._bridgeWatcher = watch(bridge.file, (event) => {
+                    this.parse(bridge.file!, event as WatchEventType).catch(error => {
+                        Logger.error('[bridge] reload failed', error?.message ?? error)
+                    })
+                });
+            } catch (error: any) {
+                Logger.debug('[bridge] cannot watch bridge file', error?.message ?? error)
+            }
+        }
 
         return this;
     }
@@ -233,6 +285,54 @@ export class RaitonBuilder implements BuilderInterface {
 
         await this.typecheck()
         await this.compile()
+        await this.validateBridgeOutput()
+
+        return this;
+    }
+
+    /**
+     * Node production cannot dynamically import TypeScript files. Validate the
+     * compiled manifest after the build so a local `.ts` entry fails at build
+     * time with an actionable diagnostic instead of at startup.
+     */
+    protected async validateBridgeOutput(): Promise<this> {
+        if (!isNodeUsed || !this._out) return this;
+        const bridge = resolveBridgeSource(this.workdir);
+        if (!bridge.file) return this;
+
+        const compiled = path.join(this._out, "artifacts.bridge.mjs");
+        if (!fs.existsSync(compiled)) return this;
+
+        let imported: any;
+        try {
+            imported = await import(pathToFileURL(compiled).href);
+        } catch (error: any) {
+            throw new BridgeError("BRIDGE_IMPORT_FAILED", {
+                message: `Compiled bridge failed to load: ${error?.message ?? error}`,
+                location: compiled,
+            });
+        }
+
+        const definition = imported?.default ?? imported;
+        if (!definition || !Array.isArray(definition.artifacts)) {
+            throw new BridgeError("BRIDGE_FILE_INVALID_EXPORT", {
+                message: "The compiled bridge does not export a valid definition",
+                location: compiled,
+            });
+        }
+
+        for (const entry of definition.artifacts) {
+            if (typeof entry !== "string") continue;
+            if (!/^(\.\.?\/|\/)/.test(entry)) continue;
+            if (/\.(ts|mts|cts|tsx)$/i.test(entry)) {
+                throw new BridgeError("BRIDGE_RUNTIME_UNSUPPORTED", {
+                    message: `Local bridge entry is TypeScript and cannot be imported on Node.js: ${entry}`,
+                    action: "Import the class directly in artifacts.bridge.ts (recommended) or compile the file to JavaScript.",
+                    location: compiled,
+                    entry,
+                });
+            }
+        }
 
         return this;
     }
@@ -258,17 +358,46 @@ export class RaitonBuilder implements BuilderInterface {
         const outfile = this.bootstrapperFile
         if (!outfile) throw new Error('Bootstrapper file not found')
 
+        const bridge = resolveBridgeSource(this.workdir)
+        if (bridge.explicit && !bridge.file) {
+            throw new BridgeError("BRIDGE_FILE_NOT_FOUND", {
+                location: bridge.expected ?? this.workdir,
+                entry: bridge.expected ?? undefined,
+            })
+        }
+
         const {build} = await import("esbuild")
-        await build({
-            entryPoints: [this.bootstrapper],
+        const shared = {
             bundle: true,
-            platform: 'node',
-            format: 'esm',
+            platform: 'node' as const,
+            format: 'esm' as const,
             target: 'node20',
-            outfile,
             sourcemap: true,
-            packages: 'external',
+            packages: 'external' as const,
             external: ['@protorians/*', 'argon2', 'bcrypt'],
+        }
+
+        if (bridge.file) {
+            // Two explicit entry points: the application bootstrapper and the
+            // bridge manifest. `outExtension` keeps the documented `.mjs`
+            // names (`main.mjs`, `artifacts.bridge.mjs`).
+            await build({
+                ...shared,
+                entryPoints: [
+                    {in: this.bootstrapper, out: 'main'},
+                    {in: bridge.file, out: 'artifacts.bridge'},
+                ],
+                outdir: this._out,
+                outExtension: {'.js': '.mjs'},
+            })
+            Logger.log(LBadge.info('Bridge'), path.relative(this.workdir, bridge.file));
+            return this;
+        }
+
+        await build({
+            ...shared,
+            entryPoints: [this.bootstrapper],
+            outfile,
         })
 
         return this;
@@ -282,7 +411,17 @@ export class RaitonBuilder implements BuilderInterface {
         if (isNodeUsed) {
             const compiled = this.bootstrapperFile
             if (!compiled) throw new Error('Bootstrapper file not found')
-            if (!fs.existsSync(compiled)) await this.compile()
+            const bridge = resolveBridgeSource(this.workdir)
+            const bridgeCompiled = bridge.file
+                ? path.join(this._out!, "artifacts.bridge.mjs")
+                : null
+            // Development on Node uses the controlled restart, so the source
+            // must be recompiled on every boot. Production reuses an existing
+            // build; a missing file (or bridge output) triggers a compile.
+            const needsCompile = this.options.hmr
+                || !fs.existsSync(compiled)
+                || Boolean(bridgeCompiled && !fs.existsSync(bridgeCompiled))
+            if (needsCompile) await this.compile()
             entry = compiled
         }
 

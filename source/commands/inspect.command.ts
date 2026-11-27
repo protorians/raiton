@@ -97,6 +97,9 @@ export default class InspectCommand extends RaitonCommand {
         } else {
             print(`Manifest ${manifest.schemaVersion} · ${manifest.framework.name} ${manifest.framework.version}`);
             print(`Routes: ${manifest.routes.length} · artifacts: ${manifest.artifacts.length} · MCP servers: ${manifest.mcp.length}`);
+            if (manifest.bridge) {
+                print(`Bridge: ${manifest.bridge.file ?? "none"} · loaded: ${manifest.bridge.loaded} · entries: ${manifest.bridge.artifacts.length} · unresolved: ${manifest.bridge.unresolved.length}`);
+            }
             if (manifest.routes.length) {
                 for (const route of manifest.routes) {
                     print(`  ${route.method.padEnd(6)} ${route.path}  → ${route.controller}.${route.handler} (${route.file}:${route.line})`);

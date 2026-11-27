@@ -15,3 +15,4 @@ export * from "./scheduler/index.ts";
 export * from "./plugins/index.ts";
 export * from "./middleware/index.ts";
 export * from "./router/index.ts";
+export * from "./bridge/index.ts";

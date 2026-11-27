@@ -7,6 +7,8 @@ import {RaitonConfig} from "../core/config/config.ts";
 import {errorDocsUrl} from "../framework/errors/catalog.ts";
 import {loadProject} from "../bin/project-utils.ts";
 import {isBunUsed, isDenoUsed} from "../bin/constants.ts";
+import {BridgeLoader} from "../core/bridge/loader.ts";
+import type {BridgeDiagnostic} from "../types/bridge.ts";
 
 type Severity = "error" | "warning" | "info";
 
@@ -124,6 +126,20 @@ export default class DoctorCommand extends RaitonCommand {
             add("CONFIG_FIELD", "error", `Configuration: ${configError.field} ${configError.message}`, "Fix the field in raiton.config.*.", "user-guide/config.md", RaitonConfig.source ?? undefined);
         }
 
+        // Bridge diagnostics are non-throwing so doctor can report every issue
+        // instead of stopping at the first invalid declaration.
+        const bridgeDiagnostics: BridgeDiagnostic[] = BridgeLoader.diagnose(this.workdir);
+        for (const diagnostic of bridgeDiagnostics) {
+            issues.push({
+                code: diagnostic.code,
+                severity: diagnostic.severity,
+                message: diagnostic.message,
+                action: diagnostic.action,
+                docsUrl: diagnostic.docsUrl,
+                location: diagnostic.location,
+            });
+        }
+
         const root = path.resolve(this.workdir, RaitonConfig.get("rootDir") || "./");
         if (!fs.existsSync(root)) {
             add("SOURCE_MISSING", "error", `Source directory not found: ${path.relative(this.workdir, root)}`, "Create the directory or fix rootDir.", "user-guide/config.md", root);
@@ -158,6 +174,30 @@ export default class DoctorCommand extends RaitonCommand {
         // Project-level introspection: decorators, routes, MCP and env coverage.
         try {
             const {manifest} = await loadProject(this.workdir, true);
+
+            if (BridgeLoader.state.loaded) {
+                const state = BridgeLoader.state;
+                add(
+                    "BRIDGE_LOADED",
+                    "info",
+                    `Bridge loaded: ${state.artifacts.length} artifact(s), ${state.packages.length} package(s)`,
+                    "No action required.",
+                    "user-guide/artifact-bridge.md",
+                    state.sourceFile ?? undefined,
+                );
+                for (const diagnostic of state.diagnostics) {
+                    if (issues.some(issue => issue.code === diagnostic.code && issue.message === diagnostic.message)) continue;
+                    issues.push({
+                        code: diagnostic.code,
+                        severity: diagnostic.severity,
+                        message: diagnostic.message,
+                        action: diagnostic.action,
+                        docsUrl: diagnostic.docsUrl,
+                        location: diagnostic.location,
+                    });
+                }
+            }
+
             const envIssue = await this.fixEnv(manifest.env, options.fix, fixed);
             if (envIssue) add(...envIssue);
 
@@ -185,7 +225,19 @@ export default class DoctorCommand extends RaitonCommand {
                 }
             }
         } catch (error: any) {
-            if (error?.code !== "PREREQUISITE_MISSING") {
+            if (error?.code && String(error.code).startsWith("BRIDGE_")) {
+                const message = error.message;
+                if (!issues.some(issue => issue.code === error.code && issue.message === message)) {
+                    issues.push({
+                        code: error.code,
+                        severity: "error",
+                        message,
+                        action: error.diagnostic?.action ?? error.hint ?? "Fix the bridge declaration and retry.",
+                        docsUrl: error.diagnostic?.docsUrl ?? error.docsUrl ?? errorDocsUrl("user-guide/artifact-bridge.md"),
+                        location: error.diagnostic?.location ?? error.location,
+                    });
+                }
+            } else if (error?.code !== "PREREQUISITE_MISSING") {
                 add("INTROSPECTION_FAILED", "error", `Could not inspect the project: ${error.message}`, "Fix the bootstrapper, then run `raiton doctor` again.", "user-guide/cli.md");
             }
         }

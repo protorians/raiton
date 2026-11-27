@@ -177,6 +177,21 @@ export class SchedulerManager implements SchedulerControlInterface {
         return this;
     }
 
+    /**
+     * Remove one or more registered jobs. Used when a bridge-declared
+     * scheduler is removed during hot reload.
+     */
+    unregister(names: string | string[]): this {
+        for (const name of Array.isArray(names) ? names : [names]) {
+            const job = this._jobs.get(name);
+            if (!job) continue;
+            this.clearTimer(job);
+            job.paused = true;
+            this._jobs.delete(name);
+        }
+        return this;
+    }
+
     async start(): Promise<void> {
         if (!this._config.enabled || this._booted) return;
 
