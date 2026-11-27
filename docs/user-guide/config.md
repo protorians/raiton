@@ -26,6 +26,24 @@ export default {
 }
 ```
 
+## Debug runtime
+
+```typescript
+export default {
+  rootDir: "./source",
+  debug: {
+    enabled: true,                       // false hors développement par défaut
+    journal: {enabled: true, capture: "full", capacity: 1_000, maxBodyBytes: 65_536},
+    http: {enabled: true, basePath: "/__raiton", loopbackOnly: true},
+    mcp: {enabled: true, path: "/__raiton/mcp"},
+    replay: {allowUnsafeMethods: false},
+  },
+}
+```
+
+Voir [debug.md](debug.md) pour les commandes, les transports MCP et les règles
+de sécurité.
+
 ## Chargement et validation
 
 Ordre de chargement documenté :

@@ -136,6 +136,25 @@ deno task start     # démarrage en production
 deno task compile   # binaire autonome stable et rapide
 ```
 
+## Déboguer avec un agent IA
+
+Les surfaces de debug sont opt-in et désactivées par défaut en production.
+
+```bash
+bun raiton call GET /api/items/:id --param id=42 --json
+bun raiton requests --since 5m
+bun raiton explain --last --json
+bun raiton verify --json
+bun raiton mcp debug --stdio        # ou --http --port 5711
+```
+
+- résolution de route et validation locale avant envoi ;
+- journal borné, expurgé et explications avec chronologie, source et actions ;
+- serveur MCP de debug (`routes.list`, `routes.call`, `requests.explain`, `manifest.get`, …) ;
+- erreurs enrichies avec attendu, reçu, emplacement et `hint` en développement.
+
+Voir [docs/user-guide/debug.md](docs/user-guide/debug.md).
+
 ## Runtimes supportés
 
 Raiton détecte automatiquement l'environnement d'exécution et adapte son serveur :

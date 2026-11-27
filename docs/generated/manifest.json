@@ -3,7 +3,7 @@
   "generatedAt": "generated",
   "framework": {
     "name": "raiton",
-    "version": "6.8.9-beta.25"
+    "version": "6.10.0-beta.28"
   },
   "runtime": "unknown",
   "project": {
@@ -23,14 +23,29 @@
     "observability": "object",
     "validation": "object",
     "shutdown": "object",
-    "mcp": "object"
+    "mcp": "object",
+    "debug": "object"
   },
   "env": [
     "API_KEY",
     "APPDATA",
     "ARM_VERSION",
     "AWS_SECRET_ACCESS_KEY",
-    "BENCH_ROUTES",
+    "BENCH_AI_JOURNAL_WRITE_US",
+    "BENCH_AI_LOOKUP_US",
+    "BENCH_AI_REAL_LOOKUP_US",
+    "BENCH_AI_REAL_SERIALIZE_US",
+    "BENCH_AI_REAL_WRITE_FULL_US",
+    "BENCH_AI_REAL_WRITE_US",
+    "BENCH_AI_SERIALIZE_US",
+    "BENCH_BODY_BUDGET_US",
+    "BENCH_BODY_READ_BUDGET_US",
+    "BENCH_CLASSIFICATION_BUDGET_MS",
+    "BENCH_DECORATORS_IMPORT_MS",
+    "BENCH_FRAMEWORK_IMPORT_MS",
+    "BENCH_HMR_BUDGET_MS",
+    "BENCH_HTTP_BUDGET_US",
+    "BENCH_VALIDATION_BUDGET_US",
     "BOOK_LANG",
     "CI_BRANCH",
     "CLICOLOR_FORCE",
@@ -78,6 +93,8 @@
     "PRETTIER_DEBUG",
     "PRETTIER_FALLBACK_RESOLVE",
     "RAITON_ACCESS_LOG",
+    "RAITON_DEBUG",
+    "RAITON_DEBUG_TOKEN",
     "RAITON_METRICS_PATH",
     "RAITON_NATURAL_MODE",
     "RAITON_OBSERVABILITY",

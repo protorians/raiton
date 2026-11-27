@@ -60,6 +60,7 @@
     "routes": {
       "type": "array",
       "items": {
+        "additionalProperties": true,
         "type": "object",
         "required": [
           "method",
@@ -107,6 +108,81 @@
             "type": "object",
             "patternProperties": {
               "^(.*)$": {}
+            }
+          },
+          "querySchema": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          },
+          "paramsSchema": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          },
+          "headersSchema": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "body": {},
+                "params": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^(.*)$": {}
+                  }
+                },
+                "query": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^(.*)$": {}
+                  }
+                },
+                "headers": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^(.*)$": {}
+                  }
+                },
+                "expectedStatus": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "status"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "number"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
             }
           }
         }

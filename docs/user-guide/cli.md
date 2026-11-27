@@ -49,6 +49,11 @@ bun raiton client --out ./sdk
 bun raiton contract check --baseline openapi.baseline.json
 bun raiton mcp list --json
 bun raiton mcp conformance --json
+bun raiton call GET /api/items/:id --param id=42 --json
+bun raiton requests --since 5m
+bun raiton explain --last --json
+bun raiton verify --json
+bun raiton mcp debug --stdio
 bun raiton docs agents
 ```
 

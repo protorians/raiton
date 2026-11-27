@@ -129,6 +129,99 @@
         }
       }
     },
+    "debug": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "journal": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "capacity": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1000
+            },
+            "maxBodyBytes": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 65536
+            },
+            "capture": {
+              "enum": [
+                "off",
+                "metadata",
+                "full"
+              ]
+            },
+            "ttlMs": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 900000
+            },
+            "sampleRate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "redact": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        "http": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "basePath": {
+              "type": "string",
+              "pattern": "^/",
+              "default": "/__raiton"
+            },
+            "loopbackOnly": {
+              "type": "boolean",
+              "default": true
+            },
+            "tokenEnv": {
+              "type": "string",
+              "default": "RAITON_DEBUG_TOKEN"
+            }
+          }
+        },
+        "mcp": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^/",
+              "default": "/__raiton/mcp"
+            }
+          }
+        },
+        "replay": {
+          "type": "object",
+          "properties": {
+            "allowUnsafeMethods": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      }
+    },
     "docs": {
       "type": "object",
       "properties": {

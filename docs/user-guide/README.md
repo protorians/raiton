@@ -19,6 +19,7 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 | [responses.md](responses.md) | Structurer les réponses et les erreurs |
 | [contracts.md](contracts.md) | Contrats schema-first : validation, types, OpenAPI et client |
 | [observability.md](observability.md) | Corrélation, métriques, traces et arrêt gracieux |
+| [debug.md](debug.md) | Invoquer, expliquer, rejouer et vérifier avec un agent IA |
 | [recipes/README.md](recipes/README.md) | Recettes exécutables par fonctionnalité |
 | [en/README.md](en/README.md) | English reference |
 | [body-parser.md](body-parser.md) | Lire JSON, formulaires et fichiers |
