@@ -4,7 +4,7 @@ import {
     Get,
     Post,
 } from "../../../../../source/framework/index.ts";
-import {Input, Output, t} from "../../../../../source/contracts/index.ts";
+import {Example, Input, Output, t} from "../../../../../source/contracts/index.ts";
 
 const CreateItem = t.object({
     name: t.string().min(2),
@@ -27,6 +27,7 @@ export class ItemsController {
     @Post("/")
     @Input(CreateItem)
     @Output(Item)
+    @Example({name: "create", body: {name: "Raiton"}, expectedStatus: 200})
     create(@Body() input: {name: string}) {
         return {id: 2, name: input.name};
     }
