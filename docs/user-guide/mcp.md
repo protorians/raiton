@@ -98,6 +98,50 @@ La version du protocole est vérifiée : une version non supportée renvoie `406
 
 Les fichiers `*.mcp.ts` bénéficient du **hot reload** : une modification recharge le serveur MCP sans redémarrer le process, exactement comme les contrôleurs et les sockets.
 
+## Transports HTTP et stdio
+
+Le même registre d'outils est servi par :
+
+- **Streamable HTTP** sur le chemin déclaré (`/mcp` par défaut) ;
+- **stdio**, pour les clients qui lancent le serveur comme sous-processus :
+
+```bash
+raiton mcp serve math --stdio
+```
+
+Les deux transports passent la même suite de conformité :
+
+```bash
+raiton mcp conformance math --json
+```
+
+## Schémas et sûreté
+
+```ts
+@McpTool({
+  name: "refund",
+  description: "Rembourse une commande",
+  inputSchema: RefundInput,
+  outputSchema: RefundOutput,
+  scopes: ["payments:write"],
+  annotations: {readOnlyHint: false, destructiveHint: true, idempotentHint: false},
+})
+refund(@McpArg("orderId", "Identifiant", String) orderId: string) {
+  return this.payments.refund(orderId)
+}
+```
+
+- `inputSchema` / `outputSchema` sont exposés à `tools/list`.
+- Un outil `destructiveHint: true` est **masqué par défaut** ; il faut
+  `mcp.exposeDestructive: true` dans `raiton.config.ts` ou
+  `@McpServer({exposeDestructive: true})`.
+- Les scopes sont vérifiés lorsqu'ils sont fournis (`x-mcp-scopes` en HTTP,
+  contexte du transport en stdio).
+- Les appels sont audités (identifiant, outil, durée, acteur, résultat) et les
+  secrets sont expurgés.
+- Une limite de débit par outil peut être configurée
+  (`mcp.rateLimitPerMinute`).
+
 ## OpenAPI
 
 Les serveurs MCP sont documentés dans le contrat OpenAPI généré, avec une extension `x-mcp` listant outils, prompts et ressources.
@@ -107,11 +151,10 @@ Les serveurs MCP sont documentés dans le contrat OpenAPI généré, avec une ex
 - intégration native avec le serveur HTTP existant
 - réutilise l’injection de dépendances
 - HMR, artifacts et OpenAPI homogènes avec le reste du framework
-- aucun serveur ni processus séparé
+- transport stdio pour les agents locaux
 
 ## Inconvénients
 
-- transport limité au Streamable HTTP (pas de stdio fourni)
 - les notifications serveur `GET` (SSE) restent basiques
 - le protocole évolue vite, la liste des versions supportées doit être suivie
 

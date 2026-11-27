@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import {METADATA_KEYS} from "../constants/decorators.constant.ts";
-import {getControllerMetadata} from "../../core/controller/index.ts";
+import {getControllerMetadata} from "../../core/controller/metadata.ts";
 import {RouteMetaInterface} from "../../types/index.ts";
 
 export interface HealthCheckOptions {

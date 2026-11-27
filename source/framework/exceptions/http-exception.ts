@@ -1,5 +1,5 @@
 import {HttpStatus} from "../enums/http-status.enum.ts";
-import {Raiton} from "../../core/index.ts";
+import {Raiton} from "../../core/raiton.ts";
 import {HttpResponseBaseInterface} from "../../types/index.ts";
 
 export class HttpException extends Error {

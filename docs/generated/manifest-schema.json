@@ -1,0 +1,236 @@
+{
+  "additionalProperties": true,
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "framework",
+    "runtime",
+    "project",
+    "routes",
+    "injection",
+    "artifacts",
+    "config",
+    "env",
+    "mcp"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string"
+    },
+    "generatedAt": {
+      "type": "string"
+    },
+    "framework": {
+      "type": "object",
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "runtime": {
+      "type": "string"
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "rootDir",
+        "entry"
+      ],
+      "properties": {
+        "rootDir": {
+          "type": "string"
+        },
+        "entry": {
+          "type": "string"
+        },
+        "configFile": {
+          "type": "string"
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "method",
+          "path",
+          "controller",
+          "handler",
+          "file",
+          "line"
+        ],
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "controller": {
+            "type": "string"
+          },
+          "handler": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "line": {
+            "type": "number"
+          },
+          "input": {
+            "type": "string"
+          },
+          "output": {
+            "type": "string"
+          },
+          "inputSchema": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          },
+          "outputSchema": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        }
+      }
+    },
+    "injection": {
+      "type": "object",
+      "patternProperties": {
+        "^(.*)$": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "config": {
+      "type": "object",
+      "patternProperties": {
+        "^(.*)$": {
+          "type": "string"
+        }
+      }
+    },
+    "env": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mcp": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "server",
+          "path",
+          "tools"
+        ],
+        "properties": {
+          "server": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "exposed"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "file": {
+                  "type": "string"
+                },
+                "line": {
+                  "type": "number"
+                },
+                "inputSchema": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^(.*)$": {}
+                  }
+                },
+                "outputSchema": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^(.*)$": {}
+                  }
+                },
+                "annotations": {
+                  "type": "object",
+                  "properties": {
+                    "readOnlyHint": {
+                      "type": "boolean"
+                    },
+                    "destructiveHint": {
+                      "type": "boolean"
+                    },
+                    "idempotentHint": {
+                      "type": "boolean"
+                    },
+                    "openWorldHint": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "exposed": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "prompts": {
+            "type": "array",
+            "items": {}
+          },
+          "resources": {
+            "type": "array",
+            "items": {}
+          }
+        }
+      }
+    }
+  }
+}

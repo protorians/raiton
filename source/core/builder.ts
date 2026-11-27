@@ -10,9 +10,9 @@ import {watch} from "fs";
 import {LBadge, Logger} from "@protorians/logger";
 import {Throwable} from "../framework/exceptions/index.ts";
 import {Artifacts, HMR_CHANNELS, HmrChannel} from "../framework/artifacts.ts";
-import {build} from "esbuild";
 import {execSync, spawn, spawnSync} from "node:child_process";
 import {isNodeUsed} from "../bin/constants.ts";
+import {invalidateManifest} from "../manifest/manifest.ts";
 
 export class RaitonBuilder implements BuilderInterface {
     protected _source: string | null = null;
@@ -55,6 +55,9 @@ export class RaitonBuilder implements BuilderInterface {
 
         const classification = Artifacts.classify(filename)
         if (!classification) return
+
+        // Any source change makes the cached inventory stale.
+        invalidateManifest()
 
         // Sur Node, le rechargement d'artefacts TypeScript en mémoire n'est pas
         // possible (import() natif des fichiers .ts). On bascule alors sur le
@@ -251,6 +254,7 @@ export class RaitonBuilder implements BuilderInterface {
         const outfile = this.bootstrapperFile
         if (!outfile) throw new Error('Bootstrapper file not found')
 
+        const {build} = await import("esbuild")
         await build({
             entryPoints: [this.bootstrapper],
             bundle: true,
@@ -289,7 +293,7 @@ export class RaitonBuilder implements BuilderInterface {
         Raiton.thread = thread;
         const app = await bootstrapper.default(thread);
 
-        if (!this.options.serve) await this.build(thread)
+        if (!this.options.serve && this.options.compile !== false) await this.build(thread)
 
         return app;
     }

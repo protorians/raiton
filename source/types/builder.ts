@@ -13,6 +13,11 @@ export interface BuildCommandOptionsInterface {
 export interface BuilderConfigInterface {
     serve?: boolean;
     hmr?: boolean;
+    /**
+     * Compile/typecheck when booting without serving. CLI introspection sets
+     * this to `false` so `inspect` and `doctor` never run a build.
+     */
+    compile?: boolean;
 }
 
 export type BuilderBootCallableType = (builder: BuilderInterface) => Promise<void>

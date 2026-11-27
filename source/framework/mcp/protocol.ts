@@ -6,6 +6,12 @@ import type {
 
 export const McpVersion = '2024-11-05'
 export const LatestProtocolVersion = '2024-11-05'
+export const SUPPORTED_PROTOCOL_VERSIONS = new Set([
+    '2024-11-05',
+    '2025-03-26',
+    '2025-06-18',
+    '2025-11-25',
+])
 
 export enum JsonRpcErrorCode {
     PARSE_ERROR = -32700,

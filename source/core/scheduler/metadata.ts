@@ -1,5 +1,5 @@
 import {SchedulerMetaInterface, SchedulerRegistrationInterface} from "../../types/index.ts";
-import {METADATA_KEYS} from "../../framework/constants/index.ts";
+import {METADATA_KEYS} from "../../framework/constants/decorators.constant.ts";
 import "reflect-metadata";
 
 const registry = new Map<string, SchedulerRegistrationInterface>();

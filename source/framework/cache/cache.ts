@@ -58,6 +58,8 @@ export class MemoryCacheStore implements CacheStore {
 export class CacheManager {
     private static _store: CacheStore = new MemoryCacheStore();
     private static _defaults: Partial<CacheOptions> = {};
+    private static readonly _routeVersions = new Map<string, number>();
+    private static readonly _routeKeys = new Map<string, Set<string>>();
 
     static configure(options: Partial<CacheOptions>): void {
         this._defaults = {...this._defaults, ...options};
@@ -78,8 +80,43 @@ export class CacheManager {
         this._store = store;
     }
 
+    /**
+     * Version courante d'une route. La version est intégrée aux clés de cache
+     * afin qu'une invalidation HMR rende immédiatement les anciennes entrées
+     * inaccessibles, même si le handler est recompilé.
+     */
+    static version(route: string): number {
+        return this._routeVersions.get(route) ?? 0;
+    }
+
+    static track(route: string, key: string): void {
+        let keys = this._routeKeys.get(route);
+        if (!keys) {
+            keys = new Set();
+            this._routeKeys.set(route, keys);
+        }
+        keys.add(key);
+    }
+
+    static invalidateRoute(route: string): void {
+        this._routeVersions.set(route, this.version(route) + 1);
+        const keys = this._routeKeys.get(route);
+        if (keys) {
+            for (const key of keys) {
+                try {
+                    this._store.delete(key);
+                } catch {
+                    // A custom store may not support deletion; the version bump
+                    // is enough to stop serving the old entry.
+                }
+            }
+            this._routeKeys.delete(route);
+        }
+    }
+
     static clear(): void {
         this._store.clear();
+        this._routeKeys.clear();
     }
 }
 
@@ -148,11 +185,13 @@ export class RouteCache {
     private readonly store: CacheStore;
     private readonly route: string;
     private readonly options: CacheOptions;
+    private readonly version: number;
 
     constructor(route: string, options: CacheOptions = {}) {
         this.route = route;
         this.options = resolveCacheOptions(route, options);
         this.store = CacheManager.getStore();
+        this.version = CacheManager.version(route);
     }
 
     get enabled(): boolean {
@@ -163,8 +202,12 @@ export class RouteCache {
         return (this.options.methods ?? DEFAULT_METHODS).includes(method.toUpperCase());
     }
 
-    key(context: RequestContext): Promise<string> {
-        return buildCacheKey(context, this.route, this.options);
+    private scope(key: string): string {
+        return `${this.version}|${key}`;
+    }
+
+    async key(context: RequestContext): Promise<string> {
+        return this.scope(await buildCacheKey(context, this.route, this.options));
     }
 
     async get<T = any>(context: RequestContext, key?: string): Promise<CacheEntry<T> | undefined> {
@@ -173,13 +216,15 @@ export class RouteCache {
 
     async set<T = any>(context: RequestContext, body: T, status = 200, headers: Record<string, string> = {}, key?: string): Promise<void> {
         const ttl = this.options.ttl ?? 60_000;
-        this.store.set(key ?? await this.key(context), {
+        const scopedKey = key ?? await this.key(context);
+        this.store.set(scopedKey, {
             body,
             status,
             headers,
             createdAt: Date.now(),
             expiresAt: Date.now() + ttl,
         }, ttl);
+        CacheManager.track(this.route, scopedKey);
     }
 
     shouldCache(status: number): boolean {

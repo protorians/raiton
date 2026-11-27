@@ -1,8 +1,6 @@
 import type {PluginInterface} from "../../types/index.ts";
 import type {ContextInterface} from "../../types/core.ts";
-import {PluginScope} from "../../core/index.ts";
-import {Logger} from "@protorians/logger";
-import {generateOpenApiSpec} from "../utilities/openapi.utils.ts";
+import type {PluginScope} from "../../core/plugins/scope.ts";
 
 /**
  * OpenAPI plugin options
@@ -12,10 +10,10 @@ export interface OpenApiOptions {
      * The base route for the documentation UI (e.g., '/docs')
      * @default '/docs'
      */
-    route?: string;
+    route?: string | false;
 
     /**
-     * The HTML string page
+     * The HTML string page. A Redoc UI is provided by default.
      */
     ui?: (config: Omit<OpenApiOptions, 'ui'>, context: ContextInterface) => string;
 
@@ -61,8 +59,47 @@ export interface OpenApiOptions {
     };
 }
 
+/**
+ * Dependency-free default documentation UI (Redoc via CDN). The page only
+ * references the JSON endpoint served by the same plugin.
+ */
+function relativeEndpoint(route: string | false | undefined, endpoint: string): string {
+    if (!route) return endpoint;
+    const base = route.split("/").slice(0, -1).join("/") || "/";
+    if (!endpoint.startsWith(base === "/" ? "/" : `${base}/`)) return endpoint;
+    const relative = base === "/" ? endpoint.slice(1) : endpoint.slice(base.length + 1);
+    return relative || endpoint;
+}
+
+export function defaultOpenApiUi(config: Omit<OpenApiOptions, "ui">): string {
+    const title = config.title || "API";
+    const endpoint = relativeEndpoint(config.route, config.endpoint || "/docs/json");
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${escapeHtml(title)} — API documentation</title>
+  <style>body{margin:0;padding:0;font-family:system-ui,sans-serif;}</style>
+</head>
+<body>
+  <redoc spec-url="${escapeHtml(endpoint)}"></redoc>
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+</body>
+</html>`;
+}
+
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
 export function openApiPlugin(options: OpenApiOptions = {}): PluginInterface {
     const opts = {
+        route: '/docs',
         endpoint: '/docs/json',
         title: 'API',
         version: '1.0.0',
@@ -77,21 +114,27 @@ export function openApiPlugin(options: OpenApiOptions = {}): PluginInterface {
         name: 'openapi-plugin',
         setup: (scope: PluginScope) => {
 
-            if (opts.route && opts.ui) {
-                scope.get(opts.route, async ({reply, req, ...context}: ContextInterface) => {
+            if (opts.route) {
+                const ui = opts.ui ?? defaultOpenApiUi;
+                const handler = async ({reply, req, ...context}: ContextInterface) => {
                     const optionsWithoutUi = {...opts, ui: undefined}
-                    const html = opts.ui?.(optionsWithoutUi, {reply, req, ...context});
+                    const html = ui(optionsWithoutUi, {reply, req, ...context});
                     reply.type('text/html');
-                    reply.send(html || 'No Ui function defined');
-                });
+                    return html || defaultOpenApiUi(optionsWithoutUi);
+                };
+                (handler as any)._raitonInternal = true;
+                scope.get(opts.route, handler);
             }
 
             if (opts.endpoint) {
-                scope.get(opts.endpoint, async ({reply}: ContextInterface) => {
+                const handler = async ({reply}: ContextInterface) => {
+                    const {generateOpenApiSpec} = await import("../utilities/openapi.utils.ts")
                     const spec = await generateOpenApiSpec(scope, opts);
                     reply.type('application/json');
                     return spec
-                });
+                };
+                (handler as any)._raitonInternal = true;
+                scope.get(opts.endpoint, handler);
             }
         }
     };

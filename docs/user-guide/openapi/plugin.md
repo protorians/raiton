@@ -30,6 +30,16 @@ app.register(openApiPlugin({
 
 `route` désigne la page de documentation et `endpoint` le point d’accès au document JSON. Le titre et la version apparaissent dans les informations du contrat.
 
+Sans fonction `ui`, le plugin sert une interface **Redoc** par défaut. Le même
+document est exportable sans démarrer le serveur :
+
+```bash
+raiton openapi export --out openapi.json
+```
+
+Les schémas `@Input`/`@Output` (schema-first) remplacent les heuristiques et
+alimentent l'OpenAPI depuis la même définition que la validation runtime.
+
 ## Décrire les routes
 
 Le plugin exploite les métadonnées ajoutées avec les décorateurs :

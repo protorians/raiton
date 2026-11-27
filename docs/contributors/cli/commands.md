@@ -1,7 +1,13 @@
 # Commandes CLI
 
 **Fichiers :** `source/commands/`
-**Commandes intégrées :** 5 commandes
+**Commandes intégrées :** 15 commandes
+
+Toutes les commandes de diagnostic, d'inventaire et de génération supportent
+`--json`, un mode non interactif et des codes de sortie stables
+(`0` succès, `1` usage, `2` prérequis manquant, `3` conflit de fichiers,
+`4` échec de diagnostic). Les erreurs exposent
+`{ code, message, hint, docsUrl, location? }`.
 
 > **Navigation :** [← cli/](README.md) | [↑ cli/](README.md) | [hmr.md →](hmr.md)
 
@@ -105,26 +111,31 @@ bun run build/bin/index.mjs
 
 ## `artifact` / `art`
 
-Gestion des artifacts.
+Inventaire des artifacts détectés.
 
 ```bash
-bun raiton artifact --dump        # Affiche les artifacts
-bun raiton artifact --create      # Crée un artifact
-bun raiton artifact --remove      # Supprime un artifact
-bun raiton artifact --clear       # Vide tous les artifacts
+bun raiton artifact --dump
+bun raiton artifact --dump --json
 ```
 
-**Note :** Cette commande est actuellement en développement (stub).
+## Onboarding, contrats et inventaire
 
-## `grafts`
+| Commande | Rôle |
+|---|---|
+| `new <name>` | Crée un projet (`api`, `minimal`, `mcp-agent`) sans prompt ; `--dry-run`, `--force`, `--offline`, `--no-install`. |
+| `generate <type> <name>` | Génère `controller`, `service`, `repository`, `dto`, `mcp-tool`, `test` ou `resource`. |
+| `routes [--json]` | Liste les routes montées. |
+| `inspect [--json]` | Émet le manifeste versionné (routes, DI, config, env, MCP, sources). |
+| `why <method> <path>` | Indique le fichier, la ligne, le décorateur et l'artifact d'une route. |
+| `doctor [--json] [--fix]` | Diagnostic actionnable (runtime, config, décorateurs, versions, ports, env). |
+| `openapi export --out` | Exporte le document OpenAPI depuis les routes et contrats. |
+| `client --out` | Génère un client TypeScript typé sans `any`. |
+| `contract check --baseline` | Détecte les ruptures de contrat (route + champ). |
+| `contract snapshot --out` | Écrit une baseline de contrat. |
+| `mcp list\|inspect\|test\|serve\|conformance` | Outils MCP, transport HTTP et stdio. |
+| `docs agents [--check]` | Génère `llms.txt`, `llms-full.txt`, `AGENTS.md`, `CLAUDE.md`, schémas et références. |
 
-Génération de typings.
-
-```bash
-bun raiton grafts
-```
-
-**Note :** Cette commande est actuellement en développement (stub).
+> `grafts` a été retiré tant qu'aucune implémentation stable n'est disponible.
 
 ## Commandes personnalisées du projet
 

@@ -138,3 +138,6 @@ dist
 /node_modules/typescript
 /bun.lock
 /.idea/ShadcnHelperSettings.xml
+
+./specs
+.specify/

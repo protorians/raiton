@@ -1,7 +1,7 @@
-import {getControllerMetadata} from "../../core/controller/index.ts";
-import {Injectable} from "../index.ts";
+import {getControllerMetadata} from "../../core/controller/metadata.ts";
+import {Injectable} from "./injection.decorator.ts";
 import {LifetimeEnum} from "@protorians/core";
-import {ControllerDecoratorCallable} from "../../types/index.ts";
+import type {ControllerDecoratorCallable} from "../../types/controller.ts";
 
 export function Controllable(prefix = '') {
     return (target: any) => {

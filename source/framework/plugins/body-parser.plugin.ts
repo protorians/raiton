@@ -3,31 +3,51 @@ import {RequestContext} from "../../core/context.ts";
 import {Logger} from "@protorians/logger";
 import {tryParseJson} from "../utilities/json.util.ts";
 
+const textDecoder = new TextDecoder()
+const installedScopes = new WeakSet<object>()
+
 export function bodyParserPlugin(): PluginInterface {
     return {
         name: 'body-parser-plugin',
         setup: (scope) => {
+            // Installing the plugin twice would run the parser twice and read
+            // the request stream a second time.
+            if (installedScopes.has(scope as object)) return
+            installedScopes.add(scope as object)
+
             scope.use(async ({context, next}: MiddlewareParametersInterface) => {
-                readQueryBody(context);
+                const url = getRequestUrl(context)
+                readQueryBody(context, url);
 
-                const isGetOrHead = ['GET', 'HEAD'].includes(context.req.method.toUpperCase());
+                const method = context.req.method.toUpperCase();
 
-                if (isGetOrHead) {
+                // GET/HEAD never carry a body: expose the already-parsed query
+                // without touching content-type or the body stream.
+                if (method === 'GET' || method === 'HEAD') {
                     context.req.body = context.req.query;
+                    await next();
+                    return;
                 }
 
                 const hasBody = context.req.body !== undefined && context.req.body !== null;
 
-                if (hasBody && !context.state.bodyParsed && !isGetOrHead) {
+                if (hasBody && !context.state.bodyParsed) {
                     try {
                         const contentType = context.req.headers.get('content-type') || '';
                         const rawBody = await readRawBody(context.req.body);
                         const bodyString = decode(rawBody);
 
-                        await readMultipartBody(context, contentType, rawBody);
-                        readJsonBody(context, contentType, bodyString);
-                        readUrlEncodedBody(context, contentType, bodyString);
-                        readTextBody(context, contentType, bodyString);
+                        if (contentType.includes('multipart/form-data')) {
+                            await readMultipartBody(context, rawBody);
+                        } else if (contentType.includes('application/json')) {
+                            context.req.body = tryParseJson(bodyString) || {};
+                            context.state.bodyParsed = true;
+                        } else if (contentType.includes('application/x-www-form-urlencoded')) {
+                            readUrlEncodedBody(context, bodyString);
+                        } else if (contentType.includes('text/')) {
+                            context.req.body = bodyString as unknown as any;
+                            context.state.bodyParsed = true;
+                        }
 
                         if (!context.state.bodyParsed) {
                             context.req.body = rawBody as any;
@@ -45,105 +65,88 @@ export function bodyParserPlugin(): PluginInterface {
     };
 }
 
-function readJsonBody(ctx: RequestContext, contentType: string, body: string) {
-    if (contentType.includes('application/json')) {
-        ctx.req.body = tryParseJson(body) || {};
-        ctx.state.bodyParsed = true;
-    }
-}
-
-async function readMultipartBody(ctx: RequestContext, contentType: string, rawBody: any) {
-    if (contentType.includes('multipart/form-data')) {
-        try {
-            const tempRequest = new Request(ctx.req.url, {
-                method: ctx.req.method,
-                headers: ctx.req.headers,
-                body: rawBody
-            });
-
-            const formData = await tempRequest.formData();
-            const record: Record<string, any> = {};
-            const files: Record<string, any> = {};
-
-            for (const [key, value] of formData.entries()) {
-                const v = value as any;
-                if (v && (v instanceof File)) {
-                    files[key] = {
-                        name: v.name,
-                        type: v.type,
-                        size: v.size,
-                        lastModified: v.lastModified,
-                        buffer: Buffer.from(await v.arrayBuffer())
-                    };
-                } else {
-                    record[key] = value;
-                }
-            }
-
-            ctx.req.body = record;
-            ctx.req.files = files;
-            ctx.req.file = Object.values(files)[0] || null;
-            ctx.state.bodyParsed = true;
-        } catch (e) {
-            Logger.error('Error parsing multipart body:', e);
-        }
-    }
-}
-
-function readUrlEncodedBody(ctx: RequestContext, contentType: string, body: string) {
-    if (contentType.includes('application/x-www-form-urlencoded')) {
-        const params = new URLSearchParams(body);
-        const record: Record<string, any> = {};
-        params.forEach((value, key) => {
-            record[key] = value;
+async function readMultipartBody(ctx: RequestContext, rawBody: Uint8Array | string) {
+    try {
+        const tempRequest = new Request(ctx.req.url, {
+            method: ctx.req.method,
+            headers: ctx.req.headers,
+            body: rawBody as BodyInit
         });
-        ctx.req.body = record as unknown as any;
+
+        const formData = await tempRequest.formData();
+        const record: Record<string, any> = {};
+        const files: Record<string, any> = {};
+
+        for (const [key, value] of formData.entries()) {
+            const v = value as any;
+            if (v && (v instanceof File)) {
+                files[key] = {
+                    name: v.name,
+                    type: v.type,
+                    size: v.size,
+                    lastModified: v.lastModified,
+                    buffer: Buffer.from(await v.arrayBuffer())
+                };
+            } else {
+                record[key] = value;
+            }
+        }
+
+        ctx.req.body = record;
+        ctx.req.files = files;
+        ctx.req.file = Object.values(files)[0] || null;
         ctx.state.bodyParsed = true;
+    } catch (e) {
+        Logger.error('Error parsing multipart body:', e);
     }
 }
 
-function readTextBody(ctx: RequestContext, contentType: string, body: string) {
-    if (contentType.includes('text/')) {
-        ctx.req.body = body as unknown as any;
-        ctx.state.bodyParsed = true;
-    }
+function readUrlEncodedBody(ctx: RequestContext, body: string) {
+    const params = new URLSearchParams(body);
+    const record: Record<string, any> = {};
+    params.forEach((value, key) => {
+        record[key] = value;
+    });
+    ctx.req.body = record as unknown as any;
+    ctx.state.bodyParsed = true;
 }
 
-function readQueryBody(ctx: RequestContext) {
+function getRequestUrl(ctx: RequestContext): URL {
+    const cached = ctx.state?.url;
+    if (cached instanceof URL) return cached
 
-    const searchParams = new URLSearchParams(ctx.req.url.split('?')[1] || '');
+    const url = new URL(ctx.req.url, 'http://localhost')
+    ctx.state.url = url
+    return url
+}
+
+function readQueryBody(ctx: RequestContext, url: URL) {
+    // Avoid allocating URLSearchParams when the request has no query string.
+    if (!url.search) {
+        ctx.req.query = {} as unknown as any;
+        return
+    }
+
     const record = {} as Record<string, any>;
-    searchParams.forEach((value, key) => record[key] = value);
+    url.searchParams.forEach((value, key) => record[key] = value);
     ctx.req.query = record as unknown as any;
 }
 
-async function readRawBody(body: any): Promise<Uint8Array | string> {
+export async function readRawBody(body: any): Promise<Uint8Array | string> {
     if (!body) return new Uint8Array(0);
 
     if (body instanceof Uint8Array || typeof body === 'string') {
         return body;
     }
 
-    if (typeof body === 'object' && !('on' in body) && !(body instanceof ReadableStream)) {
-        return JSON.stringify(body);
+    // Fetch/Web streams (Bun, Deno, Workers): let the runtime decode the body
+    // through the native Response path instead of a manual reader loop.
+    if (body instanceof ReadableStream) {
+        return new Uint8Array(await new Response(body).arrayBuffer());
     }
 
-    if (body instanceof ReadableStream) {
-        const reader = body.getReader();
-        const chunks: Uint8Array[] = [];
-        while (true) {
-            const {done, value} = await reader.read();
-            if (done) break;
-            chunks.push(value);
-        }
-        const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-        const result = new Uint8Array(totalLength);
-        let offset = 0;
-        for (const chunk of chunks) {
-            result.set(chunk, offset);
-            offset += chunk.length;
-        }
-        return result;
+    if (typeof body === 'object' && !('on' in body)) {
+        return JSON.stringify(body);
     }
 
     if (typeof body === 'object' && body !== null && 'on' in body && typeof body.on === 'function') {
@@ -173,5 +176,5 @@ async function readRawBody(body: any): Promise<Uint8Array | string> {
 
 function decode(data: Uint8Array | string): string {
     if (typeof data === 'string') return data;
-    return new TextDecoder().decode(data);
+    return textDecoder.decode(data);
 }

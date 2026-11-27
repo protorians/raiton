@@ -13,7 +13,10 @@ il offre également un support complet pour **Node.js** et **Deno**.
 - **Multi-Runtime** : Compatible avec Bun (recommandé), Node.js et les environnements Web.
 - **Architecture Décorative** : Utilise les décorateurs TypeScript pour définir contrôleurs, routes et injections.
 - **Modulaire** : Système de plugins et de middlewares flexible.
-- **CLI Puissant** : Outils intégrés pour le développement, le build et le déploiement.
+- **CLI Puissant** : Création de projet, générateurs, inventaire, diagnostic, OpenAPI, client typé et contrats.
+- **Schema-first** : une seule définition TypeBox alimente validation runtime, types, OpenAPI et client.
+- **AI-friendly** : manifeste versionné, `llms.txt`, `AGENTS.md`, MCP HTTP **et** stdio.
+- **Observabilité opt-in** : corrélation, métriques Prometheus, traces OTLP, arrêt gracieux.
 
 ## Installation
 
@@ -68,6 +71,48 @@ export default async (thread: ThreadInterface) => {
 ```
 
 > **Note :** selon la configuration du projet, le bootstrapper est chargé depuis `source/main.ts` et la racine du projet peut être définie par `raiton.config.ts` via `rootDir`.
+
+## Créer un projet
+
+```bash
+bun raiton new my-api --template api --runtime bun --yes
+cd my-api
+bun raiton dev
+bun test
+```
+
+```bash
+bun raiton generate resource users       # contrôleur + service + dépôt + DTO + test
+bun raiton inspect --json                # inventaire machine-readable
+bun raiton doctor                        # diagnostic actionnable
+bun raiton openapi export --out openapi.json
+bun raiton client --out ./sdk
+bun raiton mcp conformance --json
+```
+
+## Contrats schema-first
+
+```typescript
+import { t } from "raiton/contracts"
+
+export const CreateUser = t.object({
+  email: t.string().email(),
+  name: t.string().min(2),
+})
+export type CreateUser = t.infer<typeof CreateUser>
+```
+
+```typescript
+@Post("/")
+@Input(CreateUser)
+@Output(User)
+create(@Body() input: CreateUser) {
+  return this.users.create(input)
+}
+```
+
+Les charges invalides sont rejetées avant le handler avec un code stable
+`VALIDATION_ERROR`, et le client généré compile sans `any`.
 
 ## Utilisation du CLI
 

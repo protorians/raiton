@@ -1,5 +1,5 @@
-import {MiddlewareCallable} from "../../types/index.ts";
-import {getControllerMetadata} from "../../core/index.ts";
+import type {MiddlewareCallable} from "../../types/middleware.ts";
+import {getControllerMetadata} from "../../core/controller/metadata.ts";
 
 
 export function Middleware(middleware: MiddlewareCallable) {

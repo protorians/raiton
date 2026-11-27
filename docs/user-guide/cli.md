@@ -35,6 +35,27 @@ deno task compile   # génère un binaire autonome (build/bin/raiton)
 - `build` génère un artefact exécutable
 - `start` démarre l’application compilée (sans HMR)
 
+## Onboarding, contrats et diagnostic
+
+```bash
+bun raiton new my-api --template api --runtime bun --yes
+bun raiton generate resource users
+bun raiton routes --json
+bun raiton inspect --json
+bun raiton why GET /api/users/:id
+bun raiton doctor --json
+bun raiton openapi export --out openapi.json
+bun raiton client --out ./sdk
+bun raiton contract check --baseline openapi.baseline.json
+bun raiton mcp list --json
+bun raiton mcp conformance --json
+bun raiton docs agents
+```
+
+Toutes les commandes machine écrivent un document JSON unique sur `stdout`
+(logs sur `stderr`) et utilisent des codes de sortie stables : `0` succès,
+`1` usage, `2` prérequis manquant, `3` conflit de fichiers, `4` diagnostic.
+
 ## Commandes utiles
 
 ```bash

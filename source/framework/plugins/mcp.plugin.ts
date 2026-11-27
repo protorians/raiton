@@ -1,8 +1,14 @@
 import type {PluginInterface} from "../../types/index.ts";
 import type {ContextInterface} from "../../types/core.ts";
-import {PluginScope} from "../../core/index.ts";
+import type {PluginScope} from "../../core/plugins/scope.ts";
 import {findMcpServerForPath} from "../../core/mcp/metadata.ts";
-import {isMcpJsonRpc, mcpHandleGet, mcpHandlePost, SESSION_HEADER} from "../mcp/streamable-http.ts";
+import {
+    isMcpJsonRpc,
+    mcpContextFromHeaders,
+    mcpHandleGet,
+    mcpHandlePost,
+    SESSION_HEADER
+} from "../mcp/streamable-http.ts";
 
 export interface McpPluginOptions {
     /**
@@ -41,7 +47,12 @@ export function mcpPlugin(options: McpPluginOptions = {}): PluginInterface {
                     return {error: {code: -32700, message: 'Invalid JSON-RPC request'}}
                 }
 
-                const result = await mcpHandlePost(entry, context.req.body, existingSessionId)
+                const result = await mcpHandlePost(
+                    entry,
+                    context.req.body,
+                    existingSessionId,
+                    mcpContextFromHeaders(context.req.headers),
+                )
                 context.reply.status(result.status)
                 if (result.headers[SESSION_HEADER]) {
                     context.reply.header(SESSION_HEADER, result.headers[SESSION_HEADER])

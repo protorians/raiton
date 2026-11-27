@@ -2,26 +2,59 @@ import type {
     JsonRpcRequest,
     JsonRpcResponse,
     McpElementMetaInterface,
+    McpInvocationContext,
     McpServerRegistrationInterface,
     McpToolResultContent,
 } from "../../types/index.ts";
 import {
     JsonRpcErrorCode,
     LatestProtocolVersion,
+    SUPPORTED_PROTOCOL_VERSIONS,
     rpcError,
     rpcFailure,
     rpcSuccess,
 } from "./protocol.ts";
 import {Injection} from "../../core/injection/index.ts";
+import {RaitonConfig} from "../../core/config/config.ts";
+import {contractToJsonSchema, validateContract} from "../../contracts/index.ts";
+import {McpAudit} from "./audit.ts";
+import {mcpRateLimiter} from "./rate-limit.ts";
 
 export interface McpHandleResult {
     kind: 'response' | 'notification';
     message?: JsonRpcResponse | JsonRpcResponse[];
 }
 
+function isDestructive(tool: McpElementMetaInterface): boolean {
+    return tool.annotations?.destructiveHint === true || tool.destructive === true;
+}
+
+/**
+ * Default-deny: destructive tools are hidden unless the server explicitly
+ * exposes them or project configuration opts in.
+ */
+export function isToolExposed(entry: McpServerRegistrationInterface, tool: McpElementMetaInterface): boolean {
+    if (!isDestructive(tool)) return true;
+    return entry.metadata.exposeDestructive === true
+        || RaitonConfig.get("mcp")?.exposeDestructive === true;
+}
+
+function exposedTools(entry: McpServerRegistrationInterface): McpElementMetaInterface[] {
+    return entry.metadata.tools.filter(tool => isToolExposed(entry, tool));
+}
+
+function toolInputSchema(tool: McpElementMetaInterface) {
+    return tool.inputSchema ? contractToJsonSchema(tool.inputSchema) : argumentsToSchema(tool.arguments);
+}
+
+function toolOutputSchema(tool: McpElementMetaInterface) {
+    return tool.outputSchema ? contractToJsonSchema(tool.outputSchema) : undefined;
+}
+
 export async function handleMcpRequest(
     registryEntry: McpServerRegistrationInterface,
     body: any,
+    context?: McpInvocationContext,
 ): Promise<McpHandleResult> {
     const requests = Array.isArray(body) ? body : [body];
     const responses: JsonRpcResponse[] = [];
@@ -40,7 +73,7 @@ export async function handleMcpRequest(
         const request = raw as JsonRpcRequest
         const isNotification = request.id === undefined || request.id === null
 
-        const handled = await dispatchMcpMethod(registryEntry, request)
+        const handled = await dispatchMcpMethod(registryEntry, request, context)
         if (handled.kind === 'response' && handled.message) {
             const message = Array.isArray(handled.message) ? handled.message[0] : handled.message
             // Notifications never carry a response unless it's part of a batch with ids
@@ -69,6 +102,7 @@ export async function handleMcpRequest(
 async function dispatchMcpMethod(
     entry: McpServerRegistrationInterface,
     request: JsonRpcRequest,
+    context?: McpInvocationContext,
 ): Promise<McpHandleResult> {
     const method = request.method
     const params = request.params || {}
@@ -76,6 +110,12 @@ async function dispatchMcpMethod(
     try {
         switch (method) {
             case 'initialize':
+                if (params?.protocolVersion && !SUPPORTED_PROTOCOL_VERSIONS.has(params.protocolVersion)) {
+                    return {kind: 'response', message: rpcFailure(request.id, rpcError(
+                        JsonRpcErrorCode.INVALID_REQUEST,
+                        `Unsupported protocol version: ${params.protocolVersion}`,
+                    ))}
+                }
                 return {kind: 'response', message: rpcSuccess(request.id, handleInitialize(entry, params))}
 
             case 'notifications/initialized':
@@ -88,7 +128,7 @@ async function dispatchMcpMethod(
                 return {kind: 'response', message: rpcSuccess(request.id, listTools(entry))}
 
             case 'tools/call':
-                return {kind: 'response', message: await callTool(entry, request.id, params)}
+                return {kind: 'response', message: await callTool(entry, request.id, params, context)}
 
             case 'prompts/list':
                 return {kind: 'response', message: rpcSuccess(request.id, listPrompts(entry))}
@@ -122,7 +162,7 @@ async function dispatchMcpMethod(
     }
 }
 
-function handleInitialize(entry: McpServerRegistrationInterface, params: any) {
+function handleInitialize(entry: McpServerRegistrationInterface, _params: any) {
     return {
         protocolVersion: LatestProtocolVersion,
         capabilities: {
@@ -142,10 +182,15 @@ function handleInitialize(entry: McpServerRegistrationInterface, params: any) {
 
 function listTools(entry: McpServerRegistrationInterface) {
     return {
-        tools: entry.metadata.tools.map(element => ({
+        tools: exposedTools(entry).map(element => ({
             name: element.name,
+            title: element.title,
             description: element.description,
-            inputSchema: argumentsToSchema(element.arguments),
+            inputSchema: toolInputSchema(element),
+            ...(toolOutputSchema(element) ? {outputSchema: toolOutputSchema(element)} : {}),
+            ...(element.annotations && Object.keys(element.annotations).length
+                ? {annotations: element.annotations}
+                : {}),
         })),
     }
 }
@@ -166,40 +211,117 @@ function argumentsToSchema(args: {name: string; description?: string; required?:
     }
 }
 
-async function callTool(entry: McpServerRegistrationInterface, id: JsonRpcRequest['id'], params: any): Promise<JsonRpcResponse> {
+function toolFailure(
+    id: JsonRpcRequest['id'],
+    code: string,
+    message: string,
+    details?: any,
+): JsonRpcResponse {
+    return rpcSuccess(id, {
+        content: [{type: 'text', text: message}],
+        structuredContent: {
+            error: true,
+            code,
+            message,
+            ...(details !== undefined ? {details} : {}),
+        },
+        isError: true,
+    })
+}
+
+async function callTool(
+    entry: McpServerRegistrationInterface,
+    id: JsonRpcRequest['id'],
+    params: any,
+    context?: McpInvocationContext,
+): Promise<JsonRpcResponse> {
     const name = params?.name
-    const input = params?.arguments || {}
+    const rawInput = params?.arguments || {}
     if (!name) {
         return rpcFailure(id, rpcError(JsonRpcErrorCode.INVALID_PARAMS, 'Tool name required'))
     }
 
-    const tool = entry.metadata.tools.find(t => t.name === name)
+    const tool = exposedTools(entry).find(t => t.name === name)
     if (!tool) {
+        // Hidden destructive tools are indistinguishable from unknown tools.
         return rpcFailure(id, rpcError(JsonRpcErrorCode.METHOD_NOT_FOUND, `Tool not found: ${name}`))
     }
 
+    if (tool.scopes?.length) {
+        const granted = context?.scopes ?? [];
+        if (!tool.scopes.some(scope => granted.includes(scope))) {
+            return toolFailure(id, 'MCP_FORBIDDEN', `Missing scope for tool: ${name}`, {
+                required: tool.scopes,
+            })
+        }
+    }
+
+    const limit = entry.metadata.rateLimitPerMinute
+        ?? RaitonConfig.get("mcp")?.rateLimitPerMinute
+        ?? 0;
+    if (!mcpRateLimiter.consume(`${entry.name}:${tool.name}`, limit)) {
+        return toolFailure(id, 'MCP_RATE_LIMITED', `Rate limit exceeded for tool: ${name}`)
+    }
+
+    const schema = toolInputSchema(tool) as any
+    const validation = await validateContract(schema, rawInput)
+    if (!validation.success) {
+        return toolFailure(id, 'MCP_INVALID_ARGUMENTS', `Invalid arguments for tool: ${name}`, validation.issues)
+    }
+
+    const input = (validation.value ?? rawInput) as Record<string, any>
     const instance: any = Injection.resolve(entry.construct)
     if (!instance || typeof instance[tool.propertyKey] !== 'function') {
         return rpcFailure(id, rpcError(JsonRpcErrorCode.INTERNAL_ERROR, `Tool handler unavailable: ${name}`))
     }
 
+    const callId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+    const started = performance.now()
+    let success = false
+    let auditResult: any = undefined
+
     try {
         const args = collectArguments(instance, tool, input)
         const result = await instance[tool.propertyKey](...args)
+        auditResult = result
+
+        const outputSchema = toolOutputSchema(tool)
+        if (outputSchema) {
+            const output = await validateContract(outputSchema as any, result)
+            if (!output.success) {
+                return toolFailure(id, 'MCP_OUTPUT_VALIDATION_ERROR', `Invalid output for tool: ${name}`, output.issues)
+            }
+        }
 
         const content: McpToolResultContent[] = [{
             type: 'text',
             text: normalizeToolResult(result),
         }]
 
+        success = true
         return rpcSuccess(id, {
             content,
+            ...(result !== null && typeof result === 'object' && !Array.isArray(result)
+                ? {structuredContent: result}
+                : {}),
             isError: false,
         })
     } catch (e: any) {
         return rpcSuccess(id, {
             content: [{type: 'text', text: `Error: ${e.message ?? e}`}],
             isError: true,
+        })
+    } finally {
+        McpAudit.emit({
+            callId,
+            server: entry.name,
+            tool: name,
+            actor: context?.actor,
+            transport: context?.transport,
+            durationMs: Math.round(performance.now() - started),
+            success,
+            arguments: input,
+            result: auditResult,
         })
     }
 }

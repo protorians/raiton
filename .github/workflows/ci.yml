@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - beta
+      - alpha
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bunx tsc --noEmit -p tsconfig.json
+
+      - name: Test
+        run: bun test tests
+
+      - name: Build declarations
+        run: bun run build:types
+
+      - name: Check generated documentation freshness
+        run: bun source/bin/index.ts docs agents --check --json
+
+      - name: Benchmark budgets (spec 001 / 002)
+        run: bun run scripts/bench.ts --check
+        env:
+          # Absolute micro-benchmark budgets are calibrated on the reference
+          # Apple Silicon machine. Shared CI runners are slower and noisier, so
+          # they use relaxed absolute values while order/scale ratios, HMR route
+          # stability and functional checks stay strict.
+          BENCH_HTTP_BUDGET_US: 10
+          BENCH_VALIDATION_BUDGET_US: 10
+          BENCH_BODY_READ_BUDGET_US: 5
+          BENCH_BODY_BUDGET_US: 20
+          BENCH_FRAMEWORK_IMPORT_MS: 120
+          BENCH_DECORATORS_IMPORT_MS: 60
+          BENCH_HMR_BUDGET_MS: 4
+          BENCH_CLASSIFICATION_BUDGET_MS: 8

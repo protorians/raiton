@@ -1,9 +1,9 @@
 import "reflect-metadata";
-import {getSchedulerMetadata, registerScheduler, unregisterScheduler} from "../../core/scheduler/index.ts";
-import {Injectable} from "./index.ts";
+import {getSchedulerMetadata, registerScheduler, unregisterScheduler} from "../../core/scheduler/metadata.ts";
+import {Injectable} from "./injection.decorator.ts";
 import {LifetimeEnum} from "@protorians/core";
 import {parseDuration} from "../../core/scheduler/duration.ts";
-import {TaskTriggerEnum} from "../enums/index.ts";
+import {TaskTriggerEnum} from "../enums/scheduler.enum.ts";
 import type {
     CronOptionsInterface,
     IntervalOptionsInterface,

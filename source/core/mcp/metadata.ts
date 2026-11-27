@@ -1,5 +1,5 @@
 import {McpServerMetaInterface, McpServerRegistrationInterface} from "../../types/index.ts";
-import {METADATA_KEYS} from "../../framework/constants/index.ts";
+import {METADATA_KEYS} from "../../framework/constants/decorators.constant.ts";
 import "reflect-metadata";
 
 const registry = new Map<string, McpServerRegistrationInterface>();
@@ -17,6 +17,7 @@ export function getMcpServerMetadata(target: any): McpServerMetaInterface {
             prompts: [],
             resources: [],
             resourceTemplates: [],
+            exposeDestructive: false,
         };
         Reflect.defineMetadata(METADATA_KEYS.MCP, metadata, target);
     }

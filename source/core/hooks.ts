@@ -37,9 +37,21 @@ export class HookStore {
         this.hooks.set(name, list)
     }
 
+    /**
+     * Remplace tous les handlers d'un hook. Utilisé par le HMR quand un
+     * artefact exporte une nouvelle version de `onRequest` / `onResponse`.
+     */
+    replaceAll(name: HookNameType, handler: HookHandlerCallable) {
+        this.hooks.set(name, [handler])
+    }
+
+    has(name: HookNameType): boolean {
+        return (this.hooks.get(name)?.length ?? 0) > 0
+    }
+
     async run(name: HookNameType, ctx: any) {
         const list = this.hooks.get(name)
-        if (!list) return
+        if (!list || list.length === 0) return
 
         for (const hook of list) {
             await hook(ctx)

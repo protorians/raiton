@@ -22,6 +22,10 @@ import {Injection} from "./injection/injection.ts";
 import {Throwable} from "../framework/exceptions/index.ts";
 import {isBunUsed, isDenoUsed, isNodeUsed} from "../bin/constants.ts";
 import {getLanIp} from "../framework/utilities/ip.util.ts";
+import {RaitonConfig} from "./config/config.ts";
+import {ConfigValidationError, validateConfig} from "./config/schema.ts";
+import {Readiness} from "../framework/observability/readiness.ts";
+import {shutdown} from "../framework/observability/shutdown.ts";
 
 
 export class RaitonThread implements ThreadInterface {
@@ -31,6 +35,10 @@ export class RaitonThread implements ThreadInterface {
     public static get current(): RaitonThread | null {
         // if (!RaitonThread.instance) throw new Throwable('Thread not initialized')
         return RaitonThread.instance;
+    }
+
+    public static reset(): void {
+        RaitonThread.instance = null;
     }
 
     public application: ApplicationInterface | null = null;
@@ -62,6 +70,21 @@ export class RaitonThread implements ThreadInterface {
     }
 
     public async stop(): Promise<void> {
+        // Readiness fails immediately, before any new request is accepted.
+        Readiness.markNotReady('shutting down')
+        const timeout = RaitonConfig.getShutdownTimeout()
+        const result = await shutdown.drain(timeout)
+        Logger.info(
+            `Shutdown: drained ${result.drained ? 'all' : 'partially'} ` +
+            `(${result.remaining} request(s) remaining, timeout ${timeout}ms)`
+        )
+
+        try {
+            await this.runtimeServer?.close()
+        } catch (error: any) {
+            Logger.debug('Server close failed', error?.message ?? error)
+        }
+
         await SchedulerManager.current.stop();
         await Injection.shutdown();
         if (isDenoUsed) {
@@ -89,6 +112,8 @@ export class RaitonThread implements ThreadInterface {
             : (isDenoUsed ? RuntimeType.Deno : RuntimeType.Node);
         this.runtime = new Runtime(runtime || defaultRuntime);
         this.application = application;
+        // Idempotent: `Application.initialize()` already installs it, but
+        // custom ApplicationInterface implementations rely on this setup hook.
         this.application.use(bodyParserPlugin())
         return this;
     }
@@ -100,6 +125,16 @@ export class RaitonThread implements ThreadInterface {
         if (!this.runtime)
             throw new Throwable('Runtime not defined');
 
+        // Configuration is validated before any socket is opened.
+        if (RaitonConfig.errors.length) throw new ConfigValidationError(RaitonConfig.errors)
+        const applicationValidation = validateConfig(this.application.config as any)
+        if (!applicationValidation.valid) throw new ConfigValidationError(applicationValidation.errors)
+
+        // Load only the adapter of the selected runtime.
+        await (this.runtime as any).prepare?.()
+
+        Readiness.markReady()
+
         const scanRoot = isNodeUsed
             ? (this.builder.out || this.builder.source)
             : this.builder.source;
@@ -109,9 +144,9 @@ export class RaitonThread implements ThreadInterface {
             registerDefaultHealthCheck(this.application)
         }
 
-        await SchedulerManager.current.start();
-
         if (this._options.serve) {
+            await SchedulerManager.current.start();
+
             if (isDenoUsed) {
                 const addSignalListener = (globalThis as any).Deno.addSignalListener;
                 if (typeof addSignalListener === 'function') {
