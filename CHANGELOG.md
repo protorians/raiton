@@ -1,3 +1,20 @@
+## [6.11.0-beta.29](https://github.com/protorians/raiton/compare/v6.10.0-beta.28...v6.11.0-beta.29) (2026-11-27)
+
+### Features
+
+* feat(debug): livrer le debug runtime assisté par IA ([a88e078](https://github.com/protorians/raiton/commit/a88e078ea8046c5961b2faa10c4da61b195faf9e))
+
+### Bug Fixes
+
+* chore(gitignore): ignorer les specs à tous les niveaux ([a5d7d4e](https://github.com/protorians/raiton/commit/a5d7d4e885958d7f1cba55d3f420852c8eca88d4))
+* docs(specs): déclarer implémentée la spec 003 de debug runtime ([d10ed61](https://github.com/protorians/raiton/commit/d10ed61332c9bb85328bb12a48f5ebebea9a81c1))
+* docs(debug): documenter les commandes, la configuration et le MCP de debug ([1edbfd2](https://github.com/protorians/raiton/commit/1edbfd2cd951f8c1a1e2d24d7aabf59cbfb60db7))
+* perf(debug): mesurer le coût du journal et l'économie de tokens du debug ([fe47a5d](https://github.com/protorians/raiton/commit/fe47a5d7763fc4166bfeca97020e4816811b0e0b))
+
+### Other Changes
+
+* test(debug): couvrir le journal, les commandes et le serveur MCP de debug ([6edbd30](https://github.com/protorians/raiton/commit/6edbd30599a2deebad1d4c9a39726e6902e48058))
+
 ## Unreleased
 
 ### Features
