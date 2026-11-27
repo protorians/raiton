@@ -1,3 +1,14 @@
+## [6.9.1-beta.27](https://github.com/protorians/raiton/compare/v6.9.0-beta.26...v6.9.1-beta.27) (2026-11-27)
+
+### Bug Fixes
+
+* chore(ci): calibre les budgets de benchmark sur les runners partagés ([1f5586d](https://github.com/protorians/raiton/commit/1f5586d98bc7b04e29755090a2009dd3f645945b))
+* perf(framework): accélère le routage, le pipeline HTTP et le démarrage ([25e9dfb](https://github.com/protorians/raiton/commit/25e9dfbe4dac7dd0983340e530d87061ded2f335))
+
+### Other Changes
+
+* test(perf): ajoute les benchmarks et les tests de non-régression ([4c28bbf](https://github.com/protorians/raiton/commit/4c28bbf857068271ec444c5fdfc2bea7b5148343))
+
 ## [6.9.0-beta.26](https://github.com/protorians/raiton/compare/v6.8.9-beta.25...v6.9.0-beta.26) (2026-11-27)
 
 ### Features
