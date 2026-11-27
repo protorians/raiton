@@ -6,7 +6,7 @@
   "description": "Modular TypeScript Backend Framework with Dependency Injection, Plugins, Controllers, Middleware and Hot Reloading",
   "main": "./source/core/index.ts",
   "module": "./source/core/index.ts",
-  "types": "./source/core/index.d.ts",
+  "types": "./build/types/core/index.d.ts",
   "bin": {
     "raiton": "source/bin/index.ts"
   },
@@ -27,12 +27,37 @@
     "url": "git+https://github.com/protorians/raiton.git"
   },
   "exports": {
-    ".": "./source/core/index.ts",
-    "./core": "./source/core/index.ts",
+    ".": {
+      "types": "./build/types/core/index.d.ts",
+      "import": "./source/core/index.ts",
+      "default": "./source/core/index.ts"
+    },
+    "./core": {
+      "types": "./build/types/core/index.d.ts",
+      "import": "./source/core/index.ts",
+      "default": "./source/core/index.ts"
+    },
     "./core/*": "./source/core/*.ts",
     "./commands/*": "./source/commands/*.ts",
-    "./framework": "./source/framework/index.ts",
+    "./cli": "./source/bin/index.ts",
+    "./framework": {
+      "types": "./build/types/framework/index.d.ts",
+      "import": "./source/framework/index.ts",
+      "default": "./source/framework/index.ts"
+    },
     "./framework/*": "./source/framework/*.ts",
+    "./contracts": {
+      "types": "./build/types/contracts/index.d.ts",
+      "import": "./source/contracts/index.ts",
+      "default": "./source/contracts/index.ts"
+    },
+    "./contracts/*": "./source/contracts/*.ts",
+    "./manifest": {
+      "types": "./build/types/manifest/index.d.ts",
+      "import": "./source/manifest/index.ts",
+      "default": "./source/manifest/index.ts"
+    },
+    "./manifest/*": "./source/manifest/*.ts",
     "./types": "./source/types/index.ts",
     "./types/*": "./source/types/*.ts"
   },
@@ -40,14 +65,16 @@
     "dev": "bun run --hot source/bin/index.ts dev",
     "dev:node": "node build/bin/index.mjs dev",
     "dev:deno": "deno task dev",
-    "build": "bun build source/bin/index.ts --target=node --format=esm --outfile=build/bin/index.mjs",
+    "build": "bun build source/bin/index.ts --target=node --format=esm --outfile=build/bin/index.mjs && bun run build:types",
+    "build:types": "tsc -p tsconfig.build.json",
+    "bench": "bun run scripts/bench.ts",
     "test": "bun test tests",
     "start": "bun run source/bin/index.ts start",
     "start:node": "node build/bin/index.mjs start",
     "start:deno": "deno task start",
     "compile:deno": "deno task compile",
     "version": "bun run scripts/update-version.ts",
-    "postinstall": "bun run scripts/postinstall.js",
+    "postinstall": "node scripts/postinstall.mjs",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

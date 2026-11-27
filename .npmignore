@@ -1,4 +1,5 @@
-/source
+/tests
+/specs
 /.github
 /.idea
 tsup.config.ts
