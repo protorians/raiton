@@ -1,3 +1,18 @@
+## [6.12.0-beta.31](https://github.com/protorians/raiton/compare/v6.11.1-beta.30...v6.12.0-beta.31) (2026-11-27)
+
+### Features
+
+* feat(bridge): livrer l'artifact bridge pour les artefacts hors convention ([b6dd7d9](https://github.com/protorians/raiton/commit/b6dd7d9c82b137b78b93cb90c807d5e57a635019))
+
+### Bug Fixes
+
+* docs(specs): déclarer implémentée la spec 004 d'artifact bridge ([6f68777](https://github.com/protorians/raiton/commit/6f68777651463f061dbd5a422f9577c4835c1087))
+* docs(bridge): documenter la configuration, le manifeste et les diagnostics ([36b5f50](https://github.com/protorians/raiton/commit/36b5f5079a7456384aab2f9a41959fb02e9f07ef))
+
+### Other Changes
+
+* test(bridge): couvrir la découverte, le montage et le rechargement des artefacts ([4dbdc99](https://github.com/protorians/raiton/commit/4dbdc990475b8de6933f675a31edc717176e5dc6))
+
 ## [6.11.1-beta.30](https://github.com/protorians/raiton/compare/v6.11.0-beta.29...v6.11.1-beta.30) (2026-11-27)
 
 ### Bug Fixes
