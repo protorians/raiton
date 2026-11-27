@@ -1,0 +1,16 @@
+# Benchmarks Raiton
+
+Rapports générés par le harnais de la spec 001 :
+
+```bash
+bun run bench          # rapport Markdown + benchmarks/latest.{md,json}
+bun run bench --check  # vérifie les budgets spec 001
+bun run bench --check --check-observability  # inclut les budgets spec 002
+```
+
+Les fichiers `latest.md` et `latest.json` sont remplacés à chaque exécution. Le
+protocole, les scénarios et les budgets de référence sont décrits dans
+[`specs/001-performance-optimization/metrics.md`](../specs/001-performance-optimization/metrics.md).
+
+Scénarios couverts : routage indexé, pile HTTP complète, validation de réponse,
+body parser, démarrage à froid, reload HMR et classification d'artefacts.
