@@ -4,7 +4,13 @@ import {McpServerRegistrationInterface} from "../../types/index.ts";
 import {McpRouteTracker} from "./tracker.ts";
 import {RaitonThread} from "../thread.ts";
 import {HttpMethod} from "../../framework/enums/index.ts";
-import {mcpHandleGet, mcpHandlePost, isMcpJsonRpc, SESSION_HEADER} from "../../framework/mcp/streamable-http.ts";
+import {
+    mcpHandleGet,
+    mcpHandlePost,
+    isMcpJsonRpc,
+    mcpContextFromHeaders,
+    SESSION_HEADER
+} from "../../framework/mcp/streamable-http.ts";
 import type {ContextInterface} from "../../types/core.ts";
 
 export function compileMcp(McpServerClass: any): McpServerRegistrationInterface | undefined {
@@ -31,7 +37,12 @@ export function compileMcp(McpServerClass: any): McpServerRegistrationInterface 
                     return {error: {code: -32700, message: 'Invalid JSON-RPC request'}}
                 }
                 const existingSessionId = readSessionId(context)
-                const result = await mcpHandlePost(entry, context.req.body, existingSessionId)
+                const result = await mcpHandlePost(
+                    entry,
+                    context.req.body,
+                    existingSessionId,
+                    mcpContextFromHeaders(context.req.headers),
+                )
                 context.reply.status(result.status)
                 if (result.headers[SESSION_HEADER]) {
                     context.reply.header(SESSION_HEADER, result.headers[SESSION_HEADER])

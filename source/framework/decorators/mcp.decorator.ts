@@ -9,12 +9,16 @@ import type {
     McpElementMetaInterface,
     McpElementType,
     McpServerOptionsInterface,
+    McpToolOptions,
 } from "../../types/index.ts";
 
 /**
  * Decorate a class as an MCP server. The class methods decorated with
  * {@link McpTool}, {@link McpPrompt}, {@link McpResource} and
  * {@link McpResourceTemplate} become the server's exposed elements.
+ *
+ * Destructive tools are not exposed unless `exposeDestructive: true` is set
+ * explicitly on the server or in project configuration.
  *
  * @example
  * ```ts
@@ -37,6 +41,8 @@ export function McpServer(options: McpServerOptionsInterface = {}) {
         meta.description = options.description
         meta.path = options.path || '/mcp'
         meta.instructions = options.instructions
+        meta.exposeDestructive = options.exposeDestructive ?? false
+        meta.rateLimitPerMinute = options.rateLimitPerMinute
 
         unregisterMcpServer(options.name || target.name)
         registerMcpServer(target)
@@ -44,7 +50,18 @@ export function McpServer(options: McpServerOptionsInterface = {}) {
 }
 
 function createElementDecorator(type: McpElementType) {
-    return (nameOrOptions?: string | {name?: string; description?: string; uri?: string; mimeType?: string; title?: string}) =>
+    return (nameOrOptions?: string | {
+        name?: string;
+        description?: string;
+        uri?: string;
+        mimeType?: string;
+        title?: string;
+        inputSchema?: any;
+        outputSchema?: any;
+        annotations?: any;
+        destructive?: boolean;
+        scopes?: string[];
+    }) =>
         (target: any, propertyKey: string) => {
             const meta = getMcpServerMetadata(target)
             const name = typeof nameOrOptions === 'string'
@@ -60,6 +77,11 @@ function createElementDecorator(type: McpElementType) {
                 uri: typeof nameOrOptions === 'object' ? nameOrOptions?.uri : undefined,
                 mimeType: typeof nameOrOptions === 'object' ? nameOrOptions?.mimeType : undefined,
                 title: typeof nameOrOptions === 'object' ? nameOrOptions?.title : undefined,
+                inputSchema: typeof nameOrOptions === 'object' ? nameOrOptions?.inputSchema : undefined,
+                outputSchema: typeof nameOrOptions === 'object' ? nameOrOptions?.outputSchema : undefined,
+                annotations: typeof nameOrOptions === 'object' ? nameOrOptions?.annotations : undefined,
+                destructive: typeof nameOrOptions === 'object' ? nameOrOptions?.destructive : undefined,
+                scopes: typeof nameOrOptions === 'object' ? nameOrOptions?.scopes : undefined,
             }
 
             const list = meta[elementChildren(type)]
@@ -76,9 +98,10 @@ function elementChildren(type: McpElementType) {
 }
 
 /**
- * Expose a class method as an MCP tool.
+ * Expose a class method as an MCP tool. `annotations` follows the MCP safety
+ * hints; a tool with `destructiveHint: true` is hidden by default.
  */
-export function McpTool(options: {name?: string; description?: string} = {}) {
+export function McpTool(options: McpToolOptions = {}) {
     return createElementDecorator('tool')(options)
 }
 
@@ -167,4 +190,12 @@ export function schemaFromMetatype(metatype?: any): McpArgumentSchema | undefine
         default:
             return undefined
     }
+}
+
+/**
+ * Return whether a tool must be hidden because it is destructive and the server
+ * has not explicitly authorised destructive exposure.
+ */
+export function isDestructiveTool(element: McpElementMetaInterface): boolean {
+    return element.annotations?.destructiveHint === true || element.destructive === true;
 }

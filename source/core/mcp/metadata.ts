@@ -17,6 +17,7 @@ export function getMcpServerMetadata(target: any): McpServerMetaInterface {
             prompts: [],
             resources: [],
             resourceTemplates: [],
+            exposeDestructive: false,
         };
         Reflect.defineMetadata(METADATA_KEYS.MCP, metadata, target);
     }
