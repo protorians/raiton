@@ -5,6 +5,7 @@ import {RaitonConfig} from "../../core/config/index.ts";
 import {getSocketRegistry} from "../../core/socket/index.ts";
 import {getMcpServerRegistry} from "../../core/mcp/index.ts";
 import {RaitonThread} from "../../core/thread.ts";
+import {contractToOpenApiSchema, isCompositeInput} from "../../contracts/index.ts";
 
 /**
  * Generate the OpenAPI specification object
@@ -323,6 +324,53 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
             }
         }
 
+        // Schema-first contracts are the single source for validation, types
+        // and documentation. They override heuristics when present.
+        const contract = handler._raitonContract as any;
+        if (contract?.input) {
+            const composite = isCompositeInput(contract.input);
+            const contractBody = composite ? contract.input.body : contract.input;
+            const schema = contractToOpenApiSchema(contractBody);
+            if (schema) {
+                operation.requestBody = {
+                    required: true,
+                    content: {'application/json': {schema}},
+                };
+            }
+            if (composite) {
+                const locations: Array<[string, string]> = [
+                    ['query', 'query'],
+                    ['params', 'path'],
+                    ['headers', 'header'],
+                ];
+                for (const [part, location] of locations) {
+                    const partSchema = contractToOpenApiSchema(contract.input[part]);
+                    if (!partSchema?.properties) continue;
+                    const required = new Set<string>(Array.isArray(partSchema.required) ? partSchema.required : []);
+                    for (const [name, property] of Object.entries(partSchema.properties)) {
+                        operation.parameters.push({
+                            name,
+                            in: location,
+                            required: location === 'path' || required.has(name),
+                            schema: property,
+                        });
+                    }
+                }
+            }
+        }
+        if (contract?.output) {
+            const schema = contractToOpenApiSchema(contract.output);
+            if (schema) {
+                operation.responses = {
+                    ...operation.responses,
+                    '200': {
+                        description: 'Successful response',
+                        content: {'application/json': {schema}},
+                    },
+                };
+            }
+        }
+
         // Assign operation to path item under the method key
         (spec.paths[path] as any)[method] = operation;
     }
@@ -473,13 +521,17 @@ export async function generateOpenApiSpec(scope: PluginScope, opts: any): Promis
                 tools: mcpEntry.metadata.tools.map(t => ({
                     name: t.name,
                     description: t.description,
-                    inputSchema: {
-                        type: 'object',
-                        properties: Object.fromEntries(
-                            t.arguments.map(a => [a.name, {type: a.schema?.type || 'string', description: a.description}])
-                        ),
-                        ...(t.arguments.some(a => a.required) ? {required: t.arguments.filter(a => a.required).map(a => a.name)} : {})
-                    }
+                    inputSchema: t.inputSchema
+                        ? contractToOpenApiSchema(t.inputSchema)
+                        : {
+                            type: 'object',
+                            properties: Object.fromEntries(
+                                t.arguments.map(a => [a.name, {type: a.schema?.type || 'string', description: a.description}])
+                            ),
+                            ...(t.arguments.some(a => a.required) ? {required: t.arguments.filter(a => a.required).map(a => a.name)} : {})
+                        },
+                    ...(t.outputSchema ? {outputSchema: contractToOpenApiSchema(t.outputSchema)} : {}),
+                    ...(t.annotations ? {annotations: t.annotations} : {}),
                 })),
                 prompts: mcpEntry.metadata.prompts.map(p => ({
                     name: p.name,

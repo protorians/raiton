@@ -25,6 +25,17 @@ export class Router {
         return this.matcher.match(method, url)
     }
 
+    /**
+     * Return a route matching the URL regardless of method. Used to answer 405
+     * instead of 404 when the path exists.
+     */
+    matchPath(url: string) {
+        for (const route of this.matcher.routes.values()) {
+            if (route.match(route.method, url)) return route;
+        }
+        return null;
+    }
+
     reset() {
         this.matcher.clear()
     }

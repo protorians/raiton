@@ -2,6 +2,7 @@ import {HttpStatus, HttpMethod} from "./enums/index.ts";
 import {RaitonResponses} from "./responses/helpers.ts";
 import {ApplicationInterface} from "../types/application.ts";
 import {RequestContext} from "../core/context.ts";
+import {Readiness} from "./observability/readiness.ts";
 
 export interface HealthCheckConfig {
     enabled: boolean;
@@ -86,6 +87,22 @@ export class HealthCheckManager {
             return this._customHandler(ctx);
         }
 
+        if (!Readiness.isReady) {
+            const state = Readiness.snapshot();
+            return RaitonResponses(
+                'Service is shutting down',
+                {
+                    status: 'unhealthy',
+                    ready: false,
+                    reason: state.reason,
+                    timestamp: new Date().toISOString(),
+                    uptime: process.uptime(),
+                },
+                HttpStatus.SERVICE_UNAVAILABLE,
+                {error: true}
+            );
+        }
+
         const checks = await this.runChecks();
         const timestamp = new Date().toISOString();
 
@@ -104,6 +121,7 @@ export class HealthCheckManager {
             this._config.response?.message || `Service is ${overallStatus}`,
             {
                 status: overallStatus,
+                ready: Readiness.isReady,
                 timestamp,
                 checks: checks.length > 0 ? checks : undefined,
                 uptime: process.uptime(),
