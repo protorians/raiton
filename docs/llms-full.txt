@@ -1,0 +1,1271 @@
+# Raiton
+
+> Modular TypeScript backend framework with dependency injection, plugins, schema-first contracts, MCP (HTTP + stdio), observability and typed CLI tooling.
+
+## Start
+
+- [Getting started](user-guide/getting-started.md): create, run and test a project in under five minutes.
+- [Configuration](user-guide/config.md): `raiton.config.ts` is typed and validated before the port opens.
+- [Contracts](user-guide/recipes/contracts.md): one schema feeds validation, TypeScript types, OpenAPI and the generated client.
+- [MCP](user-guide/mcp.md): expose tools over HTTP and stdio with safety annotations.
+- [Observability](user-guide/observability.md): correlation ids, Prometheus metrics, OTLP traces and graceful shutdown.
+
+## Commands
+
+- `raiton new <name>`: Create a project from a template
+- `raiton generate <type> <name>`: Generate controller, service, repository, dto, mcp-tool, test or resource
+- `raiton routes`: List mounted routes
+- `raiton inspect`: Emit the versioned project manifest
+- `raiton why <method> <path>`: Explain which file registered a route
+- `raiton doctor`: Diagnose runtime, configuration and prerequisites
+- `raiton openapi export`: Export the OpenAPI document
+- `raiton client`: Generate a typed client
+- `raiton contract check`: Detect breaking contract changes
+- `raiton contract snapshot`: Write a contract baseline
+- `raiton mcp list`: List MCP servers
+- `raiton mcp inspect <server>`: Inspect MCP schemas and safety annotations
+- `raiton mcp test <server>.<tool>`: Call an MCP tool
+- `raiton mcp serve [server]`: Serve an MCP server over stdio
+- `raiton mcp conformance [server]`: Run the HTTP + stdio conformance suite
+- `raiton docs agents`: Generate llms.txt, llms-full.txt, AGENTS.md and CLAUDE.md
+- `raiton artifact --dump`: Inspect detected artifacts
+- `raiton dev`: Run the application with HMR
+- `raiton build`: Build the application
+- `raiton start`: Run the application in production
+
+## Project inventory
+
+- Framework: raiton 6.8.9-beta.25
+- Runtime: unknown
+- Manifest schema: 1.0.0
+- Routes: 0
+- MCP servers: 0
+
+## Routes
+
+No route is currently mounted.
+
+
+<!-- user-guide/getting-started.md -->
+
+# Démarrage rapide
+
+> **Navigation :** [← user-guide](README.md) | [architecture →](architecture.md)
+
+Le point d’entrée attendu est `source/main.ts`.
+Le projet peut aussi définir `raiton.config.ts` à la racine pour décrire le `rootDir`, la version et les options globales.
+
+La séparation attendue est la suivante :
+- `raiton.config.ts` décrit le projet
+- `source/main.ts` crée et démarre le serveur
+- `source/modules/`, `source/controllers/`, `source/services/` et `source/repositories/` contiennent la logique applicative
+
+## Créer un projet en une commande
+
+```bash
+bun raiton new my-api --template api --runtime bun --yes
+cd my-api
+bun raiton dev
+bun test
+```
+
+`--template` accepte `api`, `minimal` et `mcp-agent`. `--dry-run` affiche le
+plan sans écrire, `--offline` et `--no-install` désactivent l'installation.
+
+## Installer dans un projet existant
+
+```bash
+bun add raiton reflect-metadata
+```
+
+## Bootstrap
+
+```typescript
+import "reflect-metadata"
+import { ThreadInterface } from "raiton/types"
+import { Application } from "raiton/core"
+import { RuntimeType } from "raiton/framework"
+
+export default async (thread: ThreadInterface) => {
+  const app = new Application({
+    port: 5711,
+    prefix: "/api"
+  })
+
+  return await thread.setup({
+    application: app,
+    runtime: RuntimeType.Bun
+  }).run()
+}
+```
+
+## Lancer
+
+```bash
+bun raiton dev
+```
+
+## Configuration projet
+
+Exemple de fichier `raiton.config.ts` :
+
+```typescript
+export default {
+  rootDir: "./source",
+  version: "0.10.0",
+  port: 5711,
+  pathname: "/",
+  artifacts: {
+    types: ["controller", "socket", "service"]
+  }
+}
+```
+
+Dans ce schéma, Raiton charge les fichiers depuis `source/` et le bootstrapper reste dans `source/main.ts`.
+
+## Vérifier
+
+```bash
+curl http://localhost:5711/api/users
+```
+
+---
+
+[← user-guide](README.md) | [architecture →](architecture.md)
+
+
+<!-- user-guide/architecture.md -->
+
+# Structure recommandée
+
+> **Navigation :** [← getting-started](getting-started.md) | [api →](api/README.md)
+
+Une structure simple et lisible fonctionne bien pour la plupart des projets.
+Le guide recommande une logique par domaine, avec une couche API et des services dédiés.
+
+```text
+source/
+├── controllers/
+├── services/
+├── repositories/
+├── middleware/
+├── plugins/
+├── dto/
+├── models/
+├── modules/
+├── core/
+└── main.ts
+```
+
+Le principe est de séparer :
+- la couche HTTP
+- la logique métier
+- l’accès aux données
+- les règles transverses
+
+## Exemple concret
+
+Pour une API de gestion de tâches, une structure lisible peut ressembler à ceci :
+
+```text
+source/
+├── controllers/
+│   └── tasks.controller.ts
+├── services/
+│   └── tasks.service.ts
+├── repositories/
+│   └── tasks.repository.ts
+├── dto/
+│   ├── create-task.dto.ts
+│   └── update-task.dto.ts
+├── middleware/
+│   └── auth.middleware.ts
+├── plugins/
+│   └── openapi.plugin.ts
+├── modules/
+│   └── tasks/
+│       ├── application/
+│       ├── domain/
+│       └── presentation/
+└── main.ts
+```
+
+Règle simple :
+- `controller` reçoit la requête et retourne la réponse
+- `service` applique la règle métier
+- `repository` parle à la base de données
+- `dto` définit la forme attendue des données
+- `modules/` regroupe un domaine complet quand l’application grossit
+
+## Modèle de module
+
+Un module peut être organisé comme suit :
+
+```text
+modules/
+└── users/
+    ├── application/
+    │   └── service/
+    ├── domain/
+    │   └── entities/
+    ├── presentation/
+    │   ├── components/
+    │   └── views/
+    └── index.ts
+```
+
+Cette organisation réduit les fichiers dispersés et facilite la lecture par domaine.
+
+---
+
+[← getting-started](getting-started.md) | [api →](api/README.md)
+
+
+<!-- user-guide/cli.md -->
+
+# CLI et workflow
+
+> **Navigation :** [← plugins](plugins.md) | [best-practices →](best-practices.md)
+
+Le CLI couvre le cycle standard de développement d’une application Raiton.
+
+## Pourquoi utilisé
+
+- lancer rapidement un serveur en local
+- vérifier le comportement pendant l’implémentation
+- produire une version compilée pour la livraison ou le déploiement
+
+Raiton fonctionne sur les trois runtimes majeurs : **Bun**, **Node.js** et **Deno**.
+
+```bash
+# Bun — exécution TypeScript native (aucune compilation requise)
+bun raiton dev
+bun raiton build
+bun raiton start
+
+# Node.js — le CLI est fourni sous forme de bundle JS (build/bin/index.mjs)
+node build/bin/index.mjs dev
+node build/bin/index.mjs start
+
+# Deno — exécution TypeScript native, tâches déclarées dans deno.json
+deno task dev
+deno task build
+deno task start
+deno task compile   # génère un binaire autonome (build/bin/raiton)
+```
+
+## Commandes principales
+
+- `dev` lance le projet avec hot reloading (HMR)
+- `build` génère un artefact exécutable
+- `start` démarre l’application compilée (sans HMR)
+
+## Onboarding, contrats et diagnostic
+
+```bash
+bun raiton new my-api --template api --runtime bun --yes
+bun raiton generate resource users
+bun raiton routes --json
+bun raiton inspect --json
+bun raiton why GET /api/users/:id
+bun raiton doctor --json
+bun raiton openapi export --out openapi.json
+bun raiton client --out ./sdk
+bun raiton contract check --baseline openapi.baseline.json
+bun raiton mcp list --json
+bun raiton mcp conformance --json
+bun raiton docs agents
+```
+
+Toutes les commandes machine écrivent un document JSON unique sur `stdout`
+(logs sur `stderr`) et utilisent des codes de sortie stables : `0` succès,
+`1` usage, `2` prérequis manquant, `3` conflit de fichiers, `4` diagnostic.
+
+## Commandes utiles
+
+```bash
+bun raiton --help
+bun raiton --version
+```
+
+Quand vous faites évoluer l’application, gardez l’ordre suivant :
+- modifier le code
+- lancer `bun raiton dev`
+- vérifier le comportement
+- lancer `bun raiton build` avant livraison
+
+## Mode dev vs mode prod
+
+Le mode dev utilise le système de HMR embarqué : le builder observe le
+répertoire source et recompile les artefacts (contrôleurs, services,
+middlewares, sockets, hooks, MCP) sans redémarrer le processus.
+
+Le mode `start` démarre l’application sans HMR :
+- sur **Bun** et **Deno**, le bootstrapper TypeScript est importé directement
+- sur **Node.js**, l’application est compilée (esbuild) vers `.raiton/server/main.mjs`
+  puis exécutée
+
+## Runtimes
+
+| Runtime | Exécution TS native | Dev (HMR) | Prod (bundle) |
+| --- | --- | --- | --- |
+| Bun | Oui | `bun raiton dev` | `bun raiton start` |
+| Node.js | Non (bundle JS requis) | `node build/bin/index.mjs dev` | `node build/bin/index.mjs start` |
+| Deno | Oui | `deno task dev` | `deno task start` / `deno task compile` |
+
+## Avantages
+
+- flux simple et prévisible
+- adapté au développement quotidien
+- garde la différence claire entre exécution locale et artefact compilé
+
+## Inconvénients
+
+- demande de bien distinguer `dev` et `start`
+- le build ajoute une étape supplémentaire avant livraison
+
+---
+
+[← plugins](plugins.md) | [best-practices →](best-practices.md)
+
+<!-- user-guide/config.md -->
+
+# Configuration
+
+> **Navigation :** [← getting-started](getting-started.md) | [architecture →](architecture.md)
+
+Le fichier `raiton.config.ts` décrit la racine du projet et quelques options globales.
+
+## Pourquoi utilisé
+
+- définir le `rootDir`
+- centraliser les valeurs de base de l’application
+- garder le bootstrap propre
+
+## Exemple
+
+```typescript
+export default {
+  rootDir: "./source",
+  version: "0.10.0",
+  port: 5711,
+  hostname: "0.0.0.0",
+  protocole: "http",
+  pathname: "/",
+  artifacts: {
+    types: ["controller", "socket", "service"]
+  }
+}
+```
+
+## Chargement et validation
+
+Ordre de chargement documenté :
+
+```text
+raiton.config.ts → .mts → .cts → .js → .mjs → .cjs → .json
+```
+
+La configuration est validée **avant l’ouverture du port**. Une valeur
+invalide produit des erreurs par champ et empêche l’écoute. Le schéma JSON
+publié est disponible dans `docs/generated/config-schema.json` ou via
+`raiton inspect --config-schema`.
+
+## Comment l’utiliser
+
+- placez le fichier à la racine du projet
+- gardez `source/main.ts` comme point d’entrée applicatif
+- ajustez `rootDir` si votre code source n’est pas dans `source/`
+- utilisez `defineConfigSync` pour le typage et la validation à la définition
+
+## Avantages
+
+- configuration lisible
+- séparation claire entre code et runtime
+
+## Inconvénients
+
+- le projet doit suivre une convention de chargement
+- les options doivent rester cohérentes avec le bootstrap
+
+---
+
+[← getting-started](getting-started.md) | [architecture →](architecture.md)
+
+
+<!-- user-guide/api/routes.md -->
+
+# Routes d’API
+
+> **Navigation :** [← README](README.md) | [responses →](responses.md)
+
+Raiton décrit les routes dans des classes de contrôleur avec `@Controllable()` et les décorateurs HTTP.
+
+## Pourquoi utilisé
+
+- regrouper les routes par domaine métier
+- garder le code proche de l’intention HTTP
+- simplifier le câblage du serveur
+
+## Comment l’utiliser
+
+- créez un contrôleur avec `@Controllable("/users")`
+- ajoutez `@Get()`, `@Post()`, `@Put()`, `@Patch()` ou `@Delete()`
+- utilisez les décorateurs de paramètres pour extraire les données d’entrée
+
+## Exemple
+
+```typescript
+import { Controllable, Get, Post, Param, Body } from "raiton/framework"
+
+@Controllable("/users")
+export class UsersController {
+  @Get("/")
+  list() {
+    return []
+  }
+
+  @Get("/:id")
+  getOne(@Param("id") id: string) {
+    return { id }
+  }
+
+  @Post("/")
+  create(@Body() payload: { name: string }) {
+    return payload
+  }
+}
+```
+
+## Avantages
+
+- lisible
+- aligné sur le vocabulaire HTTP
+- facile à faire évoluer
+
+## Inconvénients
+
+- nécessite une convention de structure
+- peut devenir volumineux si un contrôleur gère trop d’actions
+
+---
+
+[← README](README.md) | [responses →](responses.md)
+
+
+<!-- user-guide/responses.md -->
+
+# Réponses
+
+> **Navigation :** [← middleware](middleware.md) | [plugins →](plugins.md)
+
+Raiton peut renvoyer une réponse de plusieurs façons :
+- un objet simple
+- une exception HTTP
+- une réponse structurée
+
+## Réponse simple
+
+Le cas le plus courant est de retourner un objet.
+
+```typescript
+@Get("/users")
+list() {
+  return {
+    ok: true,
+    service: "raiton-api"
+  }
+}
+```
+
+Pourquoi utilisé
+- c’est la forme la plus simple
+- le framework sérialise automatiquement en JSON
+
+Avantages
+- rapide à écrire
+- lisible
+
+Inconvénients
+- peu de contrôle sur le format final si l’on ne standardise pas la réponse
+
+## Réponse structurée
+
+Pour des APIs cohérentes, il est utile de standardiser la forme de réponse.
+
+```typescript
+return {
+  statusCode: 200,
+  error: false,
+  message: "OK",
+  data: {
+    id: "1",
+    name: "John Doe"
+  }
+}
+```
+
+Pourquoi utilisé
+- uniformiser les réponses
+- faciliter l’intégration côté frontend
+
+Avantages
+- format prévisible
+- plus simple à consommer
+
+Inconvénients
+- un peu plus verbeux
+
+## Erreurs HTTP
+
+Lorsque la ressource n’existe pas ou qu’une règle métier échoue, renvoyez une erreur explicite.
+
+```typescript
+import { HttpException, HttpStatus } from "raiton/framework"
+
+@Get("/:id")
+getOne(@Param("id") id: string) {
+  if (id !== "1") {
+    throw new HttpException("Utilisateur introuvable", HttpStatus.NOT_FOUND)
+  }
+
+  return { id: "1", name: "John Doe" }
+}
+```
+
+## Réponses textuelles ou binaires
+
+Quand il faut renvoyer autre chose que du JSON, utilisez le `reply` brut.
+
+```typescript
+@Get("/export")
+export(@Reply() reply: any) {
+  reply.type("text/csv")
+  return reply.send("id,name\n1,John Doe")
+}
+```
+
+## Conseils
+
+- garder un format de réponse stable
+- utiliser les exceptions pour les erreurs métier
+- réserver `reply` aux cas où le JSON ne suffit pas
+
+---
+
+[← middleware](middleware.md) | [plugins →](plugins.md)
+
+
+<!-- user-guide/injection.md -->
+
+# Injection et services
+
+> **Navigation :** [← api](api/README.md) | [plugins →](plugins.md)
+
+Le schéma recommandé est de laisser le contrôleur orchestrer la requête, puis de déléguer la logique métier au service.
+
+Cette couche sert souvent à encapsuler les appels vers une base de données, une API externe ou un système de stockage.
+
+```typescript
+import { Injectable } from "raiton/framework"
+
+@Injectable()
+export class UserService {
+  private readonly users = [
+    { id: "1", name: "John Doe" },
+    { id: "2", name: "Jane Doe" }
+  ]
+
+  findAll() {
+    return this.users
+  }
+
+  findById(id: string) {
+    return this.users.find((user) => user.id === id) ?? null
+  }
+
+  create(name: string) {
+    const user = { id: crypto.randomUUID(), name }
+    this.users.push(user)
+    return user
+  }
+}
+```
+
+```typescript
+import { Controllable, Get, Inject, Param } from "raiton/framework"
+import { UserService } from "../services/user.service"
+
+@Controllable("/users")
+export class UserController {
+  constructor(
+    @Inject(UserService) private readonly userService: UserService
+  ) {}
+
+  @Get("/")
+  list() {
+    return this.userService.findAll()
+  }
+
+  @Get("/:id")
+  getOne(@Param("id") id: string) {
+    const user = this.userService.findById(id)
+    return user ?? { error: true, statusCode: 404, message: "Utilisateur introuvable" }
+  }
+}
+```
+
+Utilisez cette approche pour séparer clairement :
+- les contrôleurs
+- la logique métier
+- la persistance
+
+## Pourquoi c’est utile
+
+- les tests ciblent le service sans démarrer tout le serveur
+- les contrôleurs restent minces
+- les règles métier deviennent réutilisables
+
+## Convention de nommage
+
+Une convention fréquente consiste à nommer les services par domaine et par rôle :
+- `UsersService`
+- `UsersRepository`
+- `UsersController`
+
+Cette convention aide à identifier rapidement le domaine et le rôle du service.
+
+---
+
+[← api](api/README.md) | [plugins →](plugins.md)
+
+
+<!-- user-guide/contracts.md -->
+
+# Contrats schema-first
+
+Une seule définition alimente la validation runtime, les types TypeScript, OpenAPI et le client généré.
+
+## Déclarer un contrat
+
+```ts
+import {t} from "raiton/contracts"
+
+export const CreateUser = t.object({
+  email: t.string().email(),
+  name: t.string().min(2),
+  age: t.integer().min(0).optional(),
+})
+
+export type CreateUser = t.infer<typeof CreateUser>
+```
+
+## Brancher une route
+
+```ts
+import {Body, Controllable, Post} from "raiton/framework"
+import {Input, Output, t} from "raiton/contracts"
+
+const User = t.object({id: t.string(), name: t.string()})
+
+@Controllable("/users")
+export class UsersController {
+  @Post("/")
+  @Input(CreateUser)
+  @Output(User)
+  create(@Body() input: CreateUser) {
+    return this.users.create(input)
+  }
+}
+```
+
+## Erreur stable
+
+Une entrée invalide n'exécute jamais le handler :
+
+```json
+{
+  "error": true,
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid request",
+  "statusCode": 400,
+  "details": [{"path": "email", "code": "invalid_format", "message": "Expected string to match 'email' format"}],
+  "docsUrl": "https://github.com/protorians/raiton/blob/main/docs/user-guide/recipes/contracts.md"
+}
+```
+
+## Validation de sortie
+
+- `validation.responses: "auto"` (défaut) : active en développement, désactive en production.
+- `true` / `false` : force le comportement.
+- En développement, un écart retourne `OUTPUT_VALIDATION_ERROR` avec la route et le champ fautif.
+- En production, aucun coût n'est ajouté.
+
+## OpenAPI et client
+
+```bash
+raiton openapi export --out openapi.json
+raiton client --out ./sdk
+```
+
+Les schémas d'entrée/sortie OpenAPI proviennent des mêmes `@Input`/`@Output`. Le client généré n'utilise jamais `any` : les schémas inconnus deviennent `unknown`.
+
+
+<!-- user-guide/mcp.md -->
+
+# MCP (Model Context Protocol)
+
+> **Navigation :** [← sockets](sockets.md) | [scheduler →](scheduler.md)
+
+Raiton permet de créer un serveur **MCP (Model Context Protocol)** facilement, avec des décorateurs, et de le faire coexister avec le serveur HTTP et les sockets sur le même processus et le même port.
+
+## De quoi s’agit-il
+
+MCP est un protocole qui expose des **outils (tools)**, des **prompts** et des **ressources (resources)** à des clients IA (assistants, agents, IDE…). Raiton implémente le transport **Streamable HTTP** : un simple endpoint qui accepte des requêtes JSON-RPC `POST`, identique au reste de l’API.
+
+## Pourquoi utilisé
+
+- exposer une logique applicative existante à des assistants IA
+- réutiliser les services et l’injection de dépendances existants
+- cohabiter avec les contrôleurs HTTP et les sockets sans serveur séparé
+- bénéficier du HMR, des artifacts et d’OpenAPI, comme pour le reste du framework
+
+## Comment l’utiliser
+
+1. Créez un fichier artifact `*.mcp.ts` (reconnu automatiquement)
+2. Déclarez une classe avec `@McpServer()`
+3. Ajoutez des méthodes avec `@McpTool()`, `@McpPrompt()`, `@McpResource()` ou `@McpResourceTemplate()`
+4. Déclarez les paramètres avec `@McpArg()`
+5. Le chemin `path` du serveur devient automatiquement accessible en `POST`
+
+## Exemple
+
+```typescript
+import { McpServer, McpTool, McpPrompt, McpResource, McpResourceTemplate, McpArg } from "raiton/framework"
+
+@McpServer({ name: "math", version: "1.0.0", path: "/mcp" })
+export class MathServer {
+  @McpTool({ name: "add", description: "Additionne deux nombres" })
+  add(
+    @McpArg("a", "Premier opérande", Number) a: number,
+    @McpArg("b", "Second opérande", Number) b: number,
+  ) {
+    return a + b
+  }
+
+  @McpPrompt({ name: "resume", description: "Résume un texte" })
+  resume(@McpArg("text", "Le texte à résumer", String) text: string) {
+    return `Résume le texte suivant :\n\n${text}`
+  }
+
+  @McpResource({ uri: "config://app", name: "Configuration", mimeType: "application/json" })
+  config() {
+    return { env: "production" }
+  }
+
+  @McpResourceTemplate({ uriTemplate: "user://{id}", name: "Utilisateur par id" })
+  user({ id }: any) {
+    return { id, name: `User-${id}` }
+  }
+}
+```
+
+Aucun enregistrement supplémentaire n’est nécessaire : le scanner détecte `*.mcp.ts`, compile la classe, enregistre le serveur dans le registre MCP et ajoute automatiquement les routes `POST /mcp` et `GET /mcp` sur l’application.
+
+## Points d’extensibilité
+
+### Enregistrement manuel
+
+Vous pouvez aussi compiler et enregistrer un serveur MCP explicitement :
+
+```typescript
+import { compileMcp } from "raiton/core"
+
+compileMcp(MathServer)
+```
+
+### Plugin MCP
+
+Le plugin `mcpPlugin()` permet un montage explicite sur un chemin personnalisé et d’activer le endpoint `GET` :
+
+```typescript
+import { app } from "raiton"
+
+app.register(mcpPlugin({ path: "/mcp", enableGet: true }))
+```
+
+> Les routes étant normalement auto-générées par la compilation, le plugin est surtout utile lorsque vous gérez vous-même l’enregistrement ou souhaitez un contrôle fin.
+
+## Protocole
+
+Le endpoint répond au protocole MCP sur JSON-RPC 2.0 :
+
+- `initialize` — négociation de la version et des capacités
+- `ping` — test de disponibilité
+- `tools/list` / `tools/call`
+- `prompts/list` / `prompts/get`
+- `resources/list` / `resources/templates/list` / `resources/read`
+- `logging/setLevel` / `notifications/initialized`
+
+La version du protocole est vérifiée : une version non supportée renvoie `406`. Les réponses utilisent le header `mcp-session-id`.
+
+## HMR
+
+Les fichiers `*.mcp.ts` bénéficient du **hot reload** : une modification recharge le serveur MCP sans redémarrer le process, exactement comme les contrôleurs et les sockets.
+
+## Transports HTTP et stdio
+
+Le même registre d'outils est servi par :
+
+- **Streamable HTTP** sur le chemin déclaré (`/mcp` par défaut) ;
+- **stdio**, pour les clients qui lancent le serveur comme sous-processus :
+
+```bash
+raiton mcp serve math --stdio
+```
+
+Les deux transports passent la même suite de conformité :
+
+```bash
+raiton mcp conformance math --json
+```
+
+## Schémas et sûreté
+
+```ts
+@McpTool({
+  name: "refund",
+  description: "Rembourse une commande",
+  inputSchema: RefundInput,
+  outputSchema: RefundOutput,
+  scopes: ["payments:write"],
+  annotations: {readOnlyHint: false, destructiveHint: true, idempotentHint: false},
+})
+refund(@McpArg("orderId", "Identifiant", String) orderId: string) {
+  return this.payments.refund(orderId)
+}
+```
+
+- `inputSchema` / `outputSchema` sont exposés à `tools/list`.
+- Un outil `destructiveHint: true` est **masqué par défaut** ; il faut
+  `mcp.exposeDestructive: true` dans `raiton.config.ts` ou
+  `@McpServer({exposeDestructive: true})`.
+- Les scopes sont vérifiés lorsqu'ils sont fournis (`x-mcp-scopes` en HTTP,
+  contexte du transport en stdio).
+- Les appels sont audités (identifiant, outil, durée, acteur, résultat) et les
+  secrets sont expurgés.
+- Une limite de débit par outil peut être configurée
+  (`mcp.rateLimitPerMinute`).
+
+## OpenAPI
+
+Les serveurs MCP sont documentés dans le contrat OpenAPI généré, avec une extension `x-mcp` listant outils, prompts et ressources.
+
+## Avantages
+
+- intégration native avec le serveur HTTP existant
+- réutilise l’injection de dépendances
+- HMR, artifacts et OpenAPI homogènes avec le reste du framework
+- transport stdio pour les agents locaux
+
+## Inconvénients
+
+- les notifications serveur `GET` (SSE) restent basiques
+- le protocole évolue vite, la liste des versions supportées doit être suivie
+
+---
+
+[← sockets](sockets.md) | [scheduler →](scheduler.md)
+
+
+<!-- user-guide/observability.md -->
+
+# Observabilité et exploitation
+
+L'observabilité est opt-in. Désactivée, elle n'ajoute aucun travail sur le chemin chaud.
+
+## Activer
+
+```bash
+RAITON_OBSERVABILITY=off|metrics|traces|all
+RAITON_METRICS_PATH=/metrics
+RAITON_OTEL_ENDPOINT=http://localhost:4318
+RAITON_REQUEST_ID_HEADER=x-request-id
+RAITON_SHUTDOWN_TIMEOUT_MS=10000
+RAITON_ACCESS_LOG=1
+```
+
+`RAITON_ACCESS_LOG=1` ajoute une ligne par requête avec l'identifiant de
+corrélation et celui de trace. Les logs d'erreur portent toujours
+l'identifiant.
+
+Ou dans `raiton.config.ts` :
+
+```ts
+export default {
+  observability: {mode: "all", metricsPath: "/metrics"},
+  shutdown: {timeoutMs: 10000},
+}
+```
+
+## Corrélation
+
+Chaque requête reçoit un identifiant :
+
+- repris de `x-request-id` s'il est valide ;
+- sinon généré ;
+- présent dans la réponse, les logs et le contexte (`ctx.state.requestId`).
+
+## Métriques
+
+`GET /metrics` expose le format texte Prometheus :
+
+- `http_requests_total{method,route,status}`
+- `http_request_duration_seconds` (histogramme)
+- `http_errors_total{method,route,status}`
+
+Le chemin est relatif au préfixe de l'application.
+
+## Traces
+
+- Les spans entrants utilisent `traceparent` lorsqu'il est fourni.
+- Les appels sortants doivent utiliser `tracedFetch` (exporté par `raiton/framework`) pour partager la trace.
+- Export OTLP/HTTP JSON vers `RAITON_OTEL_ENDPOINT`.
+
+## Erreurs
+
+Toutes les erreurs HTTP publiques suivent le catalogue `code → statut → message → docsUrl`. En production, aucune pile d'appels n'est retournée.
+
+## Arrêt gracieux
+
+Sur `SIGINT`/`SIGTERM` :
+
+1. readiness passe immédiatement à `false` (`/health` répond 503) ;
+2. les nouvelles connexions sont refusées ;
+3. les requêtes en cours sont drainées jusqu'à `shutdown.timeoutMs` ;
+4. le processus sort en `0`.
+
+## Budgets
+
+Les budgets de la spec 001 restent la référence :
+
+| Mode | Surcoût cible p50 |
+|---|---|
+| `off` | 0 mesurable |
+| `metrics` | ≤ 5 % |
+| `traces` | ≤ 10 % |
+
+
+<!-- user-guide/decorators/README.md -->
+
+# Décorateurs
+
+> **Navigation :** [← api](../api/README.md) | [runtime →](../runtime.md)
+
+Cette section regroupe les décorateurs que vous utilisez pour définir vos contrôleurs, routes, paramètres, injections, plugins et métadonnées OpenAPI.
+
+## Fiches disponibles
+
+- [controllable.md](controllable.md)
+- [routes.md](routes.md)
+- [parameters.md](parameters.md)
+- [injection.md](injection.md)
+- [middleware.md](middleware.md)
+- [cache.md](cache.md)
+- [socket.md](socket.md)
+- [api-tags.md](api-tags.md)
+- [api-operation.md](api-operation.md)
+- [api-response.md](api-response.md)
+- [api-body.md](api-body.md)
+- [api-param.md](api-param.md)
+- [api-property.md](api-property.md)
+- [api-query.md](api-query.md)
+- [route-interaction.md](route-interaction.md)
+- [guard.md](guard.md)
+- [health-check.md](health-check.md)
+- [mcp.md](mcp.md)
+- [scheduler.md](scheduler.md)
+
+## Comment lire cette section
+
+- commencez par `controllable.md` et `routes.md`
+- utilisez ensuite `parameters.md`, `injection.md` et `middleware.md`
+- documentez vos endpoints temps réel et IA avec `socket.md` et `mcp.md`
+- planifiez des tâches avec `scheduler.md`
+- qualifiez un endpoint de santé avec `health-check.md`
+- terminez par les décorateurs OpenAPI si vous documentez votre API
+
+---
+
+[← api](../api/README.md) | [runtime →](../runtime.md)
+
+
+<!-- user-guide/recipes/README.md -->
+
+# Recettes exécutables
+
+Chaque fonctionnalité publique dispose d'une recette : objectif, fichier complet, commande, sortie attendue.
+Une recette qui ne s'exécute pas en CI est considérée comme cassée.
+
+| Fonctionnalité | Recette | Commande |
+|---|---|---|
+| Création de projet | [new-project.md](new-project.md) | `raiton new demo --template api --yes` |
+| Génération d'artifacts | [generate.md](generate.md) | `raiton generate resource users` |
+| Contrats schema-first | [contracts.md](contracts.md) | `raiton contract check --baseline baseline.json` |
+| MCP HTTP + stdio | [mcp-stdio.md](mcp-stdio.md) | `raiton mcp conformance --json` |
+| Manifeste et découverte | [manifest.md](manifest.md) | `raiton inspect --json` |
+| Observabilité | [observability.md](observability.md) | `RAITON_OBSERVABILITY=all raiton dev` |
+| Diagnostic | [doctor.md](doctor.md) | `raiton doctor --json` |
+
+## Couverture des décorateurs
+
+| Décorateur | Documentation |
+|---|---|
+| `@Controllable` | [../decorators/controllable.md](../decorators/controllable.md) |
+| `@Get/@Post/@Put/@Patch/@Delete` | [../decorators/routes.md](../decorators/routes.md) |
+| `@Body/@Query/@Param/@Headers/@Cookie` | [../decorators/parameters.md](../decorators/parameters.md) |
+| `@Injectable/@Inject` | [../decorators/injection.md](../decorators/injection.md) |
+| `@Middleware` | [../decorators/middleware.md](../decorators/middleware.md) |
+| `@Guard` | [../decorators/guard.md](../decorators/guard.md) |
+| `@Cache` | [../decorators/cache.md](../decorators/cache.md) |
+| `@HealthCheck` | [../decorators/health-check.md](../decorators/health-check.md) |
+| `@McpServer/@McpTool/@McpArg` | [../decorators/mcp.md](../decorators/mcp.md) |
+| `@Scheduler` | [../decorators/scheduler.md](../decorators/scheduler.md) |
+| `@Socket` | [../decorators/socket.md](../decorators/socket.md) |
+| `@ApiOperation/@ApiResponse/@ApiProperty` | [../decorators/api-operation.md](../decorators/api-operation.md) |
+| `@Input/@Output` | [contracts.md](contracts.md) |
+
+
+<!-- user-guide/en/README.md -->
+
+# Raiton user guide (English)
+
+This is the English reference for the same contract as the French guide.
+
+## Start
+
+```bash
+bun raiton new my-api --template api --runtime bun --yes
+cd my-api
+bun raiton dev
+```
+
+- `GET /api/health` — health check.
+- Example controller route under `/api/<project>`.
+- `bun test` — generated tests.
+
+## Configuration
+
+`raiton.config.ts` is typed and validated before the port opens. Invalid fields prevent listening and report each field.
+
+```ts
+import {defineConfigSync} from "raiton/core"
+
+export default defineConfigSync({
+  rootDir: "./source",
+  port: 5711,
+  prefix: "/api",
+  observability: {mode: "off"},
+  validation: {responses: "auto"},
+})
+```
+
+## Contracts
+
+One schema feeds runtime validation, TypeScript types, OpenAPI and the generated client:
+
+```ts
+import {t} from "raiton/contracts"
+
+export const CreateUser = t.object({email: t.string().email()})
+export type CreateUser = t.infer<typeof CreateUser>
+```
+
+Use `@Input(CreateUser)` / `@Output(User)`. Invalid input is rejected before the handler with a stable `VALIDATION_ERROR` payload.
+
+## CLI
+
+All diagnostic and generation commands support `--json`, stable exit codes and non-interactive operation.
+
+```bash
+raiton routes --json
+raiton inspect --json
+raiton why GET /api/users/:id
+raiton doctor --json
+raiton openapi export --out openapi.json
+raiton client --out ./sdk
+raiton contract check --baseline openapi.baseline.json
+raiton mcp list --json
+raiton mcp conformance --json
+raiton docs agents
+```
+
+Exit codes: `0` success, `1` usage, `2` missing prerequisite, `3` file conflict, `4` diagnostic failure.
+
+## MCP
+
+```ts
+@McpServer({name: "math", path: "/mcp"})
+export class MathServer {
+  @McpTool({name: "add", annotations: {readOnlyHint: true}})
+  add(@McpArg("a", "First", Number) a: number, @McpArg("b", "Second", Number) b: number) {
+    return {result: a + b}
+  }
+}
+```
+
+- HTTP and stdio transports share the same conformance suite.
+- Destructive tools are hidden unless `mcp.exposeDestructive` or the server option is explicit.
+- Tool calls are audited and secrets are redacted.
+
+## Observability
+
+See [observability](../observability.md) for correlation ids, Prometheus metrics, OTLP traces and graceful shutdown.
+
+
+<!-- user-guide/best-practices.md -->
+
+# Bonnes pratiques
+
+> **Navigation :** [← cli](cli.md) | [↑ user-guide](README.md)
+
+Dans un projet Raiton, gardez ces règles simples :
+
+- importez `reflect-metadata` une seule fois au point d’entrée
+- gardez les contrôleurs fins
+- déplacez la logique métier dans des services
+- isolez l’accès aux données dans des repositories
+- préférez des routes stables et explicites
+- activez les plugins de sécurité dès que l’API est exposée publiquement
+- centralisez les conventions par domaine
+- utilisez une structure modulaire quand plusieurs fonctionnalités métier cohabitent
+- importez les interfaces et types avec `import type` (ou `import {type X}` en inline pour un mélange) quand ils ne servent qu’à la compilation : avec Bun et `emitDecoratorMetadata`, un import de valeur d’un symbole type-only lève `SyntaxError: Export named '…' not found` au démarrage — laissez les entités/classes runtime en import de valeur
+
+## Exemple de découpage
+
+- `UsersController` reçoit la requête HTTP
+- `UsersService` applique les règles métier
+- `UsersRepository` lit/écrit les données
+- `UsersDto` décrit les entrées attendues
+- `UsersMiddleware` gère les règles transverses
+- `UsersResponses` garde un format de sortie stable
+
+Ce découpage garde l’application lisible quand le nombre de routes augmente.
+
+## Ce qu’il faut éviter
+
+- un `main.ts` qui contient toute la logique métier
+- des contrôleurs qui parlent directement à la base
+- des routes sans convention de nommage
+- une documentation API séparée du code
+
+---
+
+[← cli](cli.md) | [↑ user-guide](README.md)
+
+
+## Generated manifest
+
+```json
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "generated",
+  "framework": {
+    "name": "raiton",
+    "version": "6.8.9-beta.25"
+  },
+  "runtime": "unknown",
+  "project": {
+    "rootDir": ".",
+    "entry": "main.ts"
+  },
+  "routes": [],
+  "injection": {},
+  "artifacts": [
+    "controller",
+    "mcp",
+    "util"
+  ],
+  "config": {
+    "rootDir": "string",
+    "version": "string",
+    "observability": "object",
+    "validation": "object",
+    "shutdown": "object",
+    "mcp": "object"
+  },
+  "env": [
+    "API_KEY",
+    "APPDATA",
+    "ARM_VERSION",
+    "AWS_SECRET_ACCESS_KEY",
+    "BENCH_ROUTES",
+    "BOOK_LANG",
+    "CI_BRANCH",
+    "CLICOLOR_FORCE",
+    "COLUMNS",
+    "DATABASE_PASSWORD",
+    "DEBUG",
+    "DEPLOY_TOKEN",
+    "DOTENV_CONFIG_DEBUG",
+    "DOTENV_CONFIG_DOTENV_KEY",
+    "DOTENV_CONFIG_ENCODING",
+    "DOTENV_CONFIG_OVERRIDE",
+    "DOTENV_CONFIG_PATH",
+    "DOTENV_CONFIG_QUIET",
+    "DOTENV_KEY",
+    "EDITOR",
+    "ELECTRON_RUN_AS_NODE",
+    "ESBUILD_BINARY_PATH",
+    "ESBUILD_MAX_BUFFER",
+    "ESBUILD_WORKER_THREADS",
+    "FOO",
+    "FORCE_COLOR",
+    "FORMAT_START",
+    "GITHUB_REF_NAME",
+    "GITHUB_TOKEN",
+    "GRACEFUL_FS_PLATFORM",
+    "HOME",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "HOST",
+    "IGNORE_TEST_WIN32",
+    "LIBC",
+    "LNAME",
+    "LOGNAME",
+    "NODE_COMPILE_CACHE",
+    "NODE_DEBUG",
+    "NODE_ENV",
+    "NODE_TEST_WORKER_ID",
+    "NODE_UNIQUE_ID",
+    "NO_COLOR",
+    "OSTYPE",
+    "PATH",
+    "PATHEXT",
+    "PORT",
+    "PREBUILDS_ONLY",
+    "PRETTIER_DEBUG",
+    "PRETTIER_FALLBACK_RESOLVE",
+    "RAITON_ACCESS_LOG",
+    "RAITON_METRICS_PATH",
+    "RAITON_NATURAL_MODE",
+    "RAITON_OBSERVABILITY",
+    "RAITON_OTEL_ENDPOINT",
+    "RAITON_REQUEST_ID_HEADER",
+    "RAITON_SHUTDOWN_TIMEOUT_MS",
+    "REDIS_URL",
+    "TERM",
+    "TERM_PROGRAM",
+    "TEST_GRACEFUL_FS_GLOBAL_PATCH",
+    "TEST_PSEUDOMAP",
+    "TMPDIR",
+    "USER",
+    "USERNAME",
+    "USERPROFILE",
+    "VALKEY_URL",
+    "VISUAL",
+    "XDG_RUNTIME_DIR"
+  ],
+  "mcp": []
+}
+```

@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raiton.protorians.dev/schemas/config-1.0.0.json",
+  "title": "Raiton project configuration",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "rootDir": {
+      "type": "string",
+      "minLength": 1,
+      "default": "./source"
+    },
+    "version": {
+      "type": "string"
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "hostname": {
+      "type": "string"
+    },
+    "protocole": {
+      "enum": [
+        "http",
+        "https"
+      ]
+    },
+    "pathname": {
+      "type": "string"
+    },
+    "prefix": {
+      "type": "string"
+    },
+    "develop": {
+      "type": "boolean"
+    },
+    "verbose": {
+      "type": "boolean"
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "off",
+            "metrics",
+            "traces",
+            "all"
+          ],
+          "default": "off"
+        },
+        "metricsPath": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "otelEndpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "requestIdHeader": {
+          "type": "string"
+        },
+        "serviceName": {
+          "type": "string"
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "responses": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "auto"
+            }
+          ]
+        }
+      }
+    },
+    "shutdown": {
+      "type": "object",
+      "properties": {
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 10000
+        }
+      }
+    },
+    "devPage": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "properties": {
+        "exposeDestructive": {
+          "type": "boolean",
+          "default": false
+        },
+        "rateLimitPerMinute": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "docs": {
+      "type": "object",
+      "properties": {
+        "dir": {
+          "type": "string"
+        },
+        "lang": {
+          "enum": [
+            "fr",
+            "en"
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "rootDir"
+  ]
+}

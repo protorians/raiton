@@ -1,3 +1,22 @@
+## Unreleased — framework optimization (spec 002)
+
+### Features
+
+* **contracts**: schema-first `raiton/contracts` (TypeBox) feeding runtime validation, types, OpenAPI and the generated client; `@Input`/`@Output`; stable `VALIDATION_ERROR` payloads; development-only output validation.
+* **cli**: `new`, `generate`, `routes`, `inspect`, `why`, `doctor`, `openapi export`, `client`, `contract check|snapshot`, `mcp list|inspect|test|serve|conformance`, `docs agents` with JSON output, stable exit codes and dry-run.
+* **manifest**: versioned project inventory (routes, artifacts, DI graph, config, env, MCP tools, source locations), published JSON Schema and HMR cache invalidation.
+* **mcp**: stdio transport, shared HTTP/stdio conformance suite, input/output schemas, safety annotations, default-deny destructive tools, scopes, audit with secret redaction and rate limiting.
+* **observability**: correlation ids, Prometheus metrics, OTLP traces, stable error catalogue, readiness and bounded graceful shutdown.
+* **discoverability**: development page (`/__dev`), route suggestions on 404, default Redoc OpenAPI UI.
+* **docs**: French/English guides, executable recipes, `llms.txt`, `llms-full.txt`, `AGENTS.md`, `CLAUDE.md` and generated references.
+* **config**: `.ts`/`.mts`/`.cts` loading first, field-level validation, published JSON Schema and generated declarations for the package `types` entry.
+
+### Bug Fixes
+
+* `Application.handle` now honours `statusCode` carried by plain response objects (health checks).
+* OpenAPI UI no longer sends an empty body; a default UI is provided.
+* The project bootstrapper no longer installs the body parser twice or starts the scheduler outside serving mode.
+
 ## [6.8.9-beta.25](https://github.com/protorians/raiton/compare/v6.8.8-beta.24...v6.8.9-beta.25) (2026-11-26)
 
 ### Bug Fixes

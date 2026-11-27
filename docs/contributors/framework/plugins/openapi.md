@@ -15,8 +15,8 @@ openApiPlugin(options?: OpenApiOptions): PluginInterface
 
 ```typescript
 interface OpenApiOptions {
-  route?: string           // Route pour l'UI (ex: "/docs") — nécessite `ui` function
-  ui?: (config, context) => string  // Fonction retournant le HTML de l'UI
+  route?: string           // Route pour l'UI (ex: "/docs") — Redoc par défaut
+  ui?: (config, context) => string  // Remplace l'UI Redoc par défaut
   endpoint?: string | false  // Endpoint JSON (ex: "/docs/json") — false pour désactiver
   title?: string           // Titre de l'API (défaut: "API")
   version?: string         // Version (défaut: "1.0.0")
@@ -57,7 +57,16 @@ app.register(openApiPlugin({
 // GET /docs/json → retourne la spec OpenAPI 3.0 complète
 ```
 
-## Avec interface Swagger UI
+## Interface par défaut
+
+Sans option `ui`, le plugin sert une page **Redoc** qui pointe vers `endpoint`
+(`/docs/json` par défaut). Aucune fonction n'est requise :
+
+```typescript
+app.register(openApiPlugin({route: "/docs", endpoint: "/docs/json"}))
+```
+
+## Avec une interface personnalisée (Swagger UI)
 
 ```typescript
 app.register(openApiPlugin({

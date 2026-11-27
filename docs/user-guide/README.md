@@ -17,6 +17,10 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 | [injection.md](injection.md) | Injecter des services et séparer la logique métier |
 | [middleware.md](middleware.md) | Exécuter des règles transverses sur les requêtes |
 | [responses.md](responses.md) | Structurer les réponses et les erreurs |
+| [contracts.md](contracts.md) | Contrats schema-first : validation, types, OpenAPI et client |
+| [observability.md](observability.md) | Corrélation, métriques, traces et arrêt gracieux |
+| [recipes/README.md](recipes/README.md) | Recettes exécutables par fonctionnalité |
+| [en/README.md](en/README.md) | English reference |
 | [body-parser.md](body-parser.md) | Lire JSON, formulaires et fichiers |
 | [security.md](security.md) | Sécurité HTTP, CORS, rate-limit, body-limit |
 | [cache.md](cache.md) | ETag (validation) et cache de routes (`@Cache`) |
@@ -45,18 +49,20 @@ Ce dossier décrit comment utiliser Raiton pour créer un serveur d'API.
 9. lire [injection.md](injection.md)
 10. lire [middleware.md](middleware.md)
 11. lire [responses.md](responses.md)
-12. lire [body-parser.md](body-parser.md)
-13. lire [security.md](security.md)
-14. lire [https.md](https.md)
-15. lire [openapi/README.md](openapi/README.md)
-16. lire [sockets.md](sockets.md)
-17. lire [mcp.md](mcp.md)
-18. lire [scheduler.md](scheduler.md)
-19. lire [health-check.md](health-check.md)
-20. lire [types.md](types.md)
-21. lire [tutorial.md](tutorial.md)
-22. lire [plugins.md](plugins.md)
-23. lire [cli.md](cli.md)
+12. lire [contracts.md](contracts.md)
+13. lire [observability.md](observability.md)
+14. lire [body-parser.md](body-parser.md)
+15. lire [security.md](security.md)
+16. lire [https.md](https.md)
+17. lire [openapi/README.md](openapi/README.md)
+18. lire [sockets.md](sockets.md)
+19. lire [mcp.md](mcp.md)
+20. lire [scheduler.md](scheduler.md)
+21. lire [health-check.md](health-check.md)
+22. lire [types.md](types.md)
+23. lire [tutorial.md](tutorial.md)
+24. lire [plugins.md](plugins.md)
+25. lire [cli.md](cli.md)
 
 ## Ce que couvre ce guide
 

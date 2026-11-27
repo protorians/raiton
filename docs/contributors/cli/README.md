@@ -9,7 +9,7 @@
 
 | Fichier | Description |
 |---------|-------------|
-| [commands.md](commands.md) | Détail des commandes `develop`, `build`, `start`, `artifact`, `grafts` |
+| [commands.md](commands.md) | Détail des commandes `new`, `generate`, `routes`, `inspect`, `why`, `doctor`, `openapi`, `client`, `contract`, `mcp`, `docs`, `develop`, `build`, `start`, `artifact` |
 | [hmr.md](hmr.md) | Fonctionnement du Hot Module Replacement |
 
 ## Commandes disponibles
@@ -20,7 +20,11 @@
 | `build` | `b` | Compilation TypeScript vers JavaScript |
 | `start` | `run` | Démarrage en production |
 | `artifact` | `art` | Gestion des artifacts |
-| `grafts` | - | Génération de typings |
+| `generate` | `g` | Génération d'artifacts |
+| `inspect` | - | Inventaire machine-readable |
+| `doctor` | - | Diagnostic actionnable |
+| `mcp` | - | Outils MCP HTTP/stdio |
+| `docs` | - | Documentation pour agents |
 
 ```bash
 # Aide
@@ -45,7 +49,17 @@ commands/
 ├── develop.command.ts    ← develop/dev
 ├── build.command.ts      ← build/b
 ├── artifact.command.ts   ← artifact/art
-└── grafts.command.ts     ← grafts
+├── new.command.ts        ← création de projet
+├── generate.command.ts   ← génération d'artifacts
+├── routes.command.ts     ← liste des routes
+├── inspect.command.ts    ← manifeste de projet
+├── why.command.ts        ← origine d'une route
+├── doctor.command.ts     ← diagnostic
+├── openapi.command.ts    ← export OpenAPI
+├── client.command.ts     ← client typé
+├── contract.command.ts   ← contrôle de contrat
+├── mcp.command.ts        ← outils MCP
+└── docs.command.ts       ← documentation agents
 ```
 
 ## Flux de démarrage

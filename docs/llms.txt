@@ -1,0 +1,46 @@
+# Raiton
+
+> Modular TypeScript backend framework with dependency injection, plugins, schema-first contracts, MCP (HTTP + stdio), observability and typed CLI tooling.
+
+## Start
+
+- [Getting started](user-guide/getting-started.md): create, run and test a project in under five minutes.
+- [Configuration](user-guide/config.md): `raiton.config.ts` is typed and validated before the port opens.
+- [Contracts](user-guide/recipes/contracts.md): one schema feeds validation, TypeScript types, OpenAPI and the generated client.
+- [MCP](user-guide/mcp.md): expose tools over HTTP and stdio with safety annotations.
+- [Observability](user-guide/observability.md): correlation ids, Prometheus metrics, OTLP traces and graceful shutdown.
+
+## Commands
+
+- `raiton new <name>`: Create a project from a template
+- `raiton generate <type> <name>`: Generate controller, service, repository, dto, mcp-tool, test or resource
+- `raiton routes`: List mounted routes
+- `raiton inspect`: Emit the versioned project manifest
+- `raiton why <method> <path>`: Explain which file registered a route
+- `raiton doctor`: Diagnose runtime, configuration and prerequisites
+- `raiton openapi export`: Export the OpenAPI document
+- `raiton client`: Generate a typed client
+- `raiton contract check`: Detect breaking contract changes
+- `raiton contract snapshot`: Write a contract baseline
+- `raiton mcp list`: List MCP servers
+- `raiton mcp inspect <server>`: Inspect MCP schemas and safety annotations
+- `raiton mcp test <server>.<tool>`: Call an MCP tool
+- `raiton mcp serve [server]`: Serve an MCP server over stdio
+- `raiton mcp conformance [server]`: Run the HTTP + stdio conformance suite
+- `raiton docs agents`: Generate llms.txt, llms-full.txt, AGENTS.md and CLAUDE.md
+- `raiton artifact --dump`: Inspect detected artifacts
+- `raiton dev`: Run the application with HMR
+- `raiton build`: Build the application
+- `raiton start`: Run the application in production
+
+## Project inventory
+
+- Framework: raiton 6.8.9-beta.25
+- Runtime: unknown
+- Manifest schema: 1.0.0
+- Routes: 0
+- MCP servers: 0
+
+## Routes
+
+No route is currently mounted.

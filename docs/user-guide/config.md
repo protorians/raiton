@@ -26,11 +26,25 @@ export default {
 }
 ```
 
+## Chargement et validation
+
+Ordre de chargement documenté :
+
+```text
+raiton.config.ts → .mts → .cts → .js → .mjs → .cjs → .json
+```
+
+La configuration est validée **avant l’ouverture du port**. Une valeur
+invalide produit des erreurs par champ et empêche l’écoute. Le schéma JSON
+publié est disponible dans `docs/generated/config-schema.json` ou via
+`raiton inspect --config-schema`.
+
 ## Comment l’utiliser
 
 - placez le fichier à la racine du projet
 - gardez `source/main.ts` comme point d’entrée applicatif
 - ajustez `rootDir` si votre code source n’est pas dans `source/`
+- utilisez `defineConfigSync` pour le typage et la validation à la définition
 
 ## Avantages
 

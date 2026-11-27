@@ -10,7 +10,19 @@ La séparation attendue est la suivante :
 - `source/main.ts` crée et démarre le serveur
 - `source/modules/`, `source/controllers/`, `source/services/` et `source/repositories/` contiennent la logique applicative
 
-## Installer
+## Créer un projet en une commande
+
+```bash
+bun raiton new my-api --template api --runtime bun --yes
+cd my-api
+bun raiton dev
+bun test
+```
+
+`--template` accepte `api`, `minimal` et `mcp-agent`. `--dry-run` affiche le
+plan sans écrire, `--offline` et `--no-install` désactivent l'installation.
+
+## Installer dans un projet existant
 
 ```bash
 bun add raiton reflect-metadata
