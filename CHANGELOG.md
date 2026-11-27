@@ -1,21 +1,25 @@
-## Unreleased — framework optimization (spec 002)
+## [6.9.0-beta.26](https://github.com/protorians/raiton/compare/v6.8.9-beta.25...v6.9.0-beta.26) (2026-11-27)
 
 ### Features
 
-* **contracts**: schema-first `raiton/contracts` (TypeBox) feeding runtime validation, types, OpenAPI and the generated client; `@Input`/`@Output`; stable `VALIDATION_ERROR` payloads; development-only output validation.
-* **cli**: `new`, `generate`, `routes`, `inspect`, `why`, `doctor`, `openapi export`, `client`, `contract check|snapshot`, `mcp list|inspect|test|serve|conformance`, `docs agents` with JSON output, stable exit codes and dry-run.
-* **manifest**: versioned project inventory (routes, artifacts, DI graph, config, env, MCP tools, source locations), published JSON Schema and HMR cache invalidation.
-* **mcp**: stdio transport, shared HTTP/stdio conformance suite, input/output schemas, safety annotations, default-deny destructive tools, scopes, audit with secret redaction and rate limiting.
-* **observability**: correlation ids, Prometheus metrics, OTLP traces, stable error catalogue, readiness and bounded graceful shutdown.
-* **discoverability**: development page (`/__dev`), route suggestions on 404, default Redoc OpenAPI UI.
-* **docs**: French/English guides, executable recipes, `llms.txt`, `llms-full.txt`, `AGENTS.md`, `CLAUDE.md` and generated references.
-* **config**: `.ts`/`.mts`/`.cts` loading first, field-level validation, published JSON Schema and generated declarations for the package `types` entry.
+* **config**: `.ts`/`.mts`/`.cts` loading first, field-level validation, published JSON Schema and generated declarations for the package `types` entry. ([5c60a27](https://github.com/protorians/raiton/commit/5c60a27786751af16e17d4bedded54f6f10dc497))
+* **contracts**: schema-first `raiton/contracts` (TypeBox) feeding runtime validation, types, OpenAPI and the generated client; `@Input`/`@Output`; stable `VALIDATION_ERROR` payloads; development-only output validation. ([e22328e](https://github.com/protorians/raiton/commit/e22328ed35ca74dfb575c6a05797f4852dc952eb))
+* **manifest**: versioned project inventory (routes, artifacts, DI graph, config, env, MCP tools, source locations), published JSON Schema and HMR cache invalidation. ([efb8550](https://github.com/protorians/raiton/commit/efb85501382237dfcbb5b9a38f5e58816f982e7f))
+* **mcp**: stdio transport, shared HTTP/stdio conformance suite, input/output schemas, safety annotations, default-deny destructive tools, scopes, audit with secret redaction and rate limiting. ([ce68d66](https://github.com/protorians/raiton/commit/ce68d669c38f64fe8a3189649d0792db560c7af2))
+* **observability**: correlation ids, Prometheus metrics, OTLP traces, stable error catalogue, readiness and bounded graceful shutdown. ([899fed9](https://github.com/protorians/raiton/commit/899fed91afed36f663aa6d68e0c4b1528c8ee484))
+* **discoverability**: development page (`/__dev`), route suggestions on 404, default Redoc OpenAPI UI. ([899fed9](https://github.com/protorians/raiton/commit/899fed91afed36f663aa6d68e0c4b1528c8ee484))
+* **cli**: `new`, `generate`, `routes`, `inspect`, `why`, `doctor`, `openapi export`, `client`, `contract check|snapshot`, `mcp list|inspect|test|serve|conformance`, `docs agents` with JSON output, stable exit codes and dry-run. ([7390572](https://github.com/protorians/raiton/commit/73905720187e251fc0b39b93bcf60d8961650112))
+* **docs**: French/English guides, executable recipes, `llms.txt`, `llms-full.txt`, `AGENTS.md`, `CLAUDE.md` and generated references. ([030e996](https://github.com/protorians/raiton/commit/030e99668c18b3f78bc66bb3c103bf6d4ac4c7c3))
 
 ### Bug Fixes
 
 * `Application.handle` now honours `statusCode` carried by plain response objects (health checks).
 * OpenAPI UI no longer sends an empty body; a default UI is provided.
 * The project bootstrapper no longer installs the body parser twice or starts the scheduler outside serving mode.
+
+### Build
+
+* Publish generated type declarations and update scripts, npm ignores and the CI workflow. ([3d8ec11](https://github.com/protorians/raiton/commit/3d8ec11ece759ceca5f26abc168e72f07ec485f1))
 
 ## [6.8.9-beta.25](https://github.com/protorians/raiton/compare/v6.8.8-beta.24...v6.8.9-beta.25) (2026-11-26)
 
