@@ -1,3 +1,13 @@
+## [6.10.0-beta.28](https://github.com/protorians/raiton/compare/v6.8.9-beta.25...v6.10.0-beta.28) (2026-11-27)
+
+### Features
+
+* feat: contrats, manifeste, MCP, observabilité, CLI et optimisation des performances (#21) ([2131645](https://github.com/protorians/raiton/commit/2131645c5c4f1d32a762c811d444e1d8fabb2833))
+
+### Bug Fixes
+
+* chore(gitignore): ancrer l'ignore des specs à la racine du dépôt ([41cc1d8](https://github.com/protorians/raiton/commit/41cc1d871c01c65b9c17b0b52a38f2b88b4db0fb))
+
 ## [6.9.1-beta.27](https://github.com/protorians/raiton/compare/v6.9.0-beta.26...v6.9.1-beta.27) (2026-11-27)
 
 ### Bug Fixes
