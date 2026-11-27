@@ -28,4 +28,9 @@ export const METADATA_KEYS = {
     MCP_ARGUMENTS: Symbol('mcp:arguments'),
     // Scheduler metadata keys
     SCHEDULER: Symbol('scheduler:meta'),
+    // Schema-first contract metadata keys
+    CONTRACT_INPUT: Symbol('contract:input'),
+    CONTRACT_OUTPUT: Symbol('contract:output'),
+    // Documentation / discoverability metadata
+    PUBLIC_EXPORT: Symbol('docs:public-export'),
 }
